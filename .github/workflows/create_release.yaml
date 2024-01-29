@@ -1,0 +1,105 @@
+name: Flow for creating release of `wxm-explorer`
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+env:
+  TAG_NAME: ${{ github.ref_name }}
+
+concurrency:
+  group: wxm-explorer-production-${{ github.ref }}-1
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and publish wxm-explorer to production
+    runs-on: ubuntu-latest
+
+    steps:
+      # fetch the code of the repo
+      - name: Clone
+        uses: actions/checkout@v3
+
+      # configure aws cli; necessary to pull secrets and login to Amazon ECR
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # pull the respective Secret from AWS and expose it as env vars; required
+      # to push the built images to Amazon ECR registry
+      - name: Read secrets from AWS Secrets Manager into environment variables
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        with:
+          secret-ids: |
+            wxm.explorer.prod.env
+          parse-json-secrets: true
+
+      # docker login to Amazon ECR; necessary to push docker images
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # clone repo with k8s deployment scripts/yamls; necessary to
+      # deploy Thingsboard on our k8s cluster
+      - name: Checkout k8s yaml definitionsrepo
+        uses: actions/checkout@v3
+        env:
+          GH_ACCESS_TOKEN: ${{ env.WXM_EXPLORER_PROD_ENV_GH_ACCESS_TOKEN }}
+        with:
+          repository: WeatherXM/platform-deployment
+          token: ${{ env.GH_ACCESS_TOKEN }}
+          path: k8sinstall
+
+      # install kubectl; necessary to deploy Thingsboard on our k8s
+      # cluster
+      - name: Install and configure kubectl
+        run: |
+          # VERSION=$(curl --silent https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+          VERSION=v1.23.6
+          curl https://storage.googleapis.com/kubernetes-release/release/$VERSION/bin/linux/amd64/kubectl \
+            --progress-bar \
+            --location \
+            --remote-name
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      # write .env file
+      - name: Download .env
+        run: |
+          aws s3api get-object --bucket ${{ env.WXM_EXPLORER_PROD_ENV_S3_BUCKET }} --key ${{ env.WXM_EXPLORER_PROD_ENV_S3_OBJECT_PATH }} .env
+
+      # invoke wxm-explorer compilation
+      # tag images the respective images and push them to Amazon ECR
+      - name: Build wxm-explorer docker images
+        env:
+          IMAGE_REGISTRY: ${{ env.WXM_EXPLORER_PROD_ENV_IMAGE_REGISTRY }}
+          ROLLING_SNAPSHOT: production
+        run: |
+          export SHELL=/bin/bash
+
+          docker build -t ${{ env.IMAGE_REGISTRY }}/wxm-explorer:${{ env.TAG_NAME }} .
+          docker push ${{ env.IMAGE_REGISTRY }}/wxm-explorer:${{ env.TAG_NAME }}
+
+          docker tag ${{ env.IMAGE_REGISTRY }}/wxm-explorer:${{ env.TAG_NAME }} ${{ env.IMAGE_REGISTRY }}/wxm-explorer:${{ env.ROLLING_SNAPSHOT }}
+          docker push ${{ env.IMAGE_REGISTRY }}/wxm-explorer:${{ env.ROLLING_SNAPSHOT }}
+
+      # deploy the new images on the k8s cluster
+      - name: Deploy wxm-explorer on production
+        env:
+          K8S_ENVIROMENT: prod
+          IMAGE_REGISTRY: ${{ env.WXM_EXPLORER_PROD_ENV_IMAGE_REGISTRY }}
+        run: |
+          export SHELL=/bin/bash
+
+          cd ./k8sinstall/k8s/wxm-explorer
+          echo ${{ env.WXM_EXPLORER_PROD_ENV_KUBECONFIG }} | base64 --decode > ./kubeconfig.yaml
+
+          export KUBECONFIG=$PWD/kubeconfig.yaml
+          export IMAGE_TAG="${{ env.TAG_NAME }}"
+
+          bash ./install.sh -e ${{ env.K8S_ENVIROMENT }}

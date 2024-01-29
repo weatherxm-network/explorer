@@ -1,0 +1,20 @@
+name: Deploy on Dev
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "staging"
+jobs:
+  build:
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Prepare environment
+        run: |
+          echo "${{ vars.env_file }}" > .env
+          cat .env
+      - name: Run a multi-line script
+        run: |
+          echo Updating explorer container...
+          docker-compose down --remove-orphans
+          docker-compose up -d --build --force-recreate

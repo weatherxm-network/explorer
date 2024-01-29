@@ -1,0 +1,140 @@
+<script setup lang="ts">
+  import { useDisplay } from 'vuetify'
+  import { ref, computed } from 'vue'
+  import { event } from 'vue-gtag'
+  import numberFormater from '../utils/numberFormater'
+  import LineChartComponent from './LineChartComponent.vue'
+  import TooltipComponent from '~/components/common/TooltipComponent.vue'
+  import getGAEvent from '~/utils/getGAEvent'
+
+  interface Props {
+    rewardsChartData?: number[]
+    rewardsLastAndProgress?: {
+      lastValue?: string
+      progress?: string
+    }
+    rewardsChartLabels?: string[]
+    rewards30DaysTotal?: number
+  }
+
+  const props = withDefaults(defineProps<Props>(), {
+    rewardsChartData: () => [],
+    rewardsLastAndProgress: () => ({
+      lastValue: '0',
+      progress: '0'
+    }),
+    rewardsChartLabels: () => [],
+    rewards30DaysTotal: 0
+  })
+
+  const display = ref(useDisplay())
+  const rewardsCardTitle = ref('$WXM Rewards')
+  const rewardsCardLast30DaysText = ref('Last 30 Days')
+  const rewardsCardTotalText = ref('TOTAL')
+  const rewardsCardLastRunText = ref('LAST RUN')
+
+  const tottalAllocatedRewardsMessage = ref(
+    'Station owners are rewarded in $WXM for providing data to the WeatherXM Network.'
+  )
+  const tooltipTitle = ref('$WXM Rewards')
+
+  const responsiveTextStyles = computed(() => {
+    return display.value.smAndDown
+      ? { 'font-size': '1.402rem', 'font-weight': 700 }
+      : { 'font-size': '1.705rem', 'font-weight': 700 }
+  })
+
+  const nFormat = (number: number) => {
+    return numberFormater.nFormatter(number)
+  }
+
+  // track event
+  const trackEvent = (eventKey: string, parameters: any) => {
+    const validEvent = getGAEvent.getEvent(eventKey, parameters)
+    if (validEvent) {
+      event(validEvent.eventName, validEvent.parameters)
+    }
+  }
+</script>
+
+<template>
+  <VSheet color="top" style="border-radius: 16px" class="mb-4" elevation="4">
+    <div class="pl-5 pt-3 pr-2 text-body-2 d-flex align-center justify-space-between">
+      <div style="font-size: 1.094rem; font-weight: 700" class="text-text">
+        {{ rewardsCardTitle }}
+      </div>
+      <div
+        @mouseenter="trackEvent('clickInfoIcon', { ITEM_ID: 'allocated_rewards' })"
+        @click="trackEvent('clickInfoIcon', { ITEM_ID: 'allocated_rewards' })"
+      >
+        <TooltipComponent
+          :message="tottalAllocatedRewardsMessage"
+          :container="'any'"
+          :tooltip-title="tooltipTitle"
+        />
+      </div>
+    </div>
+    <VRow class="ma-0 pa-0 pl-5 pt-6 d-flex pb-4 pr-7">
+      <VCol class="ma-0 pa-0" cols="9">
+        <VRow class="ma-0 pa-0">
+          <LineChartComponent
+            :data="props.rewardsChartData"
+            class="pr-11 pl-4"
+          ></LineChartComponent>
+          <VRow class="ma-0 pa-0 d-flex justify-space-between pr-6 pt-2">
+            <div class="text-darkGrey text-uppercase" style="font-size: 0.778rem">
+              {{ props.rewardsChartLabels[0] }}
+            </div>
+            <div class="text-darkGrey text-uppercase" style="font-size: 0.778rem">
+              {{ props.rewardsChartLabels[1] }}
+            </div>
+          </VRow>
+        </VRow>
+      </VCol>
+      <VCol class="ma-0 pa-0 d-flex align-center justify-center" cols="3">
+        <div :style="responsiveTextStyles">
+          <div class="text-text d-flex justify-center" style="line-height: 120%">
+            {{ nFormat(props.rewards30DaysTotal) }}
+          </div>
+          <div
+            class="text-darkGrey d-flex justify-center"
+            :style="
+              display.smAndDown
+                ? { 'font-size': '0.691rem', 'font-weight': 400 }
+                : { 'font-size': '0.778rem', 'font-weight': 400 }
+            "
+          >
+            {{ rewardsCardLast30DaysText }}
+          </div>
+        </div>
+      </VCol>
+    </VRow>
+
+    <VRow class="px-2 pb-2 ma-0">
+      <VCol class="pa-0 ma-0" cols="6">
+        <VSheet class="px-4 pb-3 pt-3 ma-0 mr-1" color="layer1" style="border-radius: 8px">
+          <div class="d-flex justify-space-between align-center mb-4">
+            <div class="text-text text-caption">{{ rewardsCardTotalText }}</div>
+          </div>
+          <div :style="responsiveTextStyles">
+            <div class="text-text d-flex justify-start">
+              {{ props.rewardsLastAndProgress.lastValue }}
+            </div>
+          </div>
+        </VSheet>
+      </VCol>
+      <VCol class="pa-0 ma-0" cols="6">
+        <VSheet class="px-4 pb-3 pt-3 ma-0 ml-1" color="layer1" style="border-radius: 8px">
+          <div class="d-flex justify-space-between align-center mb-4">
+            <div class="tex-text text-caption">{{ rewardsCardLastRunText }}</div>
+          </div>
+          <div :style="responsiveTextStyles">
+            <div class="text-rewardVeryHigh d-flex justify-start">
+              +{{ props.rewardsLastAndProgress.progress }}
+            </div>
+          </div>
+        </VSheet>
+      </VCol>
+    </VRow>
+  </VSheet>
+</template>
