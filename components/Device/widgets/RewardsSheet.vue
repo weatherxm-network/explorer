@@ -7,6 +7,7 @@
   import RewardsMessage from './RewardsMessage.vue'
   import TooltipComponent from '~/components/common/TooltipComponent.vue'
   import wxmApi from '~/api/wxmApi'
+  import blackLogo from '@/assets/blackLogoTotalSum.svg'
 
   dayjs.extend(timezone)
 
@@ -436,5 +437,96 @@
       </VCardText>
     </VCard>
     <RewardsMessage />
+
+    <div class="py-5 px-4">
+      <!------------------------- Total rewards card ----------------------->
+      <VCard class="pa-6 d-flex" rounded="xl" elevation="2" color="layer-1">
+        <div class="me-4">
+          <img :src="blackLogo" alt="" />
+        </div>
+        <div>
+          <div class="text-darkGrey text-body-2">Total Station Rewards</div>
+          <div class="text-text font-weight-bold" style="font-size: 1.375rem">
+            173,023.54123 $WXM
+          </div>
+        </div>
+      </VCard>
+      <!------------------------- Daily reward card ----------------------->
+      <VCard class="my-4 pa-6" rounded="xl" elevation="2" color="layer-1">
+        <div
+          class="text-text font-weight-bold mb-1"
+          style="font-size: 0.984rem; letter-spacing: normal"
+        >
+          Daily Reward
+        </div>
+        <div class="text-darkGrey text-body-2 mb-6">Earnings for Dec 6, 2023</div>
+        <div
+          class="text-darkestBlue font-weight-bold"
+          style="font-size: 2rem; letter-spacing: normal"
+        >
+          + 3.1234 $WXM
+        </div>
+        <div class="my-2">
+          <VDivider />
+        </div>
+        <!------------------------- Base + boosts ----------------------->
+        <div class="d-flex mb-6">
+          <div class="d-flex me-4">
+            <div
+              style="width: 24px; height: 24px"
+              class="d-flex align-center justify-center me-1"
+              :style="{ color: validationScoreColor }"
+            >
+              <i class="fa-regular fa-hexagon fa-rotate-90 fa-lg"></i>
+            </div>
+            <div class="text-caption" style="letter-spacing: normal">
+              <div class="font-weight-bold">2.789 $WXM</div>
+              <div>Base Reward</div>
+            </div>
+          </div>
+          <div class="d-flex">
+            <div
+              style="width: 24px; height: 24px"
+              class="d-flex align-center justify-center me-1"
+              :style="{ color: theme.current.value.colors.primary }"
+            >
+              <i class="fa-regular fa-hexagon fa-rotate-90 fa-lg"></i>
+            </div>
+            <div class="text-caption" style="letter-spacing: normal">
+              <div class="font-weight-bold">1.234 $WXM</div>
+              <div>Boost</div>
+            </div>
+          </div>
+        </div>
+        <!---------------- Button ---------------->
+        <div>
+          <VBtn
+            block
+            rounded="lg"
+            color="primary"
+            variant="tonal"
+            class="text-none font-weight-bold text-body-2"
+            size="x-large"
+            style="letter-spacing: normal"
+          >
+            View Reward Details
+          </VBtn>
+        </div>
+      </VCard>
+      <!---------------------- Weekly streak ----------------------->
+      <VCard class="my-4 pa-6" rounded="xl" elevation="2" color="layer-1">
+        <div
+          class="text-text font-weight-bold mb-1"
+          style="font-size: 0.984rem; letter-spacing: normal"
+        >
+          Weekly Streak
+        </div>
+        <div class="text-darkGrey text-body-2 mb-6">Base reward scores from Nov 30 to Dec 6</div>
+        <!---------------- Progress bars ---------------->
+        <!-- <div>
+          <VProgressLinear style="transform: rotate(90deg)" height="22"></VProgressLinear>
+        </div> -->
+      </VCard>
+    </div>
   </div>
 </template>
