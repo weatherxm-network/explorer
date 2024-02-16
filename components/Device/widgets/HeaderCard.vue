@@ -108,7 +108,7 @@
 </script>
 
 <template>
-  <VCard class="ma-0 pa-0 rounded-b-xl mb-4" elevation="2" color="top">
+  <VCard class="ma-0 pa-0 rounded-b-xl" elevation="2" color="top">
     <VCardTitle class="ma-0 pt-4 pb-0 px-4">
       <div class="d-flex align-center justify-space-between">
         <div class="d-flex align-center">

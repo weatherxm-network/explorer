@@ -5,10 +5,13 @@
   import { selectValidationScoreColor } from '../utils/selectScoreColor'
   import type { Device, LatestTokens, WeeklyMonthlyTokens } from '../types/device'
   import RewardsMessage from './RewardsMessage.vue'
+  import TotalStationRewards from './RewardsWidgets/TotalStationRewards.vue'
+  import DailyRewards from './RewardsWidgets/DailyRewards.vue'
   import TooltipComponent from '~/components/common/TooltipComponent.vue'
   import wxmApi from '~/api/wxmApi'
-  import blackLogo from '@/assets/blackLogoTotalSum.svg'
-
+  import WeeklySteak from './RewardsWidgets/WeeklyStreak.vue'
+  import MainnetBanner from './RewardsWidgets/MainnetBanner.vue'
+  import EmptyRewards from './RewardsWidgets/EmptyRewards.vue'
   dayjs.extend(timezone)
 
   interface Props {
@@ -238,295 +241,58 @@
 <!-- eslint-disable vue/attribute-hyphenation -->
 <template>
   <div>
-    <VCard rounded="xl" class="mx-4 mb-4" elevation="2" color="layer1">
-      <VCardTitle class="pa-5">
-        <div class="text-body-2 text-text">Total Station Rewards</div>
-        <div class="text-darkestBlue font-weight-bold" style="font-size: 1.375rem">
-          {{ total }}
-        </div>
-      </VCardTitle>
-      <VCardText class="pa-0 ma-0"
-        ><VSheet class="pa-5" rounded="xl">
-          <VSheet border="true" color="primary" rounded="xl" style="padding: 1px">
-            <VSheet
-              :border="true"
-              color="blueTint"
-              class="d-flex justify-space-evenly"
-              rounded="xl"
-            >
-              <VRow class="ma-0 pa-1">
-                <VCol class="ma-0 pa-0" cols="4">
-                  <VBtn
-                    size="small"
-                    rounded="xl"
-                    :color="showPeriod === 'Latest' ? 'primary' : 'blueTint'"
-                    elevation="0"
-                    :outlined="!tokenBtnOutline"
-                    class="w-100 text-none text-body-2"
-                    @click="showLatest(deviceTokens.latest)"
-                  >
-                    <strong :class="showPeriod === 'Latest' ? 'text-background' : 'text-primary'">
-                      {{ latestButtonText }}
-                    </strong>
-                  </VBtn></VCol
-                >
-                <VCol class="ma-0 pa-0" cols="4">
-                  <VBtn
-                    size="small"
-                    rounded="xl"
-                    :color="showPeriod === 'Last 7D' ? 'primary' : 'blueTint'"
-                    elevation="0"
-                    :outlined="tokenBtnOutline"
-                    class="w-100 text-none text-body-2"
-                    @click="showWeekly(deviceTokens.weekly)"
-                  >
-                    <strong :class="showPeriod === 'Last 7D' ? 'text-background' : 'text-primary'">
-                      {{ last7DButtonText }}
-                    </strong>
-                  </VBtn></VCol
-                >
-                <VCol class="ma-0 pa-0" cols="4">
-                  <VBtn
-                    size="small"
-                    rounded="xl"
-                    :color="showPeriod === 'Last 30D' ? 'primary' : 'blueTint'"
-                    elevation="0"
-                    :outlined="tokenBtnOutline"
-                    class="w-100 text-none text-body-2"
-                    @click="showMonthly(deviceTokens.monthly)"
-                  >
-                    <strong :class="showPeriod === 'Last 30D' ? 'text-background' : 'text-primary'">
-                      {{ last30DButtonText }}
-                    </strong>
-                  </VBtn></VCol
-                >
-              </VRow>
-            </VSheet>
-          </VSheet>
-          <div class="my-3 d-flex justify-space-between align-end">
-            <div>
-              <div class="text-body-2 text-darkGrey">
-                {{
-                  showPeriod === 'Latest' ? timestamp : `${tokensFromDateTs} - ${tokensToDateTs}`
-                }}
-              </div>
-              <div class="text-darkestBlue font-weight-bold" style="font-size: 1.375rem">
-                {{ actualReward }}
-              </div>
-            </div>
-
-            <VSheet
-              :color="selectPercentageBadgeColor(rewardScore)"
-              class="d-flex align-center flex-shrink-1 flex-grow-0 text-caption font-weight-bold py-1 px-2 text-darkestBlue"
-              rounded="xl"
-            >
-              <div style="width: 20px; height: 20px" class="d-flex align-center justify-center">
-                <i
-                  v-if="100 - rewardScore === 0"
-                  class="fa-solid fa-badge-check"
-                  style="font-size: 13px"
-                ></i>
-                <i
-                  v-else
-                  class="fa-solid fa-triangle-exclamation"
-                  style="font-size: 13px"
-                  :class="
-                    100 - rewardScore >= 1 && 100 - rewardScore <= 29
-                      ? 'text-warning'
-                      : 'text-error'
-                  "
-                ></i>
-              </div>
-              <span class="ms-1 text-text">
-                {{ 100 - rewardScore === 0 ? `Got 100%` : `Lost ${100 - rewardScore}%` }}</span
-              >
-            </VSheet>
-          </div>
-          <div class="pt-2">
-            <div class="d-flex align-center justify-space-between">
-              <div class="d-flex align-start">
-                <span
-                  style="width: 24px; height: 24px"
-                  class="d-flex align-center justify-center"
-                  :style="{ color: validationScoreColor }"
-                >
-                  <i class="fa-regular fa-hexagon fa-rotate-90 fa-lg"></i>
-                </span>
-                <div class="ms-1 text-caption">
-                  <div class="text-text">{{ (rewardScore / 100).toFixed(2) }}</div>
-                  <div class="text-darkGrey d-flex align-center">
-                    <span>{{ rewardScoreText }}</span>
-                    <span
-                      style="width: 30px; height: 30px"
-                      class="d-flex align-center justify-center"
-                    >
-                      <TooltipComponent
-                        :message="rewardScoreTooltipMessage"
-                        :container="'any'"
-                        :tooltip-title="rewardScoreTooltipTitle"
-                      />
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div class="d-flex align-start gap-1">
-                <span
-                  style="width: 24px; height: 24px"
-                  class="d-flex align-center justify-center text-mediumGrey"
-                >
-                  <i class="fa-regular fa-hexagon fa-rotate-90 fa-lg"></i>
-                </span>
-
-                <div class="ms-1 text-caption">
-                  <div class="text-text">{{ periodMaxReward }}</div>
-                  <div class="text-darkGrey d-flex align-center">
-                    <span>{{ maxRewardsText }}</span>
-                    <span
-                      style="width: 30px; height: 30px"
-                      class="d-flex align-center justify-center"
-                    >
-                      <TooltipComponent
-                        :message="maxRewardTooltipMessage"
-                        :container="'any'"
-                        :tooltip-title="maxRewardTooltipTitle"
-                      />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="my-3">
-            <div class="d-flex justify-space-between">
-              <div
-                v-for="(item, index) in timelineColorsArray"
-                :key="index"
-                class="rounded-xl"
-                style="height: 70px"
-                :style="{ backgroundColor: `${item}`, width: calcedGraphWidth }"
-              ></div>
-            </div>
-            <div
-              v-if="showPeriod === 'Latest'"
-              class="d-flex justify-space-between mt-1 text-caption text-text"
-            >
-              <div>00:00</div>
-              <div>12:00</div>
-              <div>23:00</div>
-            </div>
-            <div v-else class="d-flex justify-space-between mt-1 text-caption text-text">
-              <div>{{ tokensFromDateTs }}</div>
-              <div>{{ tokensToDateTs }}</div>
-            </div>
-          </div>
-          <div class="d-flex text-caption align-center justify-center">
-            <div v-if="showPeriod === 'Latest'" class="text-darkGrey">{{ timelineTs }}</div>
-            <div v-else class="text-darkGrey">
-              {{ tokensTimelinePeriod }}
-            </div>
-            <div>
-              <span style="width: 30px; height: 30px" class="d-flex align-center justify-center">
-                <TooltipComponent
-                  :message="timelineTooltipMessage"
-                  :container="'any'"
-                  :tooltip-title="timelineTooltipTitle"
-              /></span>
-            </div>
-          </div>
-        </VSheet>
-      </VCardText>
-    </VCard>
-    <RewardsMessage />
-
     <div class="py-5 px-4">
-      <!------------------------- Total rewards card ----------------------->
-      <VCard class="pa-6 d-flex" rounded="xl" elevation="2" color="layer-1">
-        <div class="me-4">
-          <img :src="blackLogo" alt="" />
-        </div>
-        <div>
-          <div class="text-darkGrey text-body-2">Total Station Rewards</div>
-          <div class="text-text font-weight-bold" style="font-size: 1.375rem">
-            173,023.54123 $WXM
-          </div>
-        </div>
-      </VCard>
-      <!------------------------- Daily reward card ----------------------->
-      <VCard class="my-4 pa-6" rounded="xl" elevation="2" color="layer-1">
-        <div
-          class="text-text font-weight-bold mb-1"
-          style="font-size: 0.984rem; letter-spacing: normal"
-        >
-          Daily Reward
-        </div>
-        <div class="text-darkGrey text-body-2 mb-6">Earnings for Dec 6, 2023</div>
-        <div
-          class="text-darkestBlue font-weight-bold"
-          style="font-size: 2rem; letter-spacing: normal"
-        >
-          + 3.1234 $WXM
-        </div>
-        <div class="my-2">
-          <VDivider />
-        </div>
-        <!------------------------- Base + boosts ----------------------->
-        <div class="d-flex mb-6">
-          <div class="d-flex me-4">
-            <div
-              style="width: 24px; height: 24px"
-              class="d-flex align-center justify-center me-1"
-              :style="{ color: validationScoreColor }"
-            >
-              <i class="fa-regular fa-hexagon fa-rotate-90 fa-lg"></i>
-            </div>
-            <div class="text-caption" style="letter-spacing: normal">
-              <div class="font-weight-bold">2.789 $WXM</div>
-              <div>Base Reward</div>
-            </div>
-          </div>
-          <div class="d-flex">
-            <div
-              style="width: 24px; height: 24px"
-              class="d-flex align-center justify-center me-1"
-              :style="{ color: theme.current.value.colors.primary }"
-            >
-              <i class="fa-regular fa-hexagon fa-rotate-90 fa-lg"></i>
-            </div>
-            <div class="text-caption" style="letter-spacing: normal">
-              <div class="font-weight-bold">1.234 $WXM</div>
-              <div>Boost</div>
-            </div>
-          </div>
-        </div>
-        <!---------------- Button ---------------->
-        <div>
-          <VBtn
-            block
-            rounded="lg"
-            color="primary"
-            variant="tonal"
-            class="text-none font-weight-bold text-body-2"
-            size="x-large"
-            style="letter-spacing: normal"
-          >
-            View Reward Details
-          </VBtn>
-        </div>
-      </VCard>
+      <div v-if="false">
+        <MainnetBanner :date="'14th of February'"></MainnetBanner>
+      </div>
+      <EmptyRewards v-if="false" />
+
+      <TotalStationRewards :totalRewards="1231.123" />
+      <DailyRewards
+        :date="'Earnings for Dec 6, 2023'"
+        :dailyAmount="3.1234"
+        :validationScoreColor="validationScoreColor"
+        :baseRewardAmount="2.789"
+        :boostAmount="1.234"
+        :state="null"
+      />
+
       <!---------------------- Weekly streak ----------------------->
-      <VCard class="my-4 pa-6" rounded="xl" elevation="2" color="layer-1">
-        <div
-          class="text-text font-weight-bold mb-1"
-          style="font-size: 0.984rem; letter-spacing: normal"
-        >
-          Weekly Streak
-        </div>
-        <div class="text-darkGrey text-body-2 mb-6">Base reward scores from Nov 30 to Dec 6</div>
-        <!---------------- Progress bars ---------------->
-        <!-- <div>
-          <VProgressLinear style="transform: rotate(90deg)" height="22"></VProgressLinear>
-        </div> -->
-      </VCard>
+      <WeeklySteak
+        :date="'Base reward scores from Nov 30 to Dec 6'"
+        :bar-graph-data="[
+          {
+            rewardScore: 20,
+            timestamp: 'W'
+          },
+          {
+            rewardScore: 30,
+            timestamp: 'T'
+          },
+          {
+            rewardScore: 40,
+            timestamp: 'F'
+          },
+          {
+            rewardScore: 10,
+            timestamp: 'S'
+          },
+          {
+            rewardScore: 70,
+            timestamp: 'S'
+          },
+          {
+            rewardScore: 100,
+            timestamp: 'M'
+          },
+          {
+            rewardScore: 80,
+            timestamp: 'T'
+          }
+        ]"
+        :fromDate="'Nov 30'"
+        :toDate="'Dec 6'"
+      />
     </div>
   </div>
 </template>
