@@ -7,11 +7,11 @@
   import RewardsMessage from './RewardsMessage.vue'
   import TotalStationRewards from './RewardsWidgets/TotalStationRewards.vue'
   import DailyRewards from './RewardsWidgets/DailyRewards.vue'
-  import TooltipComponent from '~/components/common/TooltipComponent.vue'
-  import wxmApi from '~/api/wxmApi'
   import WeeklySteak from './RewardsWidgets/WeeklyStreak.vue'
   import MainnetBanner from './RewardsWidgets/MainnetBanner.vue'
   import EmptyRewards from './RewardsWidgets/EmptyRewards.vue'
+  import wxmApi from '~/api/wxmApi'
+  import TooltipComponent from '~/components/common/TooltipComponent.vue'
   dayjs.extend(timezone)
 
   interface Props {
@@ -242,13 +242,11 @@
 <template>
   <div>
     <div class="py-5 px-4">
-      <div v-if="false">
-        <MainnetBanner :date="'14th of February'"></MainnetBanner>
-      </div>
+      <MainnetBanner v-if="false" :date="'14th of February'"></MainnetBanner>
       <EmptyRewards v-if="false" />
-
-      <TotalStationRewards :totalRewards="1231.123" />
+      <TotalStationRewards v-if="true" :totalRewards="1231.123" />
       <DailyRewards
+        v-if="true"
         :date="'Earnings for Dec 6, 2023'"
         :dailyAmount="3.1234"
         :validationScoreColor="validationScoreColor"
@@ -259,6 +257,7 @@
 
       <!---------------------- Weekly streak ----------------------->
       <WeeklySteak
+        v-if="true"
         :date="'Base reward scores from Nov 30 to Dec 6'"
         :bar-graph-data="[
           {
