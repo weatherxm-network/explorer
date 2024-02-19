@@ -243,7 +243,7 @@
   <div>
     <div class="py-5 px-4">
       <MainnetBanner v-if="false" :date="'14th of February'"></MainnetBanner>
-      <EmptyRewards v-if="false" />
+      <EmptyRewards v-if="true" />
       <TotalStationRewards v-if="true" :totalRewards="1231.123" />
       <DailyRewards
         v-if="true"

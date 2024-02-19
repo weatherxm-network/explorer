@@ -11,7 +11,7 @@
   <VCard class="pa-6 mb-6" rounded="xl">
     <client-only>
       <Vue3Lottie
-        :animation-data="index['wenMoon']"
+        :animation-data="index['wenMoonSimple']"
         :height="display.smAndDown ? 120 : 150"
         :width="display.smAndDown ? 120 : 150"
       />
