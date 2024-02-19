@@ -3,7 +3,7 @@
   import bannerBackground from '~/assets/bannerBackground.jpeg'
 
   interface Props {
-    date: string
+    date?: string
   }
 
   const props = withDefaults(defineProps<Props>(), {

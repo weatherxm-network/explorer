@@ -2,7 +2,7 @@
   import blackLogo from '@/assets/blackLogoTotalSum.svg'
 
   interface Props {
-    totalRewards: float
+    totalRewards?: float
   }
 
   const props = withDefaults(defineProps<Props>(), {

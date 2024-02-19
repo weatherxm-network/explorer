@@ -2,15 +2,15 @@
   import { useTheme } from 'vuetify'
   import { selectValidationScoreColor } from '../../utils/selectScoreColor'
   interface BarGraphData {
-    rewardScore: float
-    timestamp: string
+    rewardScore?: float
+    timestamp?: string
   }
 
   interface Props {
-    date: string
-    barGraphData: BarGraphData[]
-    fromDate: string
-    toDate: string
+    date?: string
+    barGraphData?: BarGraphData[]
+    fromDate?: string
+    toDate?: string
   }
 
   const props = withDefaults(defineProps<Props>(), {

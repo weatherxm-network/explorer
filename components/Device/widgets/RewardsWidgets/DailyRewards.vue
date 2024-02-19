@@ -2,12 +2,12 @@
   import { useTheme } from 'vuetify'
 
   interface Props {
-    date: string
-    dailyAmount: float
-    baseRewardAmount: float
-    boostAmount: float
-    validationScoreColor: string | null
-    state: string
+    date?: string
+    dailyAmount?: float
+    baseRewardAmount?: float
+    boostAmount?: float
+    validationScoreColor?: string | null
+    state?: 'info' | 'warn' | 'error' | null
   }
 
   const props = withDefaults(defineProps<Props>(), {
