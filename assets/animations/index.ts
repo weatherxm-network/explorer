@@ -19,7 +19,7 @@ import errorState from './error-state.json'
 import forecastDark from './forecast-dark.json'
 import forecastLight from './forecast-light.json'
 import rocketLottie from './rocketLottie.json'
-
+import wenMoon from './wen-moon.json'
 export default {
   forecastDark,
   forecastLight,
@@ -40,5 +40,6 @@ export default {
   wind,
   fog,
   cloudy,
-  rocketLottie
+  rocketLottie,
+  wenMoon
 }
