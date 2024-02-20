@@ -1,13 +1,17 @@
 <script setup lang="ts">
   import { useTheme } from 'vuetify'
 
+  interface State {
+    state: 'INFO' | 'WARNING' | 'ERROR' | null
+  }
+
   interface Props {
     date?: string
     dailyAmount?: float
     baseRewardAmount?: float
     boostAmount?: float
     validationScoreColor?: string | null
-    state?: 'info' | 'warn' | 'error' | null
+    state?: State
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -16,7 +20,7 @@
     baseRewardAmount: 0,
     boostAmount: 0,
     validationScoreColor: '',
-    state: ''
+    state: null
   })
 
   const theme = useTheme()
@@ -34,44 +38,44 @@
 
   const calcSateColor = (state: string) => {
     switch (state) {
-      case 'info':
+      case 'INFO':
         return 'primary'
-      case 'warning':
+      case 'WARNING':
         return 'warning'
-      case 'error':
+      case 'ERROR':
         return 'error'
     }
   }
 
   const calcStateTintColor = (state: string) => {
     switch (state) {
-      case 'info':
+      case 'INFO':
         return 'layer1'
-      case 'warning':
+      case 'WARNING':
         return 'warningTint'
-      case 'error':
+      case 'ERROR':
         return 'errorTint'
     }
   }
 
   const calcStateBoldText = (state: string) => {
     switch (state) {
-      case 'info':
+      case 'INFO':
         return infoBoldText.value
-      case 'warning':
+      case 'WARNING':
         return warningBoldText.value
-      case 'error':
+      case 'ERROR':
         return errorBoldText.value
     }
   }
 
   const calcStateLightText = (state: string) => {
     switch (state) {
-      case 'info':
+      case 'INFO':
         return infoLightText.value
-      case 'warning':
+      case 'WARNING':
         return warningLightText.value
-      case 'error':
+      case 'ERROR':
         return errorLightText.value
     }
   }
@@ -92,7 +96,7 @@
         >
           {{ cardTitleText }}
         </div>
-        <div class="text-darkGrey text-body-2 mb-6">{{ props.date }}</div>
+        <div class="text-darkGrey text-body-2 mb-6">{{ `Earnings for ${props.date}` }}</div>
         <div
           class="text-darkestBlue font-weight-bold"
           style="font-size: 2rem; letter-spacing: normal"
@@ -126,16 +130,26 @@
               <i class="fa-regular fa-hexagon fa-rotate-90 fa-lg"></i>
             </div>
             <div class="text-caption" style="letter-spacing: normal">
-              <div :class="props.boostAmount !== null ? 'font-weight-bold' : ''">
+              <div
+                :class="
+                  props.boostAmount !== null || props.boostAmount !== undefined
+                    ? 'font-weight-bold'
+                    : ''
+                "
+              >
                 {{
-                  props.boostAmount !== null
+                  props.boostAmount !== null || props.boostAmount !== undefined
                     ? `${
                         props.boostAmount === 0 ? props.boostAmount.toFixed(2) : props.boostAmount
                       } $WXM`
                     : 'No Active'
                 }}
               </div>
-              <div>{{ props.boostAmount !== null ? 'Boost' : 'Boosts' }}</div>
+              <div>
+                {{
+                  props.boostAmount !== null || props.boostAmount !== undefined ? 'Boost' : 'Boosts'
+                }}
+              </div>
             </div>
           </div>
         </div>

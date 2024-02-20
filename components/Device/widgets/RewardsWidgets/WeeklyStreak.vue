@@ -1,31 +1,37 @@
 <script setup lang="ts">
   import { useTheme } from 'vuetify'
+  import dayjs from 'dayjs'
+  import timezone from 'dayjs/plugin/timezone'
   import { selectValidationScoreColor } from '../../utils/selectScoreColor'
+  dayjs.extend(timezone)
+
   interface BarGraphData {
-    rewardScore?: float
+    base_reward_score?: float
     timestamp?: string
   }
 
   interface Props {
-    date?: string
     barGraphData?: BarGraphData[]
     fromDate?: string
     toDate?: string
   }
 
   const props = withDefaults(defineProps<Props>(), {
-    date: '',
-    barGraphData: () => [{ rewardScore: 0, timestamp: '' }],
-    dateFrom: '',
-    dateTo: ''
+    barGraphData: () => [{ base_reward_score: 0, timestamp: '' }],
+    fromDate: '',
+    toDate: ''
   })
 
   const theme = useTheme()
   const cardTitleText = ref('Weekly Streak')
 
   const calcGraphValueHeight = (value: float) => {
-    const calcedHeightBasedOnValue = (value / 100) * 77
-    return calcedHeightBasedOnValue < 20 ? 20 : calcedHeightBasedOnValue
+    if (value === null) {
+      return 0
+    } else {
+      const calcedHeightBasedOnValue = (value / 100) * 77
+      return calcedHeightBasedOnValue < 20 ? 20 : calcedHeightBasedOnValue
+    }
   }
 </script>
 
@@ -37,7 +43,9 @@
     >
       {{ cardTitleText }}
     </div>
-    <div class="text-darkGrey text-body-2 mb-6">{{ props.date }}</div>
+    <div class="text-darkGrey text-body-2 mb-6">
+      {{ `Base reward scores from ${props.fromDate} to ${props.toDate}` }}
+    </div>
     <!---------------- Progress bars ---------------->
     <div>
       <div class="d-flex justify-space-evenly">
@@ -52,13 +60,15 @@
               class="rounded-xl"
               style="height: 20px"
               :style="{
-                height: `${calcGraphValueHeight(item.rewardScore)}px`,
-                backgroundColor: selectValidationScoreColor(item.rewardScore),
+                height: `${calcGraphValueHeight(item.base_reward_score)}px`,
+                backgroundColor: selectValidationScoreColor(item.base_reward_score),
                 width: '20px'
               }"
             ></div>
           </div>
-          <div class="d-flex justify-center mt-1">{{ item.timestamp }}</div>
+          <div class="d-flex justify-center mt-1">
+            {{ dayjs(item.timestamp).utc().format('dd').charAt(0) }}
+          </div>
         </div>
       </div>
       <div class="d-flex justify-space-between mt-2 mb-6">
