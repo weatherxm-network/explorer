@@ -9,7 +9,7 @@
     date?: string
     dailyAmount?: float
     baseRewardAmount?: float
-    boostAmount?: float
+    boostAmount?: float | null
     validationScoreColor?: string | null
     state?: State
   }
@@ -130,26 +130,16 @@
               <i class="fa-regular fa-hexagon fa-rotate-90 fa-lg"></i>
             </div>
             <div class="text-caption" style="letter-spacing: normal">
-              <div
-                :class="
-                  props.boostAmount !== null || props.boostAmount !== undefined
-                    ? 'font-weight-bold'
-                    : ''
-                "
-              >
+              <div :class="props.boostAmount !== null ? 'font-weight-bold' : ''">
                 {{
-                  props.boostAmount !== null || props.boostAmount !== undefined
+                  !!props.boostAmount
                     ? `${
                         props.boostAmount === 0 ? props.boostAmount.toFixed(2) : props.boostAmount
                       } $WXM`
                     : 'No Active'
                 }}
               </div>
-              <div>
-                {{
-                  props.boostAmount !== null || props.boostAmount !== undefined ? 'Boost' : 'Boosts'
-                }}
-              </div>
+              <div>{{ props.boostAmount !== null ? 'Boost' : 'Boosts' }}</div>
             </div>
           </div>
         </div>

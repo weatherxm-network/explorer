@@ -128,7 +128,7 @@
           latest: {
             timestamp: '2024-02-20T12:32:32.588Z',
             base_reward: 2.34,
-            total_business_boost_reward: 1.23,
+            total_business_boost_reward: 13.23,
             total_reward: 3.57,
             base_reward_score: 50,
             annotation_summary: [
@@ -178,7 +178,6 @@
         emptyStateFlag.value = response.total_rewards === 0
         //////// Total station rewards /////////
         totalStationRewards.value = computeStringNumber(response.total_rewards.toString())
-        console.log(totalStationRewards.value)
         //////// Daily Rewards /////////
         dailyRewardsDate.value = dayjs(response.latest.timestamp).utc().format('MMM D, YYYY')
         dailyRewardsBaseReward.value = computeStringNumber(response.latest.base_reward.toString())
@@ -191,7 +190,6 @@
           response.latest.base_reward_score
         )
         dailyRewardsSeverity.value = response?.latest?.annotation_summary[0]?.severity_level ?? null
-
         //////// Weekly streak timeline /////////
         weeklyStreakFromDate.value = dayjs(response?.timeline[0]?.timestamp)
           .utc()
