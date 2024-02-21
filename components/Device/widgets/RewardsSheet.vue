@@ -4,8 +4,8 @@
   import { selectValidationScoreColor } from '../utils/selectScoreColor'
   import type { Device, LatestTokens } from '../types/device'
 
+  import DailyRewards from '../../common/DailyRewards.vue'
   import TotalStationRewards from './RewardsWidgets/TotalStationRewards.vue'
-  import DailyRewards from './RewardsWidgets/DailyRewards.vue'
   import WeeklyStreak from './RewardsWidgets/WeeklyStreak.vue'
   import MainnetBanner from './RewardsWidgets/MainnetBanner.vue'
   import EmptyRewards from './RewardsWidgets/EmptyRewards.vue'
@@ -176,9 +176,9 @@
         }
 
         emptyStateFlag.value = response.total_rewards === 0
-        //////// Total station rewards /////////
+        /// ///// Total station rewards /////////
         totalStationRewards.value = computeStringNumber(response.total_rewards.toString())
-        //////// Daily Rewards /////////
+        /// ///// Daily Rewards /////////
         dailyRewardsDate.value = dayjs(response.latest.timestamp).utc().format('MMM D, YYYY')
         dailyRewardsBaseReward.value = computeStringNumber(response.latest.base_reward.toString())
         dailyRewardsTotalBusinessBoostReward.value = computeStringNumber(
@@ -190,7 +190,7 @@
           response.latest.base_reward_score
         )
         dailyRewardsSeverity.value = response?.latest?.annotation_summary[0]?.severity_level ?? null
-        //////// Weekly streak timeline /////////
+        /// ///// Weekly streak timeline /////////
         weeklyStreakFromDate.value = dayjs(response?.timeline[0]?.timestamp)
           .utc()
           .format('MMM D')
@@ -220,7 +220,7 @@
 <!-- eslint-disable vue/attribute-hyphenation -->
 <template>
   <div>
-    <div class="py-5 px-4">
+    <div class="py-5 px-4 pt-0">
       <MainnetBanner v-if="false" :date="'14th of February'"></MainnetBanner>
       <EmptyRewards v-if="emptyStateFlag" />
       <TotalStationRewards v-if="!emptyStateFlag" :totalRewards="totalStationRewards" />

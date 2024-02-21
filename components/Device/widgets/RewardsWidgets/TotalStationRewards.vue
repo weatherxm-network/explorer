@@ -13,7 +13,7 @@
 </script>
 
 <template>
-  <VCard class="pa-6 d-flex" rounded="xl" elevation="2" color="top">
+  <VCard class="pa-6 mb-4 d-flex" rounded="xl" elevation="2" color="top">
     <div class="me-4">
       <img :src="blackLogo" alt="" />
     </div>

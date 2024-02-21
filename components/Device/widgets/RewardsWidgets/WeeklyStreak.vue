@@ -22,6 +22,7 @@
     toDate: ''
   })
 
+  const route = useRoute()
   const theme = useTheme()
   const cardTitleText = ref('Weekly Streak')
 
@@ -86,6 +87,7 @@
         size="x-large"
         style="letter-spacing: normal"
         flat
+        @click="navigateTo(`/reward_timeline/${route.params.deviceName}`)"
       >
         <span class="text-primary">View Timeline</span>
       </VBtn>
