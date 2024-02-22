@@ -77,7 +77,8 @@
   const loadingRewards = (loading: boolean) => {
     loadingRewardsTab.value = loading
   }
-  onMounted(() => {
+
+  const fetchData = () => {
     loading.value = true
     const normalizeRouteDeviceName = formatDeviceName.normalizeDeviceName(route.params.deviceName)
     wxmApi
@@ -126,6 +127,10 @@
         loading.value = false
         showDeviceDetails.value = false
       })
+  }
+
+  onMounted(() => {
+    fetchData()
   })
 </script>
 
@@ -151,12 +156,28 @@
           <div v-if="loading" :style="animationContainerHeight">
             <LottieComponent :lottieName="'loaderLight'" :boldText="''" :lightText="''" />
           </div>
-          <div v-if="!showDeviceDetails && !loading" :style="errorAnimationContainerHeight">
+          <div
+            v-if="!showDeviceDetails && !loading"
+            class="d-flex flex-column justify-center pa-6"
+            :style="errorAnimationContainerHeight"
+          >
             <LottieComponent
               :lottieName="'errorState'"
               :boldText="errorStateBoldText"
               :lightText="errorStateLightText"
             />
+            <VSheet class="mt-4" rounded="lg" color="primary" :border="true">
+              <VBtn
+                block
+                class="text-none"
+                size="x-large"
+                rounded="lg"
+                color="top"
+                flat
+                @click="fetchData"
+                ><span class="text-primary">Retry</span></VBtn
+              >
+            </VSheet>
           </div>
           <v-card-text v-if="showDeviceDetails && !loading" class="pa-0 ma-0">
             <v-window

@@ -1,16 +1,16 @@
 <script setup lang="ts">
   import dayjs from 'dayjs'
   import timezone from 'dayjs/plugin/timezone'
+  import { useDisplay } from 'vuetify'
   import { selectValidationScoreColor } from '../utils/selectScoreColor'
-  import type { Device, LatestTokens } from '../types/device'
-
+  import type { Device } from '../types/device'
   import DailyRewards from '../../common/DailyRewards.vue'
   import TotalStationRewards from './RewardsWidgets/TotalStationRewards.vue'
   import WeeklyStreak from './RewardsWidgets/WeeklyStreak.vue'
   import MainnetBanner from './RewardsWidgets/MainnetBanner.vue'
   import EmptyRewards from './RewardsWidgets/EmptyRewards.vue'
+  import LottieComponent from '~/components/common/LottieComponent.vue'
   import wxmApi from '~/api/wxmApi'
-
   dayjs.extend(timezone)
 
   interface Props {
@@ -48,17 +48,8 @@
   const emit = defineEmits(['loadingRewardsTab'])
 
   // rewards stuff
-  const deviceTokens = ref()
   const validationScoreColor = ref()
-  const total = ref('')
-  const actualReward = ref('')
-  const lostRewards = ref(0)
-  const periodMaxReward = ref('')
-  const rewardScore = ref(100)
-  const timelineTimestamp = ref()
-  const timelineColorsArray = ref()
-  const tokensTimestamp = ref('')
-  const showPeriod = ref('Latest')
+  const loading = ref(false)
 
   const totalStationRewards = ref('')
   const dailyRewardsDate = ref('')
@@ -67,11 +58,20 @@
   const dailyRewardsTotalReward = ref('')
   const dailyRewardsValidationScoreColor = ref('')
   const dailyRewardsSeverity = ref('')
+  const dailyRewardsHasActiveBoosts = ref(false)
 
   const weeklyStreakFromDate = ref('')
   const weeklyStreakToDate = ref('')
   const weeklyStreakTimeline = ref()
   const emptyStateFlag = ref(false)
+
+  const showRewards = ref(false)
+  const display = ref(useDisplay())
+  const errorStateBoldText = ref('Oops! Something went wrong.')
+  const errorStateLightText = ref('Failed to get the details of the device: No data')
+  const errorAnimationContainerHeight = computed(() => {
+    return { marginTop: `calc(${display.value.height / 2}px - 281px)` }
+  })
 
   const countDecimals = (number: number) => {
     if (Number.isInteger(number)) {
@@ -101,91 +101,28 @@
     }
   }
 
-  const showLatest = (deviceLatestTokens: LatestTokens) => {
-    showPeriod.value = 'Latest'
-    actualReward.value = `+ ${computeStringNumber(
-      deviceLatestTokens.actual_reward.toString()
-    )} $WXM`
-    lostRewards.value = deviceLatestTokens.lost_reward
-    periodMaxReward.value = computeStringNumber(deviceLatestTokens.period_max_reward.toString())
-    rewardScore.value = deviceLatestTokens.reward_score
-    timelineTimestamp.value = deviceLatestTokens.timeline.reference_date
-    timelineColorsArray.value = deviceLatestTokens.timeline.reward_scores.map((item) => {
-      return selectValidationScoreColor(item)
-    })
-    tokensTimestamp.value = deviceLatestTokens.timestamp
-    validationScoreColor.value = selectValidationScoreColor(deviceLatestTokens.reward_score)
-  }
-
   // get device transactions
   const getSpecificDeviceTransactions = (deviceId: string) => {
     emit('loadingRewardsTab', true)
+    showRewards.value = false
+    loading.value = true
+
     wxmApi
       .getDeviceTokens(deviceId)
-      .then(() => {
-        const response = {
-          total_rewards: 1,
-          latest: {
-            timestamp: '2024-02-20T12:32:32.588Z',
-            base_reward: 2.34,
-            total_business_boost_reward: 13.23,
-            total_reward: 3.57,
-            base_reward_score: 50,
-            annotation_summary: [
-              {
-                severity_level: 'INFO',
-                group: 'NO_WALLET',
-                title: 'Minor Sensor Issues',
-                message:
-                  'Station is doing great! Minor issues detected during our data quality checks, that may be related to occasional sensor inaccuracies. That can happen once in a while.',
-                doc_url:
-                  'https://docs.weatherxm.com/project/rewards-troubleshooting#sensor-problems'
-              }
-            ]
-          },
-          timeline: [
-            {
-              timestamp: '2024-02-20T12:32:32.588Z',
-              base_reward_score: 0
-            },
-            {
-              timestamp: '2024-02-20T12:32:32.588Z',
-              base_reward_score: 40
-            },
-            {
-              timestamp: '2024-02-20T12:32:32.588Z',
-              base_reward_score: 30
-            },
-            {
-              timestamp: '2024-02-20T12:32:32.588Z',
-              base_reward_score: 50
-            },
-            {
-              timestamp: '2024-02-20T12:32:32.588Z',
-              base_reward_score: 50
-            },
-            {
-              timestamp: '2024-02-20T12:32:32.588Z',
-              base_reward_score: 100
-            },
-            {
-              timestamp: '2024-02-20T12:32:32.588Z',
-              base_reward_score: 50
-            }
-          ]
-        }
-
-        emptyStateFlag.value = response.total_rewards === 0
+      .then((response) => {
+        emptyStateFlag.value = response.total_rewards === 0 && Object.keys(response).length === 1
         /// ///// Total station rewards /////////
         totalStationRewards.value = computeStringNumber(response.total_rewards.toString())
         /// ///// Daily Rewards /////////
+        dailyRewardsHasActiveBoosts.value = 'total_business_boost_reward' in response.latest
+        if (dailyRewardsHasActiveBoosts.value) {
+          dailyRewardsTotalBusinessBoostReward.value = computeStringNumber(
+            response.latest.total_business_boost_reward.toString()
+          )
+        }
         dailyRewardsDate.value = dayjs(response.latest.timestamp).utc().format('MMM D, YYYY')
         dailyRewardsBaseReward.value = computeStringNumber(response.latest.base_reward.toString())
-        dailyRewardsTotalBusinessBoostReward.value = computeStringNumber(
-          response.latest.total_business_boost_reward.toString()
-        )
         dailyRewardsTotalReward.value = computeStringNumber(response.latest.total_reward.toString())
-
         dailyRewardsValidationScoreColor.value = selectValidationScoreColor(
           response.latest.base_reward_score
         )
@@ -200,47 +137,75 @@
           .utc()
           .format('MMM D')
         weeklyStreakTimeline.value = response.timeline
-        if (response) {
-          deviceTokens.value = response
-          total.value = `${computeStringNumber(deviceTokens.value.total_rewards.toString())} $WXM`
-          showLatest(deviceTokens.value.latest)
-          emit('loadingRewardsTab', false)
-        }
+
+        emit('loadingRewardsTab', false)
+        loading.value = false
+        showRewards.value = true
       })
       .catch(() => {
         emit('loadingRewardsTab', false)
+        loading.value = false
+        showRewards.value = false
       })
   }
 
-  onMounted(async () => {
-    await getSpecificDeviceTransactions(props.device.id)
+  onMounted(() => {
+    getSpecificDeviceTransactions(props.device.id)
   })
 </script>
 
-<!-- eslint-disable vue/attribute-hyphenation -->
 <template>
   <div>
     <div class="py-5 px-4 pt-0">
       <MainnetBanner v-if="false" :date="'14th of February'"></MainnetBanner>
-      <EmptyRewards v-if="emptyStateFlag" />
-      <TotalStationRewards v-if="!emptyStateFlag" :totalRewards="totalStationRewards" />
+      <EmptyRewards v-if="emptyStateFlag && !loading" />
+      <TotalStationRewards
+        v-if="!emptyStateFlag && !loading && showRewards"
+        :total-rewards="totalStationRewards"
+      />
       <DailyRewards
-        v-if="!emptyStateFlag"
+        v-if="!emptyStateFlag && !loading && showRewards"
         :date="dailyRewardsDate"
-        :dailyAmount="dailyRewardsTotalReward"
-        :validationScoreColor="validationScoreColor"
-        :baseRewardAmount="dailyRewardsBaseReward"
-        :boostAmount="dailyRewardsTotalBusinessBoostReward"
+        :daily-amount="dailyRewardsTotalReward"
+        :has-active-boosts="dailyRewardsHasActiveBoosts"
+        :validation-score-color="validationScoreColor"
+        :base-reward-amount="dailyRewardsBaseReward"
+        :boost-amount="dailyRewardsTotalBusinessBoostReward"
         :state="dailyRewardsSeverity"
       />
-
       <!---------------------- Weekly streak ----------------------->
       <WeeklyStreak
-        v-if="!emptyStateFlag"
+        v-if="!emptyStateFlag && !loading && showRewards"
         :bar-graph-data="weeklyStreakTimeline"
-        :fromDate="weeklyStreakFromDate"
-        :toDate="weeklyStreakToDate"
+        :from-date="weeklyStreakFromDate"
+        :to-date="weeklyStreakToDate"
       />
     </div>
+
+    <VCard height="100%" class="w-100" color="background" elevation="0">
+      <div
+        v-if="!showRewards && !loading"
+        class="d-flex flex-column justify-center pa-6"
+        :style="errorAnimationContainerHeight"
+      >
+        <LottieComponent
+          :lottie-name="'errorState'"
+          :bold-text="errorStateBoldText"
+          :light-text="errorStateLightText"
+        />
+        <VSheet class="mt-4" rounded="lg" color="primary" :border="true">
+          <VBtn
+            block
+            class="text-none"
+            size="x-large"
+            rounded="lg"
+            color="top"
+            flat
+            @click="getSpecificDeviceTransactions(props.device.id)"
+            ><span class="text-primary">Retry</span></VBtn
+          >
+        </VSheet>
+      </div>
+    </VCard>
   </div>
 </template>

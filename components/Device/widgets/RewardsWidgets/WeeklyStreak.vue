@@ -37,7 +37,7 @@
 </script>
 
 <template>
-  <VCard class="my-4 pa-6" rounded="xl" elevation="2" color="top">
+  <VCard class="mt-4 pa-6" rounded="xl" elevation="2" color="top">
     <div
       class="text-text font-weight-bold mb-1"
       style="font-size: 0.984rem; letter-spacing: normal"

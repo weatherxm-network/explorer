@@ -1,17 +1,14 @@
 <script setup lang="ts">
   import { useTheme } from 'vuetify'
 
-  interface State {
-    state: 'INFO' | 'WARNING' | 'ERROR' | null
-  }
-
   interface Props {
     date?: string
     dailyAmount?: float
     baseRewardAmount?: float
     boostAmount?: float | null
+    hasActiveBoosts?: boolean
     validationScoreColor?: string | null
-    state?: State
+    state?: 'INFO' | 'WARNING' | 'ERROR' | null
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -20,7 +17,7 @@
     baseRewardAmount: 0,
     boostAmount: 0,
     validationScoreColor: '',
-    state: null
+    state: () => 'CLEAR'
   })
 
   const theme = useTheme()
@@ -129,16 +126,16 @@
               <i class="fa-regular fa-hexagon fa-rotate-90 fa-lg"></i>
             </div>
             <div class="text-caption" style="letter-spacing: normal">
-              <div :class="props.boostAmount !== null ? 'font-weight-bold' : ''">
+              <div :class="props.hasActiveBoosts ? 'font-weight-bold' : ''">
                 {{
-                  !!props.boostAmount
+                  props.hasActiveBoosts
                     ? `${
                         props.boostAmount === 0 ? props.boostAmount.toFixed(2) : props.boostAmount
                       } $WXM`
                     : 'No Active'
                 }}
               </div>
-              <div>{{ props.boostAmount !== null ? 'Boost' : 'Boosts' }}</div>
+              <div>{{ props.hasActiveBoosts ? 'Boost' : 'Boosts' }}</div>
             </div>
           </div>
         </div>
