@@ -20,7 +20,7 @@
   const display = ref(useDisplay())
   const route = useRoute()
   const loading = ref(false)
-  const showDeviceDetails = ref(true)
+  const showDeviceDetails = ref(false)
   const windowValue = ref(1)
   const enableReverse = ref(false)
   const changeTabTo = ref(0)
@@ -80,6 +80,7 @@
 
   const fetchData = () => {
     loading.value = true
+    showDeviceDetails.value = false
     const normalizeRouteDeviceName = formatDeviceName.normalizeDeviceName(route.params.deviceName)
     wxmApi
       .resolveDeviceName(normalizeRouteDeviceName)
@@ -101,7 +102,7 @@
             })
 
           wxmApi
-            .getDeviceByID({ cellIndex: device.cell_index, deviceId: device.id })
+            .getDeviceByID(device.cell_index, device.id)
             .then((device) => {
               // calculate measurements
               resolvedDevice.value = device

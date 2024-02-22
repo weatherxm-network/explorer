@@ -68,7 +68,7 @@
   const showRewards = ref(false)
   const display = ref(useDisplay())
   const errorStateBoldText = ref('Oops! Something went wrong.')
-  const errorStateLightText = ref('Failed to get the details of the device: No data')
+  const errorStateLightText = ref('Failed to get the rewards of the device: No data')
   const errorAnimationContainerHeight = computed(() => {
     return { marginTop: `calc(${display.value.height / 2}px - 281px)` }
   })

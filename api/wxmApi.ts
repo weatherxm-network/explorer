@@ -1,10 +1,5 @@
 import axios from 'axios'
 
-interface CellIndexDeviceIdObj {
-  cellIndex: string
-  deviceId: string
-}
-
 const client = axios.create({
   baseURL: ''
 })
@@ -24,13 +19,10 @@ const setupAxios = (baseURL: string, userAgent: string, firebaseId: string) => {
 }
 
 const getCells = () => {
-  return (
-    client
-      .get('/api/v1/cells')
-      .then((response) => response.data)
-      // TODO Log this error before returning an empty array?
-      .catch(() => [])
-  )
+  return client
+    .get('/api/v1/cells')
+    .then((response) => response.data)
+    .catch(() => [])
 }
 
 const getNetStats = () => {
@@ -54,14 +46,29 @@ const getCellsData = (cellIndex: string) => {
   return client.get(`/api/v1/cells/${cellIndex}/devices`).then((response) => response.data)
 }
 
-const getDeviceByID = (cellIndexDeviceIdObj: CellIndexDeviceIdObj) => {
+const getDeviceByID = (cellIndex: string, deviceId: string) => {
   return client
-    .get(`/api/v1/cells/${cellIndexDeviceIdObj.cellIndex}/devices/${cellIndexDeviceIdObj.deviceId}`)
+    .get(`/api/v1/cells/${cellIndex}/devices/${deviceId}`)
     .then((response) => response.data)
 }
 
 const getDeviceTokens = (deviceId: string) => {
   return client.get(`/api/v1/devices/${deviceId}/tokens`).then((response) => response.data)
+}
+
+const getRewardTimeline = (
+  deviceId: string,
+  timezone: string,
+  page: number,
+  pageSize: number,
+  fromDate: string,
+  toDate: string
+) => {
+  return client
+    .get(
+      `/api/v1/devices/${deviceId}/tokens/timeline?timezone=${timezone}&page=${page}&pageSize=${pageSize}&fromDate=${fromDate}&toDate=${toDate}`
+    )
+    .then((response) => response.data)
 }
 
 export default {
@@ -72,5 +79,6 @@ export default {
   getNetStats,
   getSearchResults,
   resolveDeviceName,
-  getDeviceTokens
+  getDeviceTokens,
+  getRewardTimeline
 }

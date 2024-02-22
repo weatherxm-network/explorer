@@ -3,9 +3,9 @@
 
   interface Props {
     date?: string
-    dailyAmount?: float
-    baseRewardAmount?: float
-    boostAmount?: float | null
+    dailyAmount?: string
+    baseRewardAmount?: string
+    boostAmount?: string | null
     hasActiveBoosts?: boolean
     validationScoreColor?: string | null
     state?: 'INFO' | 'WARNING' | 'ERROR' | null
@@ -13,9 +13,9 @@
 
   const props = withDefaults(defineProps<Props>(), {
     date: '',
-    dailyAmount: 0,
-    baseRewardAmount: 0,
-    boostAmount: 0,
+    dailyAmount: '',
+    baseRewardAmount: '',
+    boostAmount: '',
     validationScoreColor: '',
     state: () => 'CLEAR'
   })
@@ -82,7 +82,7 @@
     rounded="xl"
     elevation="2"
     :color="calcSateColor(props.state)"
-    :variant="props.state !== null ? 'outlined' : 'default'"
+    :variant="props.state !== null ? 'outlined' : undefined"
   >
     <VSheet rounded="xl" :color="calcStateTintColor(props.state)">
       <VSheet rounded="xl" color="top" class="pa-6">

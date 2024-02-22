@@ -1,33 +1,26 @@
 <script setup lang="ts">
+  import dayjs from 'dayjs'
   import DailyRewards from '../../common/DailyRewards.vue'
-
-  interface AnnotationSummary {
-    severity_level: string
-    group: string
-    title: string
-    message: string
-    doc_url: string
-  }
 
   interface Timeline {
     timestamp: string
-    base_reward: number
-    total_business_boost_reward: number
-    total_reward: number
-    base_reward_score: number
-    annotation_summary: AnnotationSummary[]
+    base_reward: string
+    total_business_boost_reward: string
+    total_reward: string
+    validation_color: string
+    has_active_boosts: boolean
+    severity_level: string | null
   }
 
   interface Props {
-    timelineData: Timeline
+    timelineData: Timeline[]
   }
 
   const props = defineProps<Props>()
 </script>
 
 <template>
-  <VCard class="pa-4" color="background">
-    {{ props.timeline }}
+  <VCard class="pa-4" color="background" elevation="0">
     <div v-for="(item, index) in props.timelineData" :key="index">
       <div class="ps-7 d-flex" :class="index !== 0 ? ' align-center' : 'align-start'">
         <div class="d-flex flex-column justify-center align-center" style="width: 12px">
@@ -44,16 +37,17 @@
           class="text-darkGrey font-weight-bold ms-4 d-flex"
           style="font-size: 0.984rem; line-height: 100%"
         >
-          Dec 6, 2023
+          {{ dayjs(item.timestamp).format('MMM D, YYYY') }}
         </div>
       </div>
       <DailyRewards
-        :date="item.timestatmp"
-        :dailyAmount="4"
-        :validationScoreColor="'#F6736D'"
-        :baseRewardAmount="3"
-        :boostAmount="5"
-        :state="'INFO'"
+        :date="item.timestamp"
+        :daily-amount="item.total_reward"
+        :validation-score-color="item.validation_color"
+        :base-reward-amount="item.base_reward"
+        :boost-amount="item.total_business_boost_reward"
+        :state="item.severity_level"
+        :has-active-boosts="item.has_active_boosts"
       />
     </div>
   </VCard>

@@ -1,4 +1,6 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+  const emit = defineEmits(['backToDeviceDetails'])
+</script>
 
 <template>
   <VCard class="w-100" color="top" elevation="0" rounded="0">
@@ -7,7 +9,7 @@
         <i
           class="fa fa-arrow-left text-text"
           style="cursor: pointer; font-size: 1.375rem"
-          @click="console.log('back')"
+          @click="emit('backToDeviceDetails')"
         ></i>
       </div>
       <div class="text-text" style="font-size: 1.375rem">Reward Timeline</div>
