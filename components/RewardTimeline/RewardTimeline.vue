@@ -4,8 +4,8 @@
   import utc from 'dayjs/plugin/utc'
   import timezone from 'dayjs/plugin/timezone.js'
   import LottieComponent from '../common/LottieComponent.vue'
+  import DailyRewards from '../common/DailyRewards.vue'
   import HeaderCard from './widgets/HeaderCard.vue'
-  import Timeline from './widgets/Timeline.vue'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
   import { selectValidationScoreColor } from '~/components/Device/utils/selectScoreColor'
@@ -26,17 +26,20 @@
   const errorStateBoldText = ref('Oops! Something went wrong.')
   const errorStateLightText = ref('Failed to get the reward timeline of the device: No data')
   const animationContainerHeight = computed(() => {
-    return { marginTop: `calc(${display.value.height / 2}px - 244px)` }
+    return display.value.smAndDown
+      ? { marginTop: `calc(${display.value.height / 2}px - 115px)` }
+      : { marginTop: `calc(${display.value.height / 2}px - 125px)` }
   })
   const errorAnimationContainerHeight = computed(() => {
-    return { marginTop: `calc(${display.value.height / 2}px - 281px)` }
+    return display.value.smAndDown
+      ? { marginTop: `calc(${display.value.height / 2}px - 228px)` }
+      : { marginTop: `calc(${display.value.height / 2}px - 211px)` }
   })
 
   const mobileStore = useMobileStore()
   const route = useRoute()
   const showTimeline = ref(false)
   const loading = ref(false)
-  const loadingForMore = ref(false)
   const backTo = ref('stats')
 
   const backToDeviceDetails = () => {
@@ -84,30 +87,20 @@
       .catch(() => null)
   }
 
-  const getMoreRewards = async () => {
-    // window.onscroll = async () => {
-    //   const bottomOfWindow =
-    //     document.documentElement.scrollTop + window.innerHeight ===
-    //     document.documentElement.offsetHeight
-
-    //   if (bottomOfWindow && route.name === 'reward_timeline-deviceName') {
-    //     if (hasNextPage.value && currentPage.value <= totalPages.value) {
-    //       loading.value = true
-    //       await getRewards()
-    //     }
-    //   }
-    // }
+  const getMoreRewards = async ({ done }) => {
     if (hasNextPage.value && currentPage.value <= totalPages.value) {
-      loading.value = true
       await getRewards()
-      loadingForMore.value = false
+      done('ok')
+    } else {
+      done('empty')
     }
   }
 
   const getRewards = async () => {
-    loading.value = true
+    if (timeline.value.length === 0) {
+      loading.value = true
+    }
     deviceId.value = await resolveDeviceName()
-
     if (deviceId) {
       wxmApi
         .getRewardTimeline(
@@ -119,6 +112,7 @@
           toDate
         )
         .then((response) => {
+          backTo.value = route.params.deviceName
           hasNextPage.value = response.has_next_page
           totalPages.value = response.total_pages
           currentPage.value++
@@ -134,7 +128,12 @@
                   : '',
                 has_active_boosts: hasActiveBoosts,
                 validation_color: selectValidationScoreColor(item.base_reward_score),
-                severity_level: item.annotation_summary[0]?.severity_level ?? null
+                severity_level:
+                  item?.annotation_summary &&
+                  item?.annotation_summary.length !== 0 &&
+                  item?.annotation_summary[0]?.severity_level
+                    ? item?.annotation_summary[0]?.severity_level
+                    : null
               }
             })
             timeline.value.push(...calcedResponseData)
@@ -155,47 +154,88 @@
 </script>
 
 <template>
-  <VCard class="h-100 w-100" elevation="0" rounded="0">
-    <HeaderCard @back-to-device-details="backToDeviceDetails" />
-
-    <VCardText class="ma-0 pa-0 h-100 w-100">
-      <VCard height="100%" class="w-100" color="background" elevation="0">
-        <VCardText class="ma-0 pa-0">
-          <div v-if="loading" :style="animationContainerHeight">
-            <LottieComponent :lottie-name="'loaderLight'" :bold-text="''" :light-text="''" />
-          </div>
-          <div
-            v-if="!showTimeline && !loading"
-            class="d-flex flex-column justify-center pa-6"
-            :style="errorAnimationContainerHeight"
+  <VCard class="w-100" color="background" elevation="0" rounded="0">
+    <VCardTitle class="pa-0">
+      <HeaderCard @back-to-device-details="backToDeviceDetails" />
+    </VCardTitle>
+    <VCardText class="ma-0 pa-0">
+      <div v-if="loading" :style="animationContainerHeight">
+        <LottieComponent :lottie-name="'loaderLight'" :bold-text="''" :light-text="''" />
+      </div>
+      <div
+        v-if="!showTimeline && !loading"
+        class="d-flex flex-column justify-center pa-6"
+        :style="errorAnimationContainerHeight"
+      >
+        <LottieComponent
+          :lottie-name="'errorState'"
+          :bold-text="errorStateBoldText"
+          :light-text="errorStateLightText"
+        />
+        <VSheet class="mt-4" rounded="lg" color="primary" :border="true">
+          <VBtn
+            block
+            class="text-none"
+            size="x-large"
+            rounded="lg"
+            color="top"
+            flat
+            @click="getRewards"
+            ><span class="text-primary">Retry</span></VBtn
           >
-            <LottieComponent
-              :lottie-name="'errorState'"
-              :bold-text="errorStateBoldText"
-              :light-text="errorStateLightText"
-            />
-            <VSheet class="mt-4" rounded="lg" color="primary" :border="true">
-              <VBtn
-                block
-                class="text-none"
-                size="x-large"
-                rounded="lg"
-                color="top"
-                flat
-                @click="getRewards"
-                ><span class="text-primary">Retry</span></VBtn
-              >
-            </VSheet>
-          </div>
-          <VCardText v-if="showTimeline && !loading" class="pa-0 ma-0">
-            <Timeline :timeline-data="timeline" />
-            <div v-if="loadingForMore" class="d-flex justify-center">
-              <VProgressCircular color="primary" indeterminate></VProgressCircular>
-            </div>
-          </VCardText>
-        </VCardText>
-      </VCard>
-      <VBtn @click="[getMoreRewards, (loadingForMore = true)]">MoRE</VBtn>
+        </VSheet>
+      </div>
+      <VCardText v-if="showTimeline && !loading" class="pa-0 ma-0">
+        <!----------------------------- Timeline component --------------------------------->
+        <VCard
+          class="pa-4"
+          color="background"
+          elevation="0"
+          rounded="0"
+          style="height: 100vh; overflow: scroll"
+        >
+          <v-infinite-scroll :items="timeline" color="primary" @load="getMoreRewards">
+            <template v-for="(item, index) in timeline" :key="index">
+              <div class="ps-7 d-flex" :class="index !== 0 ? ' align-center' : 'align-start'">
+                <div class="d-flex flex-column justify-center align-center" style="width: 12px">
+                  <VSheet
+                    v-if="index !== 0"
+                    style="height: 26px; width: 4px"
+                    color="mediumGrey"
+                    rounded="0"
+                  />
+                  <VSheet style="height: 12px; width: 12px" color="mediumGrey" rounded="circle" />
+                  <VSheet style="height: 26px; width: 4px" color="mediumGrey" rounded="0" />
+                </div>
+                <div
+                  class="text-darkGrey font-weight-bold ms-4 d-flex"
+                  style="font-size: 0.984rem; line-height: 100%"
+                >
+                  {{ dayjs(item.timestamp).format('MMM D, YYYY') }}
+                </div>
+              </div>
+              <DailyRewards
+                :date="item.timestamp"
+                :daily-amount="item.total_reward"
+                :validation-score-color="item.validation_color"
+                :base-reward-amount="item.base_reward"
+                :boost-amount="item.total_business_boost_reward"
+                :state="item.severity_level"
+                :has-active-boosts="item.has_active_boosts"
+              />
+            </template>
+            <template #empty>
+              <span></span>
+            </template>
+          </v-infinite-scroll>
+        </VCard>
+      </VCardText>
     </VCardText>
   </VCard>
 </template>
+
+<style scoped>
+  .v-infinite-scroll--vertical {
+    overflow-y: hidden;
+  }
+</style>
