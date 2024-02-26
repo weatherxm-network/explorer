@@ -244,7 +244,7 @@
 
                   <VCard class="pa-6 w-100" rounded="xl" elevation="2">
                     <div class="text-darkGrey d-flex align-center">
-                      <span class="text-h6 font-weight-normal">
+                      <span class="text-h6 font-weight-normal" style="line-height: 20px">
                         <i class="fa-regular fa-hexagon-check"></i>
                       </span>
 
