@@ -133,7 +133,8 @@
                   item?.annotation_summary.length !== 0 &&
                   item?.annotation_summary[0]?.severity_level
                     ? item?.annotation_summary[0]?.severity_level
-                    : null
+                    : null,
+                numberOfIssues: item?.annotation_summary ? item?.annotation_summary.length : 0
               }
             })
             timeline.value.push(...calcedResponseData)
@@ -188,7 +189,7 @@
       <VCardText v-if="showTimeline && !loading" class="pa-0 ma-0">
         <!----------------------------- Timeline component --------------------------------->
         <VCard
-          class="pa-4"
+          class="pa-4 pb-0"
           color="background"
           elevation="0"
           rounded="0"
@@ -196,7 +197,7 @@
           style="height: calc(100dvh - 64px); overflow: scroll"
         >
           <VCardText class="pa-0">
-            <v-infinite-scroll :items="timeline" color="primary" @load="getMoreRewards">
+            <v-infinite-scroll :items="timeline" @load="getMoreRewards">
               <template v-for="(item, index) in timeline" :key="index">
                 <div class="ps-7 d-flex" :class="index !== 0 ? ' align-center' : 'align-start'">
                   <div class="d-flex flex-column justify-center align-center" style="width: 12px">
@@ -224,10 +225,36 @@
                   :boost-amount="item.total_business_boost_reward"
                   :state="item.severity_level"
                   :has-active-boosts="item.has_active_boosts"
+                  :number-of-issues="item.numberOfIssues"
                 />
               </template>
               <template #empty>
-                <span></span>
+                <div class="w-100">
+                  <div class="ps-7">
+                    <div class="d-flex flex-column justify-center align-center" style="width: 12px">
+                      <VSheet style="height: 26px; width: 4px" color="mediumGrey" rounded="0" />
+                      <VSheet
+                        style="height: 12px; width: 12px"
+                        color="mediumGrey"
+                        rounded="circle"
+                      />
+                      <VSheet style="height: 26px; width: 4px" color="mediumGrey" rounded="0" />
+                    </div>
+                  </div>
+
+                  <VCard class="pa-6 w-100" rounded="xl" elevation="2">
+                    <div class="text-darkGrey d-flex align-center">
+                      <span class="text-h6 font-weight-normal">
+                        <i class="fa-regular fa-hexagon-check"></i>
+                      </span>
+
+                      <span class="ms-2 text-body-2">You have reached the end of time!</span>
+                    </div>
+                  </VCard>
+                </div>
+              </template>
+              <template #loading>
+                <VProgressCircular indeterminate color="primary" class="mt-4" />
               </template>
             </v-infinite-scroll>
           </VCardText>
@@ -237,8 +264,12 @@
   </VCard>
 </template>
 
-<style scoped>
+<style>
   .v-infinite-scroll--vertical {
     overflow-y: hidden;
+  }
+  .v-infinite-scroll__side {
+    padding: 0px !important;
+    padding-bottom: 16px !important;
   }
 </style>

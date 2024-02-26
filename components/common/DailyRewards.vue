@@ -9,6 +9,7 @@
     hasActiveBoosts?: boolean
     validationScoreColor?: string | null
     state?: 'INFO' | 'WARNING' | 'ERROR' | null
+    numberOfIssues?: number
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -17,21 +18,16 @@
     baseRewardAmount: '',
     boostAmount: '',
     validationScoreColor: '',
+    numberOfIssues: 0,
     state: () => 'CLEAR'
   })
 
   const theme = useTheme()
   const cardTitleText = ref('Daily Reward')
-  const infoBoldText = ref('Minor issues slightly affected your rewards.')
-  const infoLightText = ref(
-    'This may happen occasionally, but we thought you should know. View reward details to identify and fix problems.'
-  )
-  const warningBoldText = ref('Some issues prevent your station from getting the full rewards.')
-  const warningLightText = ref('View reward details to identify and fix problems.')
-  const errorBoldText = ref(
-    'Serious problems were detected, that prevent the station from getting the full rewards.'
-  )
-  const errorLightText = ref('View reward details to identify and fix problems.')
+  const annotationSuffixText = ref('affecting station rewards.')
+  const calcTextPrefix = (numberOfIssues: number) => {
+    return numberOfIssues > 1 ? 'issues' : 'issue'
+  }
 
   const calcSateColor = (state: string) => {
     switch (state) {
@@ -52,28 +48,6 @@
         return 'warningTint'
       case 'ERROR':
         return 'errorTint'
-    }
-  }
-
-  const calcStateBoldText = (state: string) => {
-    switch (state) {
-      case 'INFO':
-        return infoBoldText.value
-      case 'WARNING':
-        return warningBoldText.value
-      case 'ERROR':
-        return errorBoldText.value
-    }
-  }
-
-  const calcStateLightText = (state: string) => {
-    switch (state) {
-      case 'INFO':
-        return infoLightText.value
-      case 'WARNING':
-        return warningLightText.value
-      case 'ERROR':
-        return errorLightText.value
     }
   }
 </script>
@@ -103,7 +77,7 @@
           <VDivider />
         </div>
         <!------------------------- Base + boosts ----------------------->
-        <div class="d-flex" :class="props.state === null ? 'mb-6' : ''">
+        <div class="d-flex" :class="props.state === null ? 'mb-0' : ''">
           <div class="d-flex me-4">
             <div
               style="width: 24px; height: 24px"
@@ -139,39 +113,13 @@
             </div>
           </div>
         </div>
-        <div v-if="props.state === null">
-          <VBtn
-            block
-            rounded="lg"
-            color="layer1"
-            class="text-none font-weight-bold text-body-2"
-            size="x-large"
-            style="letter-spacing: normal"
-            flat
-          >
-            <span class="text-primary">View Reward Details</span>
-          </VBtn>
-        </div>
       </VSheet>
-      <!---------------- Button ---------------->
+      <!---------------- Annotation Text ---------------->
       <div v-if="props.state !== null" class="pa-4">
-        <div class="mb-2 text-caption" style="letter-spacing: normal; line-height: 16px">
-          <span class="font-weight-bold"> {{ calcStateBoldText(props.state) }} </span
-          ><span>{{ calcStateLightText(props.state) }}</span>
-        </div>
-        <div>
-          <VBtn
-            block
-            rounded="lg"
-            color="#FEFBFFBF"
-            variant="tonal"
-            class="text-none font-weight-bold text-body-2"
-            size="x-large"
-            style="letter-spacing: normal"
-            flat
-          >
-            <span class="text-primary">View Reward Details</span>
-          </VBtn>
+        <div class="text-caption" style="letter-spacing: normal; line-height: 16px">
+          <span class="font-weight-bold">
+            {{ `${props.numberOfIssues} ${calcTextPrefix(props.numberOfIssues)} ` }} </span
+          ><span>{{ annotationSuffixText }}</span>
         </div>
       </div>
     </VSheet>

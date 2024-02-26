@@ -59,6 +59,7 @@
   const dailyRewardsValidationScoreColor = ref('')
   const dailyRewardsSeverity = ref('')
   const dailyRewardsHasActiveBoosts = ref(false)
+  const dailyRewardsNumberOfIssues = ref(0)
 
   const weeklyStreakFromDate = ref('')
   const weeklyStreakToDate = ref('')
@@ -127,6 +128,9 @@
           response.latest.base_reward_score
         )
         dailyRewardsSeverity.value = response?.latest?.annotation_summary[0]?.severity_level ?? null
+        dailyRewardsNumberOfIssues.value = response?.latest?.annotation_summary
+          ? response?.latest?.annotation_summary.length
+          : 0
         /// ///// Weekly streak timeline /////////
         weeklyStreakFromDate.value = dayjs(response?.timeline[0]?.timestamp)
           .utc()
@@ -172,6 +176,7 @@
         :base-reward-amount="dailyRewardsBaseReward"
         :boost-amount="dailyRewardsTotalBusinessBoostReward"
         :state="dailyRewardsSeverity"
+        :number-of-issues="dailyRewardsNumberOfIssues"
       />
       <!---------------------- Weekly streak ----------------------->
       <WeeklyStreak
