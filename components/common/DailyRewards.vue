@@ -25,8 +25,13 @@
   const theme = useTheme()
   const cardTitleText = ref('Daily Reward')
   const annotationSuffixText = ref('affecting station rewards.')
+
   const calcTextPrefix = (numberOfIssues: number) => {
     return numberOfIssues > 1 ? 'issues' : 'issue'
+  }
+
+  const calcMinorText = (state: string | null) => {
+    return state === 'INFO' ? 'minor' : ''
   }
 
   const calcSateColor = (state: string) => {
@@ -118,7 +123,11 @@
       <div v-if="props.state !== null" class="pa-4">
         <div class="text-caption" style="letter-spacing: normal; line-height: 16px">
           <span class="font-weight-bold">
-            {{ `${props.numberOfIssues} ${calcTextPrefix(props.numberOfIssues)} ` }} </span
+            {{
+              `${props.numberOfIssues} ${calcMinorText(props.state)} ${calcTextPrefix(
+                props.numberOfIssues
+              )} `
+            }} </span
           ><span>{{ annotationSuffixText }}</span>
         </div>
       </div>
