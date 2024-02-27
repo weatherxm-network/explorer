@@ -19,7 +19,7 @@
     boostAmount: '',
     validationScoreColor: '',
     numberOfIssues: 0,
-    state: () => 'CLEAR'
+    state: null
   })
 
   const theme = useTheme()
