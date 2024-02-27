@@ -47,6 +47,9 @@
 
   const emit = defineEmits(['loadingRewardsTab'])
 
+  const { fetchRemoteConfig } = useFirebase()
+  const remoteConfig = await fetchRemoteConfig()
+  const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
   // rewards stuff
   const validationScoreColor = ref()
   const loading = ref(false)
@@ -161,7 +164,7 @@
 <template>
   <div>
     <div class="py-5 px-4 pt-0">
-      <MainnetBanner v-if="false" :date="'14th of February'"></MainnetBanner>
+      <MainnetBanner v-if="mainnetShowFlag" :date="'14th of February'"></MainnetBanner>
       <EmptyRewards v-if="emptyStateFlag && !loading" />
       <TotalStationRewards
         v-if="!emptyStateFlag && !loading && showRewards"
