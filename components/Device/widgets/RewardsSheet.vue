@@ -60,7 +60,7 @@
   const dailyRewardsTotalBusinessBoostReward = ref('')
   const dailyRewardsTotalReward = ref('')
   const dailyRewardsValidationScoreColor = ref('')
-  const dailyRewardsSeverity = ref('')
+  const dailyRewardsSeverity = ref<'INFO' | 'WARNING' | 'ERROR' | null | undefined>(null)
   const dailyRewardsHasActiveBoosts = ref(false)
   const dailyRewardsNumberOfIssues = ref(0)
 
