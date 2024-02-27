@@ -2,7 +2,7 @@
   import { useTheme } from 'vuetify'
   import dayjs from 'dayjs'
   import timezone from 'dayjs/plugin/timezone'
-  import { selectValidationScoreColor } from '../../utils/selectScoreColor'
+  import { selectValidationScoreColor } from '../../../common/selectScoreColor'
   dayjs.extend(timezone)
 
   interface BarGraphData {

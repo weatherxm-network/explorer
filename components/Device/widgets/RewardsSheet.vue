@@ -2,7 +2,7 @@
   import dayjs from 'dayjs'
   import timezone from 'dayjs/plugin/timezone'
   import { useDisplay } from 'vuetify'
-  import { selectValidationScoreColor } from '../utils/selectScoreColor'
+  import { selectValidationScoreColor } from '../../common/selectScoreColor'
   import type { Device } from '../types/device'
   import DailyRewards from '../../common/DailyRewards.vue'
   import TotalStationRewards from './RewardsWidgets/TotalStationRewards.vue'

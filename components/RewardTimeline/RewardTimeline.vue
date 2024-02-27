@@ -8,7 +8,7 @@
   import HeaderCard from './widgets/HeaderCard.vue'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
-  import { selectValidationScoreColor } from '~/components/Device/utils/selectScoreColor'
+  import { selectValidationScoreColor } from '~/components/common/selectScoreColor'
 
   dayjs.extend(utc)
   dayjs.extend(timezone)
