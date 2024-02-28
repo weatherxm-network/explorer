@@ -192,7 +192,7 @@
 
     <VCard height="100%" class="w-100" color="background" elevation="0">
       <div
-        v-if="!showRewards && !loading"
+        v-if="!showRewards && !loading && !emptyStateFlag"
         class="d-flex flex-column justify-center pa-6"
         :style="errorAnimationContainerHeight"
       >

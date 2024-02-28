@@ -37,7 +37,7 @@
   const calcSateColor = (state: string) => {
     switch (state) {
       case 'INFO':
-        return 'primary'
+        return theme.current.value.dark ? 'primary' : 'lightestBlue'
       case 'WARNING':
         return 'warning'
       case 'ERROR':
@@ -48,7 +48,7 @@
   const calcStateTintColor = (state: string) => {
     switch (state) {
       case 'INFO':
-        return 'layer1'
+        return 'blueTint'
       case 'WARNING':
         return 'warningTint'
       case 'ERROR':
