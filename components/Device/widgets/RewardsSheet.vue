@@ -175,7 +175,7 @@
         :date="dailyRewardsDate"
         :daily-amount="dailyRewardsTotalReward"
         :has-active-boosts="dailyRewardsHasActiveBoosts"
-        :validation-score-color="validationScoreColor"
+        :validation-score-color="dailyRewardsValidationScoreColor"
         :base-reward-amount="dailyRewardsBaseReward"
         :boost-amount="dailyRewardsTotalBusinessBoostReward"
         :state="dailyRewardsSeverity"
