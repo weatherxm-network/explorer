@@ -79,7 +79,7 @@
           {{ `+ ${props.dailyAmount} $WXM` }}
         </div>
         <div class="my-2">
-          <VDivider />
+          <div :style="{ borderTop: `0.031rem solid ${theme.current.value.colors.layer2}` }"></div>
         </div>
         <!------------------------- Base + boosts ----------------------->
         <div class="d-flex" :class="props.state === null ? 'mb-0' : ''">
