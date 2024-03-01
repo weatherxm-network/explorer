@@ -412,7 +412,7 @@
       handleCellUrl(splittedUrl[2])
       mobileStore.setPageState(true)
     }
-    if (splittedUrl[1] === 'stations') {
+    if (splittedUrl[1] === 'stations' || splittedUrl[1] === 'reward_timeline') {
       const normalizeRouteDeviceName = formatDeviceName.normalizeDeviceName(splittedUrl[2])
       await wxmApi
         .resolveDeviceName(normalizeRouteDeviceName)

@@ -18,6 +18,7 @@ import loaderLight from './loader-light.json'
 import errorState from './error-state.json'
 import forecastDark from './forecast-dark.json'
 import forecastLight from './forecast-light.json'
+import wenMoonSimple from './wen-moon-simple.json'
 
 export default {
   forecastDark,
@@ -38,5 +39,6 @@ export default {
   sleet,
   wind,
   fog,
-  cloudy
+  cloudy,
+  wenMoonSimple
 }
