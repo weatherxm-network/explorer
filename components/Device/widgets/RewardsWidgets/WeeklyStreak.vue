@@ -2,7 +2,7 @@
   import { useTheme } from 'vuetify'
   import dayjs from 'dayjs'
   import timezone from 'dayjs/plugin/timezone'
-  import { selectValidationScoreColor } from '../../utils/selectScoreColor'
+  import { selectValidationScoreColor } from '../../../common/selectScoreColor'
   dayjs.extend(timezone)
 
   interface BarGraphData {
@@ -22,6 +22,7 @@
     toDate: ''
   })
 
+  const route = useRoute()
   const theme = useTheme()
   const cardTitleText = ref('Weekly Streak')
 
@@ -36,7 +37,7 @@
 </script>
 
 <template>
-  <VCard class="my-4 pa-6" rounded="xl" elevation="2" color="top">
+  <VCard class="mt-4 pa-6" rounded="xl" elevation="2" color="top">
     <div
       class="text-text font-weight-bold mb-1"
       style="font-size: 0.984rem; letter-spacing: normal"
@@ -86,6 +87,7 @@
         size="x-large"
         style="letter-spacing: normal"
         flat
+        @click="navigateTo(`/reward_timeline/${route.params.deviceName}`)"
       >
         <span class="text-primary">View Timeline</span>
       </VBtn>

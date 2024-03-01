@@ -1,45 +1,43 @@
 <script setup lang="ts">
   import { useTheme } from 'vuetify'
 
-  interface State {
-    state: 'INFO' | 'WARNING' | 'ERROR' | null
-  }
-
   interface Props {
     date?: string
-    dailyAmount?: float
-    baseRewardAmount?: float
-    boostAmount?: float | null
+    dailyAmount?: string
+    baseRewardAmount?: string
+    boostAmount?: string | null
+    hasActiveBoosts?: boolean
     validationScoreColor?: string | null
-    state?: State
+    state?: 'INFO' | 'WARNING' | 'ERROR' | null
+    numberOfIssues?: number
   }
 
   const props = withDefaults(defineProps<Props>(), {
     date: '',
-    dailyAmount: 0,
-    baseRewardAmount: 0,
-    boostAmount: 0,
+    dailyAmount: '',
+    baseRewardAmount: '',
+    boostAmount: '',
     validationScoreColor: '',
+    numberOfIssues: 0,
     state: null
   })
 
   const theme = useTheme()
   const cardTitleText = ref('Daily Reward')
-  const infoBoldText = ref('Minor issues slightly affected your rewards.')
-  const infoLightText = ref(
-    'This may happen occasionally, but we thought you should know. View reward details to identify and fix problems.'
-  )
-  const warningBoldText = ref('Some issues prevent your station from getting the full rewards.')
-  const warningLightText = ref('View reward details to identify and fix problems.')
-  const errorBoldText = ref(
-    'Serious problems were detected, that prevent the station from getting the full rewards.'
-  )
-  const errorLightText = ref('View reward details to identify and fix problems.')
+  const annotationSuffixText = ref('affecting station rewards.')
+
+  const calcTextPrefix = (numberOfIssues: number) => {
+    return numberOfIssues > 1 ? 'issues' : 'issue'
+  }
+
+  const calcMinorText = (state: string | null) => {
+    return state === 'INFO' ? 'minor' : ''
+  }
 
   const calcSateColor = (state: string) => {
     switch (state) {
       case 'INFO':
-        return 'primary'
+        return theme.current.value.dark ? 'primary' : 'lightestBlue'
       case 'WARNING':
         return 'warning'
       case 'ERROR':
@@ -50,43 +48,20 @@
   const calcStateTintColor = (state: string) => {
     switch (state) {
       case 'INFO':
-        return 'layer1'
+        return 'blueTint'
       case 'WARNING':
         return 'warningTint'
       case 'ERROR':
         return 'errorTint'
     }
   }
-
-  const calcStateBoldText = (state: string) => {
-    switch (state) {
-      case 'INFO':
-        return infoBoldText.value
-      case 'WARNING':
-        return warningBoldText.value
-      case 'ERROR':
-        return errorBoldText.value
-    }
-  }
-
-  const calcStateLightText = (state: string) => {
-    switch (state) {
-      case 'INFO':
-        return infoLightText.value
-      case 'WARNING':
-        return warningLightText.value
-      case 'ERROR':
-        return errorLightText.value
-    }
-  }
 </script>
 <template>
   <VCard
-    class="my-4"
     rounded="xl"
     elevation="2"
     :color="calcSateColor(props.state)"
-    :variant="props.state !== null ? 'outlined' : 'default'"
+    :variant="props.state !== null ? 'outlined' : undefined"
   >
     <VSheet rounded="xl" :color="calcStateTintColor(props.state)">
       <VSheet rounded="xl" color="top" class="pa-6">
@@ -104,10 +79,10 @@
           {{ `+ ${props.dailyAmount} $WXM` }}
         </div>
         <div class="my-2">
-          <VDivider />
+          <div :style="{ borderTop: `0.031rem solid ${theme.current.value.colors.layer2}` }"></div>
         </div>
         <!------------------------- Base + boosts ----------------------->
-        <div class="d-flex" :class="props.state === null ? 'mb-6' : ''">
+        <div class="d-flex" :class="props.state === null ? 'mb-0' : ''">
           <div class="d-flex me-4">
             <div
               style="width: 24px; height: 24px"
@@ -130,52 +105,30 @@
               <i class="fa-regular fa-hexagon fa-rotate-90 fa-lg"></i>
             </div>
             <div class="text-caption" style="letter-spacing: normal">
-              <div :class="props.boostAmount !== null ? 'font-weight-bold' : ''">
+              <div :class="props.hasActiveBoosts ? 'font-weight-bold' : ''">
                 {{
-                  !!props.boostAmount
+                  props.hasActiveBoosts
                     ? `${
                         props.boostAmount === 0 ? props.boostAmount.toFixed(2) : props.boostAmount
                       } $WXM`
                     : 'No Active'
                 }}
               </div>
-              <div>{{ props.boostAmount !== null ? 'Boost' : 'Boosts' }}</div>
+              <div>{{ props.hasActiveBoosts ? 'Boost' : 'Boosts' }}</div>
             </div>
           </div>
         </div>
-        <div v-if="props.state === null">
-          <VBtn
-            block
-            rounded="lg"
-            color="layer1"
-            class="text-none font-weight-bold text-body-2"
-            size="x-large"
-            style="letter-spacing: normal"
-            flat
-          >
-            <span class="text-primary">View Reward Details</span>
-          </VBtn>
-        </div>
       </VSheet>
-      <!---------------- Button ---------------->
+      <!---------------- Annotation Text ---------------->
       <div v-if="props.state !== null" class="pa-4">
-        <div class="mb-2 text-caption" style="letter-spacing: normal; line-height: 16px">
-          <span class="font-weight-bold"> {{ calcStateBoldText(props.state) }} </span
-          ><span>{{ calcStateLightText(props.state) }}</span>
-        </div>
-        <div>
-          <VBtn
-            block
-            rounded="lg"
-            color="#FEFBFFBF"
-            variant="tonal"
-            class="text-none font-weight-bold text-body-2"
-            size="x-large"
-            style="letter-spacing: normal"
-            flat
-          >
-            <span class="text-primary">View Reward Details</span>
-          </VBtn>
+        <div class="text-caption" style="letter-spacing: normal; line-height: 16px">
+          <span class="font-weight-bold">
+            {{
+              `${props.numberOfIssues} ${calcMinorText(props.state)} ${calcTextPrefix(
+                props.numberOfIssues
+              )} `
+            }} </span
+          ><span>{{ annotationSuffixText }}</span>
         </div>
       </div>
     </VSheet>
