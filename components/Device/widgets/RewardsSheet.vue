@@ -5,10 +5,10 @@
   import { selectValidationScoreColor } from '../../common/selectScoreColor'
   import type { Device } from '../types/device'
   import DailyRewards from '../../common/DailyRewards.vue'
+  import EmptyRewards from '../../common/EmptyRewards.vue'
   import TotalStationRewards from './RewardsWidgets/TotalStationRewards.vue'
   import WeeklyStreak from './RewardsWidgets/WeeklyStreak.vue'
   import MainnetBanner from './RewardsWidgets/MainnetBanner.vue'
-  import EmptyRewards from './RewardsWidgets/EmptyRewards.vue'
   import LottieComponent from '~/components/common/LottieComponent.vue'
   import wxmApi from '~/api/wxmApi'
   dayjs.extend(timezone)
@@ -51,7 +51,6 @@
   const remoteConfig = await fetchRemoteConfig()
   const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
   // rewards stuff
-  const validationScoreColor = ref()
   const loading = ref(false)
 
   const totalStationRewards = ref('')
