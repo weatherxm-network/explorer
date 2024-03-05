@@ -165,8 +165,8 @@
       <HeaderCard @back-to-device-details="backToDeviceDetails" />
     </VCardTitle>
     <VCardText class="ma-0 pa-0">
-      <div class="pa-6">
-        <EmptyRewards v-if="emptyStateFlag && !loading" />
+      <div v-if="emptyStateFlag && !loading" class="pa-6">
+        <EmptyRewards />
       </div>
 
       <div v-if="loading" :style="animationContainerHeight">
