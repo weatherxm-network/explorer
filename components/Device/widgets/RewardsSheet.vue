@@ -2,6 +2,7 @@
   import dayjs from 'dayjs'
   import timezone from 'dayjs/plugin/timezone'
   import { useDisplay } from 'vuetify'
+  import { event } from 'vue-gtag'
   import { selectValidationScoreColor } from '../../common/selectScoreColor'
   import type { Device } from '../types/device'
   import DailyRewards from '../../common/DailyRewards.vue'
@@ -11,6 +12,8 @@
   import EmptyRewards from './RewardsWidgets/EmptyRewards.vue'
   import LottieComponent from '~/components/common/LottieComponent.vue'
   import wxmApi from '~/api/wxmApi'
+  import getGAEvent from '~/utils/getGAEvent'
+
   dayjs.extend(timezone)
 
   interface Props {
@@ -51,7 +54,6 @@
   const remoteConfig = await fetchRemoteConfig()
   const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
   // rewards stuff
-  const validationScoreColor = ref()
   const loading = ref(false)
 
   const totalStationRewards = ref('')
@@ -76,6 +78,13 @@
   const errorAnimationContainerHeight = computed(() => {
     return { marginTop: `calc(${display.value.height / 2}px - 281px)` }
   })
+
+  const trackEvent = (eventKey: string, parameters: any) => {
+    const validEvent = getGAEvent.getEvent(eventKey, parameters)
+    if (validEvent) {
+      event(validEvent.eventName, validEvent.parameters)
+    }
+  }
 
   const countDecimals = (number: number) => {
     if (Number.isInteger(number)) {
@@ -157,6 +166,8 @@
   }
 
   onMounted(() => {
+    // track GA event
+    trackEvent('device_rewards')
     getSpecificDeviceTransactions(props.device.id)
   })
 </script>
