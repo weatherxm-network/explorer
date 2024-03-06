@@ -8,6 +8,22 @@ const getTrackingValue = () => {
 
 const events = [
   {
+    eventKey: 'device_rewards',
+    eventName: 'SCREEN_VIEW',
+    parameters: {
+      SCREEN_NAME: 'Device Rewards'
+    }
+  },
+  {
+    eventKey: 'device_reward_transactions',
+    eventName: 'SCREEN_VIEW',
+    parameters: {
+      SCREEN_NAME: 'Device Reward Transactions',
+      ITEM_ID: null
+    }
+  },
+
+  {
     eventKey: 'explorer_cell',
     eventName: 'SCREEN_VIEW',
     parameters: {
