@@ -120,7 +120,7 @@
         </div>
       </VSheet>
       <!---------------- Annotation Text ---------------->
-      <div v-if="props.state !== null" class="pa-4">
+      <div v-if="props.state !== null" class="px-6 py-4">
         <div class="text-caption" style="letter-spacing: normal; line-height: 16px">
           <span class="font-weight-bold">
             {{

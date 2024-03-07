@@ -53,7 +53,7 @@ const getDeviceByID = (cellIndex: string, deviceId: string) => {
 }
 
 const getDeviceTokens = (deviceId: string) => {
-  return client.get(`/api/v1/devices/${deviceId}/tokens`).then((response) => response.data)
+  return client.get(`/api/v1/devices/${deviceId}/rewards`).then((response) => response.data)
 }
 
 const getRewardTimeline = (
@@ -66,7 +66,7 @@ const getRewardTimeline = (
 ) => {
   return client
     .get(
-      `/api/v1/devices/${deviceId}/tokens/timeline?timezone=${timezone}&page=${page}&pageSize=${pageSize}&fromDate=${fromDate}&toDate=${toDate}`
+      `/api/v1/devices/${deviceId}/rewards/timeline?timezone=${timezone}&page=${page}&pageSize=${pageSize}&fromDate=${fromDate}&toDate=${toDate}`
     )
     .then((response) => response.data)
 }
