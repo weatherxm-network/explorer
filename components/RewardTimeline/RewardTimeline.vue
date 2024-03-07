@@ -5,6 +5,7 @@
   import timezone from 'dayjs/plugin/timezone.js'
   import LottieComponent from '../common/LottieComponent.vue'
   import DailyRewards from '../common/DailyRewards.vue'
+  import EmptyRewards from '../common/EmptyRewards.vue'
   import HeaderCard from './widgets/HeaderCard.vue'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
@@ -41,6 +42,7 @@
   const showTimeline = ref(false)
   const loading = ref(false)
   const backTo = ref('stats')
+  const emptyStateFlag = ref(false)
 
   const backToDeviceDetails = () => {
     if (backTo.value === 'stats') {
@@ -97,6 +99,7 @@
   }
 
   const getRewards = async () => {
+    emptyStateFlag.value = false
     if (timeline.value.length === 0) {
       loading.value = true
     }
@@ -138,6 +141,8 @@
               }
             })
             timeline.value.push(...calcedResponseData)
+          } else {
+            emptyStateFlag.value = true
           }
           loading.value = false
           showTimeline.value = true
@@ -160,11 +165,15 @@
       <HeaderCard @back-to-device-details="backToDeviceDetails" />
     </VCardTitle>
     <VCardText class="ma-0 pa-0">
+      <div v-if="emptyStateFlag && !loading" class="pa-6">
+        <EmptyRewards />
+      </div>
+
       <div v-if="loading" :style="animationContainerHeight">
         <LottieComponent :lottie-name="'loaderLight'" :bold-text="''" :light-text="''" />
       </div>
       <div
-        v-if="!showTimeline && !loading"
+        v-if="!showTimeline && !loading && !emptyStateFlag"
         class="d-flex flex-column justify-center pa-6"
         :style="errorAnimationContainerHeight"
       >
@@ -186,7 +195,7 @@
           >
         </VSheet>
       </div>
-      <VCardText v-if="showTimeline && !loading" class="pa-0 ma-0">
+      <VCardText v-if="showTimeline && !loading && !emptyStateFlag" class="pa-0 ma-0">
         <!----------------------------- Timeline component --------------------------------->
         <VCard
           class="pa-4 pb-0"
