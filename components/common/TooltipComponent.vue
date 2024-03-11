@@ -1,6 +1,8 @@
 <script setup lang="ts">
   import { computed } from 'vue'
   import { useDisplay, useTheme } from 'vuetify'
+  import { event } from 'vue-gtag'
+  import getGAEvent from '~/utils/getGAEvent'
 
   interface Props {
     message?: string
@@ -71,6 +73,14 @@
       ? addAlpha(theme.themes.value.dark.colors.layer2, 0.5)
       : addAlpha(theme.themes.value.light.colors.top, 0.5)
   })
+
+  // track event
+  const trackEvent = (eventKey: string, parameters: any) => {
+    const validEvent = getGAEvent.getEvent(eventKey, parameters)
+    if (validEvent) {
+      event(validEvent.eventName, validEvent.parameters)
+    }
+  }
 </script>
 
 <template>
@@ -130,6 +140,7 @@
                 size="large"
                 elevation="0"
                 style="letter-spacing: normal; border-radius: 10px"
+                @click="trackEvent('click_on_read_more_button_cell_capacity')"
                 >Read More</VBtn
               >
             </div>

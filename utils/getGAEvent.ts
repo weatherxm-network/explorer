@@ -8,6 +8,21 @@ const getTrackingValue = () => {
 
 const events = [
   {
+    eventKey: 'click_on_read_more_button_cell_capacity',
+    eventName: 'SELECT_CONTENT',
+    parameters: {
+      CONTENT_TYPE: 'Web Documentation'
+    }
+  },
+  {
+    eventKey: 'cell_capacity_info',
+    eventName: 'SELECT_CONTENT',
+    parameters: {
+      CONTENT_TYPE: 'Learn More',
+      ITEM_ID: null
+    }
+  },
+  {
     eventKey: 'device_rewards',
     eventName: 'SCREEN_VIEW',
     parameters: {
