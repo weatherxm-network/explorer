@@ -32,6 +32,9 @@
   )
 
   const closeButtonText = ref('OK')
+
+  const cellCapacityDocsLink = ref('https://docs.weatherxm.com/project/cell-capacity')
+
   const tooltipMaxWidth = computed(() => {
     let width
     if (display.value.smAndDown) {
@@ -56,6 +59,17 @@
     return {
       '--anchor-color': theme.current.value.colors.primary
     }
+  })
+
+  const addAlpha = (color: string, opacity: number) => {
+    const _opacity = Math.round(Math.min(Math.max(opacity ?? 1, 0), 1) * 255)
+    return color + _opacity.toString(16).toUpperCase()
+  }
+
+  const calcBackgroundColor = computed(() => {
+    return theme.current.value.dark
+      ? addAlpha(theme.themes.value.dark.colors.layer2, 0.5)
+      : addAlpha(theme.themes.value.light.colors.top, 0.5)
   })
 </script>
 
@@ -85,10 +99,6 @@
           <br />
           {{ desktopTooltipRewardsScoreMaxRewardsFooter }}
         </div>
-
-        <!-- <div v-if="props.tooltipTitle === 'Cell Capacity'">
-          <span v-html="props.message" />
-        </div> -->
       </div>
     </VTooltip>
     <!-- Mobile tooltip-->
@@ -103,12 +113,27 @@
         <template #activator="{ props }">
           <i class="fa-light fa-circle-info" :class="'text-text pa-1'" v-bind="props" />
         </template>
-        <VCard color="top" rounded="xl">
+        <VCard :color="props.tooltipTitle === 'Cell Capacity' ? 'layer1' : 'top'" rounded="xl">
           <VCardTitle class="text-text" style="font-weight: 700"
             >{{ props.tooltipTitle }}
           </VCardTitle>
           <VCardText class="text-text text-body-2">
             <span v-html="props.message" />
+
+            <div v-if="props.tooltipTitle === 'Cell Capacity'" class="mt-4">
+              <VBtn
+                :color="calcBackgroundColor"
+                :href="cellCapacityDocsLink"
+                target="_blank"
+                class="text-none text-primary"
+                block
+                size="large"
+                elevation="0"
+                style="letter-spacing: normal; border-radius: 10px"
+                >Read More</VBtn
+              >
+            </div>
+
             <div v-if="props.tooltipTitle === 'Timeline'">
               <br />
               <div v-html="desktopTooltipTimelineNote"></div>
