@@ -15,7 +15,8 @@
   const lightText = ref('Failed to get the public devices.')
   const orderedCellDevices = ref([])
   const cellAddress = ref(' ')
-
+  const countActiveStations = ref(0)
+  const countTotalStations = ref(0)
   const animationContainerHeight = computed(() => {
     return { marginTop: `calc(${display.value.height / 2}px - 128px)` }
   })
@@ -47,6 +48,10 @@
         if (orderedDevices.length !== 0) {
           // compute icon for cell devices
           orderedCellDevices.value = calcIconBasedOnCurrentWeather(orderedDevices)
+          countTotalStations.value = orderedCellDevices.value.length
+          countActiveStations.value = orderedCellDevices.value.filter(
+            (obj) => obj.isActive === true
+          ).length
           // get cell address based on cell id
           cellAddress.value = await getAddress(route.params.cellIndex)
           // show cell devices
@@ -66,7 +71,11 @@
 
 <template>
   <VCard class="w-100 h-100" color="background" elevation="0">
-    <CellsHeader />
+    <CellsHeader
+      :active-stations="countActiveStations"
+      :total-stations="countTotalStations"
+      :loading="loading"
+    />
     <!--------------- Main Content -------------->
     <VCardText class="ma-0 pa-0 h-100 w-100">
       <VCard height="100%" class="w-100" color="background" elevation="0">

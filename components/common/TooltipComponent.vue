@@ -74,7 +74,7 @@
         <i class="fa-light fa-circle-info" :class="'text-text pa-1'" v-bind="props" />
       </template>
       <div class="pt-1 pb-1 px-1 text-caption" :class="getTheme ? 'text-text' : 'text-top'">
-        {{ props.message }}
+        <span v-html="props.message" />
         <div v-if="props.tooltipTitle === 'Timeline'">
           <br />
           <div v-html="desktopTooltipTimelineNote"></div>
@@ -85,6 +85,10 @@
           <br />
           {{ desktopTooltipRewardsScoreMaxRewardsFooter }}
         </div>
+
+        <!-- <div v-if="props.tooltipTitle === 'Cell Capacity'">
+          <span v-html="props.message" />
+        </div> -->
       </div>
     </VTooltip>
     <!-- Mobile tooltip-->
@@ -104,7 +108,7 @@
             >{{ props.tooltipTitle }}
           </VCardTitle>
           <VCardText class="text-text text-body-2">
-            {{ props.message }}
+            <span v-html="props.message" />
             <div v-if="props.tooltipTitle === 'Timeline'">
               <br />
               <div v-html="desktopTooltipTimelineNote"></div>
