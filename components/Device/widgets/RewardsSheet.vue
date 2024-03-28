@@ -3,7 +3,6 @@
   import timezone from 'dayjs/plugin/timezone'
   import { useDisplay } from 'vuetify'
   import { event } from 'vue-gtag'
-  import { selectValidationScoreColor } from '../../common/selectScoreColor'
   import type { Device } from '../types/device'
   import DailyRewards from '../../common/DailyRewards.vue'
   import EmptyRewards from '../../common/EmptyRewards.vue'
@@ -49,7 +48,7 @@
   })
 
   const emit = defineEmits(['loadingRewardsTab'])
-
+  const { selectValidationColor } = useValidationScoreColor()
   const { fetchRemoteConfig } = useFirebase()
   const remoteConfig = await fetchRemoteConfig()
   const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
@@ -136,7 +135,7 @@
         dailyRewardsDate.value = dayjs(response.latest.timestamp).utc().format('MMM D, YYYY')
         dailyRewardsBaseReward.value = computeStringNumber(response.latest.base_reward.toString())
         dailyRewardsTotalReward.value = computeStringNumber(response.latest.total_reward.toString())
-        dailyRewardsValidationScoreColor.value = selectValidationScoreColor(
+        dailyRewardsValidationScoreColor.value = selectValidationColor(
           response.latest.base_reward_score
         )
         dailyRewardsSeverity.value = response?.latest?.annotation_summary[0]?.severity_level ?? null
@@ -158,7 +157,8 @@
         loading.value = false
         showRewards.value = true
       })
-      .catch(() => {
+      .catch((e) => {
+        console.log(e)
         emit('loadingRewardsTab', false)
         loading.value = false
         showRewards.value = false

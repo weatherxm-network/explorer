@@ -10,12 +10,12 @@
   import HeaderCard from './widgets/HeaderCard.vue'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
-  import { selectValidationScoreColor } from '~/components/common/selectScoreColor'
   import getGAEvent from '~/utils/getGAEvent'
 
   dayjs.extend(utc)
   dayjs.extend(timezone)
 
+  const { selectValidationColor } = useValidationScoreColor()
   const deviceTimezone = dayjs.tz.guess()
   const fromDate = dayjs().tz(deviceTimezone).subtract(1095, 'days').format('YYYY-MM-DD')
   const toDate = dayjs().tz(deviceTimezone).format('YYYY-MM-DD')
@@ -141,7 +141,7 @@
                   ? computeStringNumber(item.total_business_boost_reward.toString())
                   : '',
                 has_active_boosts: hasActiveBoosts,
-                validation_color: selectValidationScoreColor(item.base_reward_score),
+                validation_color: selectValidationColor(item.base_reward_score),
                 severity_level:
                   item?.annotation_summary &&
                   item?.annotation_summary.length !== 0 &&
