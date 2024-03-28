@@ -2,7 +2,7 @@
   import { useTheme } from 'vuetify'
   import dayjs from 'dayjs'
   import timezone from 'dayjs/plugin/timezone'
-  import { selectValidationScoreColor } from '../../../common/selectScoreColor'
+
   dayjs.extend(timezone)
 
   interface BarGraphData {
@@ -25,6 +25,7 @@
   const route = useRoute()
   const theme = useTheme()
   const cardTitleText = ref('Weekly Streak')
+  const { selectValidationColor } = useValidationScoreColor()
 
   const calcGraphValueHeight = (value: float) => {
     if (value === null) {
@@ -62,7 +63,7 @@
               style="height: 20px"
               :style="{
                 height: `${calcGraphValueHeight(item.base_reward_score)}px`,
-                backgroundColor: selectValidationScoreColor(item.base_reward_score),
+                backgroundColor: selectValidationColor(item.base_reward_score),
                 width: '20px'
               }"
             ></div>
