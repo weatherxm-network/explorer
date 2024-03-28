@@ -36,6 +36,7 @@
   const theme = useTheme()
   const showTooltip = ref(false)
   const tooltipText = ref('Station shareable link copied to clipboard')
+  let timer: any = null
   const tabValue = computed(() => {
     return props.windowValue
   })
@@ -47,7 +48,7 @@
   const backToCell = () => {
     emits('backToCell')
   }
-  let timer: any = null
+
   const shareStation = () => {
     if (isSupported.value) {
       share({

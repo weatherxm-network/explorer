@@ -1,6 +1,8 @@
 <script setup lang="ts">
   import { computed } from 'vue'
   import { useDisplay, useTheme } from 'vuetify'
+  import { event } from 'vue-gtag'
+  import getGAEvent from '~/utils/getGAEvent'
 
   interface Props {
     message?: string
@@ -32,6 +34,9 @@
   )
 
   const closeButtonText = ref('OK')
+
+  const cellCapacityDocsLink = ref('https://docs.weatherxm.com/project/cell-capacity')
+
   const tooltipMaxWidth = computed(() => {
     let width
     if (display.value.smAndDown) {
@@ -57,6 +62,25 @@
       '--anchor-color': theme.current.value.colors.primary
     }
   })
+
+  const addAlpha = (color: string, opacity: number) => {
+    const _opacity = Math.round(Math.min(Math.max(opacity ?? 1, 0), 1) * 255)
+    return color + _opacity.toString(16).toUpperCase()
+  }
+
+  const calcBackgroundColor = computed(() => {
+    return theme.current.value.dark
+      ? addAlpha(theme.themes.value.dark.colors.layer2, 0.5)
+      : addAlpha(theme.themes.value.light.colors.top, 0.5)
+  })
+
+  // track event
+  const trackEvent = (eventKey: string, parameters: any) => {
+    const validEvent = getGAEvent.getEvent(eventKey, parameters)
+    if (validEvent) {
+      event(validEvent.eventName, validEvent.parameters)
+    }
+  }
 </script>
 
 <template>
@@ -74,7 +98,7 @@
         <i class="fa-light fa-circle-info" :class="'text-text pa-1'" v-bind="props" />
       </template>
       <div class="pt-1 pb-1 px-1 text-caption" :class="getTheme ? 'text-text' : 'text-top'">
-        {{ props.message }}
+        <span v-html="props.message" />
         <div v-if="props.tooltipTitle === 'Timeline'">
           <br />
           <div v-html="desktopTooltipTimelineNote"></div>
@@ -99,12 +123,28 @@
         <template #activator="{ props }">
           <i class="fa-light fa-circle-info" :class="'text-text pa-1'" v-bind="props" />
         </template>
-        <VCard color="top" rounded="xl">
+        <VCard :color="props.tooltipTitle === 'Cell Capacity' ? 'layer1' : 'top'" rounded="xl">
           <VCardTitle class="text-text" style="font-weight: 700"
             >{{ props.tooltipTitle }}
           </VCardTitle>
           <VCardText class="text-text text-body-2">
-            {{ props.message }}
+            <span v-html="props.message" />
+
+            <div v-if="props.tooltipTitle === 'Cell Capacity'" class="mt-4">
+              <VBtn
+                :color="calcBackgroundColor"
+                :href="cellCapacityDocsLink"
+                target="_blank"
+                class="text-none text-primary"
+                block
+                size="large"
+                elevation="0"
+                style="letter-spacing: normal; border-radius: 10px"
+                @click="trackEvent('click_on_read_more_button_cell_capacity')"
+                >Read More</VBtn
+              >
+            </div>
+
             <div v-if="props.tooltipTitle === 'Timeline'">
               <br />
               <div v-html="desktopTooltipTimelineNote"></div>
