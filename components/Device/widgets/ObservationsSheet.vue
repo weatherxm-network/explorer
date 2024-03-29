@@ -127,12 +127,20 @@
 
   const calcedLastUpdated = computed(() => {
     return isBrowserLocaleClockType24h(nav) === true
-      ? `Last updated on ${dayjs
-          .tz(dayjs(props.device.current_weather.timestamp), dayjs.tz.guess())
-          .format('MMM DD, YYYY, HH:mm')}`
-      : `Last updated on ${dayjs
-          .tz(dayjs(props.device.current_weather.timestamp), dayjs.tz.guess())
-          .format('MMM DD, YYYY, hh:mm A')}`
+      ? `Last updated on ${
+          props?.device?.current_weather?.timestamp
+            ? dayjs
+                .tz(dayjs(props.device.current_weather.timestamp), dayjs.tz.guess())
+                .format('MMM DD, YYYY, HH:mm')
+            : '-'
+        }`
+      : `Last updated on ${
+          props?.device?.current_weather?.timestamp
+            ? dayjs
+                .tz(dayjs(props.device.current_weather.timestamp), dayjs.tz.guess())
+                .format('MMM DD, YYYY, hh:mm A')
+            : '-'
+        }`
   })
 
   const isBrowserLocaleClockType24h = (languages: string | string[]) => {

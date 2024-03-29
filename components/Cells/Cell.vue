@@ -13,7 +13,7 @@
   const loading = ref(false)
   const boldText = ref('Oops! Something went wrong.')
   const lightText = ref('Failed to get the public devices.')
-  const orderedCellDevices = ref([])
+  const orderedCellDevices = ref<Device[]>([])
   const cellAddress = ref(' ')
   const countActiveStations = ref(0)
   const countTotalStations = ref(0)
@@ -24,36 +24,25 @@
     return { marginTop: `calc(${display.value.height / 2}px - 159px)` }
   })
 
-  // compute icon
-  const calcIconBasedOnCurrentWeather = (devices: Device[]) => {
-    return devices.map((device) => {
-      if (!device?.current_weather || !device?.current_weather?.icon) {
-        device.current_weather.icon = 'not_available'
-        return device
-      } else {
-        return device
-      }
-    })
-  }
-
   const clickOnDevice = (deviceName: string) => {
     navigateTo(`/stations/${formatDeviceName.denormalizeDeviceName(deviceName)}`)
   }
 
-  onMounted(() => {
+  onMounted(async () => {
     loading.value = true
+    // get cell address based on cell id
+    cellAddress.value = await getAddress(route.params.cellIndex)
     // get cell devices through api
     getCellDevices(route.params.cellIndex)
       .then(async (orderedDevices) => {
         if (orderedDevices.length !== 0) {
           // compute icon for cell devices
-          orderedCellDevices.value = calcIconBasedOnCurrentWeather(orderedDevices)
+          orderedCellDevices.value = orderedDevices
           countTotalStations.value = orderedCellDevices.value.length
           countActiveStations.value = orderedCellDevices.value.filter(
             (obj) => obj.isActive === true
           ).length
-          // get cell address based on cell id
-          cellAddress.value = await getAddress(route.params.cellIndex)
+
           // show cell devices
           loading.value = false
           showCellsDevices.value = true
@@ -108,23 +97,7 @@
               :class="index === 0 ? 'mt-0' : 'mt-6'"
               @click="clickOnDevice(orderedCellDevices[index].name)"
             >
-              <DeviceCard
-                :key="device.id"
-                :device-id="device.id ? device.id : '-'"
-                :device-name="device.name ? device.name : '-'"
-                :device-address="cellAddress"
-                :is-active="device.isActive"
-                :profile="device.profile"
-                :last-active-at="
-                  device.lastWeatherStationActivity ? device.lastWeatherStationActivity : '-'
-                "
-                :icon="
-                  device.current_weather.icon
-                    ? device.current_weather.icon.replaceAll('-', '_')
-                    : 'not_available'
-                "
-                :device="device"
-              />
+              <DeviceCard :device="device" :device-address="cellAddress" />
             </div>
           </div>
         </VCardText>
