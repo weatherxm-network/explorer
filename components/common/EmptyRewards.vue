@@ -9,10 +9,9 @@
   })
 
   const title = ref('Rewards Coming Soon!')
-  const text =
-    ref(`Your station hasn't received any rewards yet. Sit back and relax, while our systems are
-          validating the station's location and data. You should start seeing rewards in the next
-          couple of days.`)
+  const text = ref(
+    `Station hasn't received any rewards yet. Sit back and relax, while our systems are validating the station's location and data. The station should start receiving rewards in the next couple of days.`
+  )
 
   const tipTitle = ref('Pro Tip')
   const tipText = ref(
