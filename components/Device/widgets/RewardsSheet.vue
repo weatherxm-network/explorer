@@ -138,6 +138,7 @@
         dailyRewardsValidationScoreColor.value = selectValidationColor(
           response.latest.base_reward_score
         )
+
         dailyRewardsSeverity.value = response?.latest?.annotation_summary[0]?.severity_level ?? null
         dailyRewardsNumberOfIssues.value = response?.latest?.annotation_summary
           ? response?.latest?.annotation_summary.length
