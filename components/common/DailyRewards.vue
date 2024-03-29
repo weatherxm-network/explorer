@@ -86,7 +86,7 @@
           <div class="d-flex me-4">
             <div
               v-if="props.state === 'INFO' || props.state === null"
-              style="width: 24px; height: 24px; font-size: large"
+              style="width: 24px; height: 24px; font-size: 20px"
               class="d-flex align-center justify-center me-1"
               :style="{ color: props.validationScoreColor }"
             >
@@ -94,7 +94,7 @@
             </div>
             <div
               v-if="props.state === 'WARNING'"
-              style="width: 24px; height: 24px; font-size: large"
+              style="width: 24px; height: 24px; font-size: 20px"
               class="d-flex align-center justify-center me-1"
               :style="{ color: props.validationScoreColor }"
             >
@@ -102,7 +102,7 @@
             </div>
             <div
               v-if="props.state === 'ERROR'"
-              style="width: 24px; height: 24px; font-size: large"
+              style="width: 24px; height: 24px; font-size: 20px"
               class="d-flex align-center justify-center me-1"
               :style="{ color: props.validationScoreColor }"
             >
@@ -116,7 +116,7 @@
           <div class="d-flex">
             <div
               v-if="props.hasActiveBoosts"
-              style="width: 24px; height: 24px; font-size: large"
+              style="width: 24px; height: 24px; font-size: 20px"
               class="d-flex align-center justify-center me-1"
               :style="{ color: theme.current.value.colors.chartLine }"
             >
@@ -124,7 +124,7 @@
             </div>
             <div
               v-else
-              style="width: 24px; height: 24px; font-size: large"
+              style="width: 24px; height: 24px; font-size: 20px"
               class="d-flex align-center justify-center me-1"
               :style="{ color: theme.themes.value.light.colors.mediumGrey }"
             >
@@ -140,7 +140,7 @@
                     : 'No Active'
                 }}
               </div>
-              <div>{{ props.hasActiveBoosts ? 'Boost' : 'Boosts' }}</div>
+              <div>{{ 'Boosts' }}</div>
             </div>
           </div>
         </div>
