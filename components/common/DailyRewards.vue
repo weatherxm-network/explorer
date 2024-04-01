@@ -58,6 +58,7 @@
 </script>
 <template>
   <VCard
+    class="mx-2"
     rounded="xl"
     elevation="2"
     :color="calcSateColor(props.state)"

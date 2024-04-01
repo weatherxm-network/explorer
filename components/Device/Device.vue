@@ -3,7 +3,6 @@
   import { useDisplay } from 'vuetify'
   import dayjs from 'dayjs'
   import relativeTime from 'dayjs/plugin/relativeTime'
-  import { event } from 'vue-gtag'
   import LottieComponent from '../common/LottieComponent.vue'
   import HeaderCard from './widgets/HeaderCard.vue'
   import RewardsSheet from './widgets/RewardsSheet.vue'
@@ -12,10 +11,10 @@
   import { getAddress } from '~/components/common/address'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
-  import getGAEvent from '~/utils/getGAEvent'
 
   dayjs.extend(relativeTime)
 
+  const { trackGAevent } = useGAevents()
   const mobileStore = useMobileStore()
   const display = ref(useDisplay())
   const route = useRoute()
@@ -30,13 +29,10 @@
   const timestamp = ref('-')
   const isActive = ref(false)
   const loadingRewardsTab = ref(false)
-
   const resolvedDevice = ref()
   const errorStateBoldText = ref('Oops! Something went wrong.')
   const errorStateLightText = ref('Failed to get the details of the device: No data')
-
   const backTo = ref('stats')
-
   const animationContainerHeight = computed(() => {
     return { marginTop: `calc(${display.value.height / 2}px - 244px)` }
   })
@@ -64,13 +60,6 @@
       navigateTo(`/stats`)
     } else {
       navigateTo(`/cells/${backTo.value}`)
-    }
-  }
-
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
     }
   }
 
@@ -113,7 +102,7 @@
               loading.value = false
               showDeviceDetails.value = true
               // track GA event
-              trackEvent('explorer_device', { ITEM_ID: device.id })
+              trackGAevent('explorer_device', { ITEM_ID: device.id })
             })
             .catch(() => {
               loading.value = false

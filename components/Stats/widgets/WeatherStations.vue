@@ -1,10 +1,8 @@
 <script setup lang="ts">
   import { computed } from 'vue'
   import { useDisplay, useTheme } from 'vuetify'
-  import { event } from 'vue-gtag'
   import numberFormater from '../utils/numberFormater'
   import TooltipComponent from '~/components/common/TooltipComponent.vue'
-  import getGAEvent from '~/utils/getGAEvent'
 
   interface WeatherStationsDetails {
     amount?: number
@@ -64,6 +62,7 @@
     })
   })
 
+  const { trackGAevent } = useGAevents()
   const display = ref(useDisplay())
   const theme = useTheme()
   const weatherStationsCardTitle = ref('Weather Stations')
@@ -108,14 +107,6 @@
   const localizeNumber = (number: number) => {
     return numberFormater.localizeNumberFormat(number)
   }
-
-  // track event
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
-  }
 </script>
 
 <template>
@@ -128,8 +119,8 @@
       <VRow class="pa-0 ma-0 pb-3 pt-3 justify-space-between align-center">
         <div class="text-body-2 pl-3">{{ weatherStationsCardTotalSectionHeader }}</div>
         <div
-          @mouseenter="trackEvent('clickInfoIcon', { ITEM_ID: 'total_stations' })"
-          @click="trackEvent('clickInfoIcon', { ITEM_ID: 'total_stations' })"
+          @mouseenter="trackGAevent('clickInfoIcon', { ITEM_ID: 'total_stations' })"
+          @click="trackGAevent('clickInfoIcon', { ITEM_ID: 'total_stations' })"
         >
           <TooltipComponent
             :message="totalWeatherStationsMessage"
@@ -151,7 +142,7 @@
               <div
                 class="text-caption text-darkGrey"
                 @click="
-                  trackEvent('clickOnOpenStationShop', {
+                  trackGAevent('clickOnOpenStationShop', {
                     ITEM_ID: 'total',
                     ITEM_LIST_ID: device.model
                   })
@@ -197,8 +188,8 @@
       <VRow class="pa-0 ma-0 pb-3 pt-3 justify-space-between align-center">
         <div class="text-body-2 pl-3">{{ weatherStationsCardClaimedSectionHeader }}</div>
         <div
-          @mouseenter="trackEvent('clickInfoIcon', { ITEM_ID: 'claimed_stations' })"
-          @click="trackEvent('clickInfoIcon', { ITEM_ID: 'claimed_stations' })"
+          @mouseenter="trackGAevent('clickInfoIcon', { ITEM_ID: 'claimed_stations' })"
+          @click="trackGAevent('clickInfoIcon', { ITEM_ID: 'claimed_stations' })"
         >
           <TooltipComponent
             :message="claimedWeatherStationsMessage"
@@ -220,7 +211,7 @@
               <div
                 class="text-caption text-darkGrey"
                 @click="
-                  trackEvent('clickOnOpenStationShop', {
+                  trackGAevent('clickOnOpenStationShop', {
                     ITEM_ID: 'claimed',
                     ITEM_LIST_ID: device.model
                   })
@@ -266,8 +257,8 @@
       <VRow class="pa-0 ma-0 pb-3 pt-3 justify-space-between align-center">
         <div class="text-body-2 pl-3">{{ weatherStationsCardActiveSectionHeader }}</div>
         <div
-          @mouseenter="trackEvent('clickInfoIcon', { ITEM_ID: 'active_stations' })"
-          @click="trackEvent('clickInfoIcon', { ITEM_ID: 'active_stations' })"
+          @mouseenter="trackGAevent('clickInfoIcon', { ITEM_ID: 'active_stations' })"
+          @click="trackGAevent('clickInfoIcon', { ITEM_ID: 'active_stations' })"
         >
           <TooltipComponent
             :message="activeWeatherStationsMessage"
@@ -290,7 +281,7 @@
               <div
                 class="text-caption text-darkGrey"
                 @click="
-                  trackEvent('clickOnOpenStationShop', {
+                  trackGAevent('clickOnOpenStationShop', {
                     ITEM_ID: 'active',
                     ITEM_LIST_ID: device.model
                   })

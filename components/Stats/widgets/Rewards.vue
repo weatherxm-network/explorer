@@ -1,11 +1,9 @@
 <script setup lang="ts">
   import { useDisplay } from 'vuetify'
   import { ref, computed } from 'vue'
-  import { event } from 'vue-gtag'
   import numberFormater from '../utils/numberFormater'
   import LineChartComponent from './LineChartComponent.vue'
   import TooltipComponent from '~/components/common/TooltipComponent.vue'
-  import getGAEvent from '~/utils/getGAEvent'
 
   interface Props {
     rewardsChartData?: number[]
@@ -27,6 +25,7 @@
     rewards30DaysTotal: 0
   })
 
+  const { trackGAevent } = useGAevents()
   const display = ref(useDisplay())
   const rewardsCardTitle = ref('$WXM Rewards')
   const rewardsCardLast30DaysText = ref('Last 30 Days')
@@ -47,14 +46,6 @@
   const nFormat = (number: number) => {
     return numberFormater.nFormatter(number)
   }
-
-  // track event
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
-  }
 </script>
 
 <template>
@@ -64,8 +55,8 @@
         {{ rewardsCardTitle }}
       </div>
       <div
-        @mouseenter="trackEvent('clickInfoIcon', { ITEM_ID: 'allocated_rewards' })"
-        @click="trackEvent('clickInfoIcon', { ITEM_ID: 'allocated_rewards' })"
+        @mouseenter="trackGAevent('clickInfoIcon', { ITEM_ID: 'allocated_rewards' })"
+        @click="trackGAevent('clickInfoIcon', { ITEM_ID: 'allocated_rewards' })"
       >
         <TooltipComponent
           :message="tottalAllocatedRewardsMessage"

@@ -2,7 +2,6 @@
   import _ from 'lodash'
   import { useDisplay, useTheme } from 'vuetify'
   import { reactive, computed, ref } from 'vue'
-  import { event } from 'vue-gtag'
   import type { SearchResultDevice, SearchResultLocation } from '../types/mapbox'
   import Settings from './Settings.vue'
   import ResultsComponent from './SearchBarWidgets/ResultsComponent.vue'
@@ -10,8 +9,8 @@
   import { useMapboxStore } from '~/stores/mapboxStore'
   import localStorage from '~/cache/localStorage'
   import wxmApi from '~/api/wxmApi'
-  import getGAEvent from '~/utils/getGAEvent'
 
+  const { trackGAevent } = useGAevents()
   const display = ref(useDisplay())
   const theme = useTheme()
   const mapboxStore = useMapboxStore()
@@ -131,7 +130,6 @@
 
   // handle user's clicks on tect field
   const handleTextFieldClick = () => {
-    // this.trackEvent('explorer_search')
     handleEmptyRecent()
     handleResultsState()
   }
@@ -217,7 +215,7 @@
     }
 
     // track GA event
-    trackEvent('clickOnResultOnNetworkSearch', {
+    trackGAevent('clickOnResultOnNetworkSearch', {
       ITEM_ID: 'search',
       ITEM_LIST_ID: 'location'
     })
@@ -247,7 +245,7 @@
       localStorage.set(`recentResults`, recentResults)
     }
     // track ga event
-    trackEvent('clickOnResultOnNetworkSearch', {
+    trackGAevent('clickOnResultOnNetworkSearch', {
       ITEM_ID: 'search',
       ITEM_LIST_ID: 'station'
     })
@@ -261,7 +259,7 @@
   // pass data to parent component
   const passSelectedAddressToExplorer = (selectedAddress: SearchResultLocation) => {
     // track ga event
-    trackEvent('clickOnResultOnNetworkSearch', {
+    trackGAevent('clickOnResultOnNetworkSearch', {
       ITEM_ID: 'recent',
       ITEM_LIST_ID: 'location'
     })
@@ -271,18 +269,12 @@
   // pass data to parent component
   const passSelectedDeviceToExplorer = (selectedDevice: SearchResultDevice) => {
     // track ga event
-    trackEvent('clickOnResultOnNetworkSearch', {
+    trackGAevent('clickOnResultOnNetworkSearch', {
       ITEM_ID: 'recent',
       ITEM_LIST_ID: 'station'
     })
     showRecentResults.value = false
     mapboxStore.setSearchedDeviceToFly(selectedDevice)
-  }
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
   }
 </script>
 

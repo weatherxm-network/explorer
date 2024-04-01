@@ -4,14 +4,12 @@
   import utc from 'dayjs/plugin/utc'
   import timezone from 'dayjs/plugin/timezone.js'
   import { computed } from 'vue'
-  import { event } from 'vue-gtag'
   import units from '../../Mapbox/widgets/SettingsUtils/units'
   import type { Device } from '../types/device'
   import DetailsCardMeasurement from './DetailsCardMeasurement.vue'
   import { calcCurrentWeather } from '~/components/common/weatherStuff'
   import index from '~/assets/animations/index'
   import { useSettingsStore } from '~/stores/settingsStore'
-  import getGAEvent from '~/utils/getGAEvent'
 
   dayjs.extend(utc)
   dayjs.extend(timezone)
@@ -49,7 +47,7 @@
   })
 
   const emits = defineEmits(['openWindow'])
-
+  const { trackGAevent } = useGAevents()
   const settingsStore = useSettingsStore()
   const currentUnits = ref(units.calcUnits())
 
@@ -145,14 +143,6 @@
 
   const openWindow = () => {
     emits('openWindow', 2)
-  }
-
-  // track event
-  const trackEvent = (eventKey: string, parameters: {} | undefined) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
   }
 </script>
 
@@ -287,7 +277,7 @@
               border-radius: 8px;
               letter-spacing: normal;
             "
-            @click="[openWindow(), trackEvent('deviceObservationsClickOnDownloadButton')]"
+            @click="[openWindow(), trackGAevent('deviceObservationsClickOnDownloadButton')]"
             >{{ downloadButtonText }}</VBtn
           >
         </VCol>

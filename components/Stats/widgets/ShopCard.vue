@@ -1,8 +1,6 @@
 <script setup lang="ts">
   import { useDisplay } from 'vuetify'
-  import { event } from 'vue-gtag'
   import TooltipComponent from '~/components/common/TooltipComponent.vue'
-  import getGAEvent from '~/utils/getGAEvent'
 
   interface Props {
     avgMonthly?: number
@@ -13,6 +11,7 @@
   })
 
   const { fetchRemoteConfig } = useFirebase()
+  const { trackGAevent } = useGAevents()
   const remoteConfig = await fetchRemoteConfig()
 
   const display = ref(useDisplay())
@@ -42,14 +41,6 @@
   const shopCardButtonLink = computed(() => {
     return remoteConfig?.shop_card_button_link?._value ?? 'https://shop.weatherxm.com'
   })
-
-  // track event
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
-  }
 </script>
 
 <template>
@@ -69,8 +60,8 @@
                 </div>
                 <div :style="{ 'font-size': '0.8rem', 'font-weight': 400 }">
                   <div
-                    @mouseenter="trackEvent('clickInfoIcon', { ITEM_ID: 'buy_station' })"
-                    @click="trackEvent('clickInfoIcon', { ITEM_ID: 'buy_station' })"
+                    @mouseenter="trackGAevent('clickInfoIcon', { ITEM_ID: 'buy_station' })"
+                    @click="trackGAevent('clickInfoIcon', { ITEM_ID: 'buy_station' })"
                   >
                     <TooltipComponent :message="shopCardMessage" :container="'any'" />
                   </div>
@@ -97,7 +88,7 @@
               border-radius: 8px;
               letter-spacing: normal;
             "
-            @click="trackEvent('clickOnOpenShop')"
+            @click="trackGAevent('clickOnOpenShop')"
             >{{ shopCardButtonText }}</VBtn
           >
         </VCol>

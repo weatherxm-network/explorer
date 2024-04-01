@@ -2,7 +2,6 @@
   import dayjs from 'dayjs'
   import timezone from 'dayjs/plugin/timezone'
   import { useDisplay } from 'vuetify'
-  import { event } from 'vue-gtag'
   import type { Device } from '../types/device'
   import DailyRewards from '../../common/DailyRewards.vue'
   import EmptyRewards from '../../common/EmptyRewards.vue'
@@ -11,7 +10,6 @@
   import MainnetBanner from './RewardsWidgets/MainnetBanner.vue'
   import LottieComponent from '~/components/common/LottieComponent.vue'
   import wxmApi from '~/api/wxmApi'
-  import getGAEvent from '~/utils/getGAEvent'
 
   dayjs.extend(timezone)
 
@@ -50,6 +48,7 @@
   const emit = defineEmits(['loadingRewardsTab'])
   const { selectValidationColor } = useValidationScoreColor()
   const { fetchRemoteConfig } = useFirebase()
+  const { trackGAevent } = useGAevents()
   const remoteConfig = await fetchRemoteConfig()
   const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
   // rewards stuff
@@ -77,13 +76,6 @@
   const errorAnimationContainerHeight = computed(() => {
     return { marginTop: `calc(${display.value.height / 2}px - 281px)` }
   })
-
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
-  }
 
   const countDecimals = (number: number) => {
     if (Number.isInteger(number)) {
@@ -168,14 +160,14 @@
 
   onMounted(() => {
     // track GA event
-    trackEvent('device_rewards')
+    trackGAevent('device_rewards')
     getSpecificDeviceTransactions(props.device.id)
   })
 </script>
 
 <template>
   <div>
-    <div class="py-5 px-4 pt-0">
+    <div class="py-5 px- pt-0">
       <MainnetBanner v-if="mainnetShowFlag" :date="'14th of February'"></MainnetBanner>
       <EmptyRewards v-if="emptyStateFlag && !loading" />
       <TotalStationRewards

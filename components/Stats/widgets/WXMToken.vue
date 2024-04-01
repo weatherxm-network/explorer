@@ -1,8 +1,6 @@
 <script setup lang="ts">
   import { useDisplay } from 'vuetify'
-  import { event } from 'vue-gtag'
   import numberFormater from '../utils/numberFormater'
-  import getGAEvent from '~/utils/getGAEvent'
 
   interface Props {
     wxmTokenTotalSupply?: number
@@ -14,6 +12,7 @@
     wxmTokenTotalSupply: 0
   })
 
+  const { trackGAevent } = useGAevents()
   const display = ref(useDisplay())
   const wxmTokenCardTitle = ref('$WXM Token')
   const wxmTokenCardContentText = ref('Deployed on Testnet -')
@@ -29,7 +28,7 @@
 
   const clickOnLink = () => {
     // track GA event
-    trackEvent('clickOnReadMoreForTokenomicsLink')
+    trackGAevent('clickOnReadMoreForTokenomicsLink')
     window.open('https://docs.weatherxm.com/tokenomics', '_blank')
   }
 
@@ -38,13 +37,6 @@
   }
   const localizeNumber = (number: number) => {
     return numberFormater.localizeNumberFormat(number)
-  }
-  // track event
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
   }
 </script>
 

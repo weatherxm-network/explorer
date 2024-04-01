@@ -3,18 +3,17 @@
   import dayjs from 'dayjs'
   import utc from 'dayjs/plugin/utc'
   import timezone from 'dayjs/plugin/timezone.js'
-  import { event } from 'vue-gtag'
   import LottieComponent from '../common/LottieComponent.vue'
   import DailyRewards from '../common/DailyRewards.vue'
   import EmptyRewards from '../common/EmptyRewards.vue'
   import HeaderCard from './widgets/HeaderCard.vue'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
-  import getGAEvent from '~/utils/getGAEvent'
 
   dayjs.extend(utc)
   dayjs.extend(timezone)
 
+  const { trackGAevent } = useGAevents()
   const { selectValidationColor } = useValidationScoreColor()
   const deviceTimezone = dayjs.tz.guess()
   const fromDate = dayjs().tz(deviceTimezone).subtract(1095, 'days').format('YYYY-MM-DD')
@@ -52,13 +51,6 @@
       navigateTo(`/stats`)
     } else {
       navigateTo(`/stations/${backTo.value}`)
-    }
-  }
-
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
     }
   }
 
@@ -115,7 +107,7 @@
     deviceId.value = await resolveDeviceName()
     if (deviceId) {
       // track GA event
-      trackEvent('device_reward_transactions', { ITEM_ID: deviceId.value })
+      trackGAevent('device_reward_transactions', { ITEM_ID: deviceId.value })
       wxmApi
         .getRewardTimeline(
           deviceId.value,
@@ -209,7 +201,7 @@
       <VCardText v-if="showTimeline && !loading && !emptyStateFlag" class="pa-0 ma-0">
         <!----------------------------- Timeline component --------------------------------->
         <VCard
-          class="pa-4 pb-0"
+          class="px-2 pt-4 pb-0"
           color="background"
           elevation="0"
           rounded="0"

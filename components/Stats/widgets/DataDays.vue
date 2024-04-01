@@ -1,10 +1,8 @@
 <script setup lang="ts">
   import { useDisplay } from 'vuetify'
-  import { event } from 'vue-gtag'
   import numberFormater from '../utils/numberFormater'
   import LineChartComponent from './LineChartComponent.vue'
   import TooltipComponent from '~/components/common/TooltipComponent.vue'
-  import getGAEvent from '~/utils/getGAEvent'
 
   interface Props {
     dataDaysChartData?: number[]
@@ -26,6 +24,7 @@
     dataDays30DaysTotal: 0
   })
 
+  const { trackGAevent } = useGAevents()
   const display = ref(useDisplay())
   const weatherStationDaysCardTitle = ref('Weather Station-Days')
   const weatherStationDaysCardLast30DaysText = ref('Last 30 Days')
@@ -47,14 +46,6 @@
   const nFormat = (number: number) => {
     return numberFormater.nFormatter(number)
   }
-
-  // track event
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
-  }
 </script>
 
 <template>
@@ -64,8 +55,8 @@
         {{ weatherStationDaysCardTitle }}
       </div>
       <div
-        @mouseenter="trackEvent('clickInfoIcon', { ITEM_ID: 'data_days' })"
-        @click="trackEvent('clickInfoIcon', { ITEM_ID: 'data_days' })"
+        @mouseenter="trackGAevent('clickInfoIcon', { ITEM_ID: 'data_days' })"
+        @click="trackGAevent('clickInfoIcon', { ITEM_ID: 'data_days' })"
       >
         <TooltipComponent
           :message="dataDaysMessage"
