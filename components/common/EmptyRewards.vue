@@ -30,7 +30,7 @@
   })
 </script>
 <template>
-  <VCard class="pa-6 mb-6" rounded="xl">
+  <VCard class="pa-6 mb-6 mx-2 mt-2" rounded="xl">
     <client-only>
       <Vue3Lottie
         :animation-data="index['wenMoonSimple']"

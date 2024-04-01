@@ -147,7 +147,7 @@
 </script>
 
 <template>
-  <VCard rounded="xl" class="ma-4 mt-0" elevation="0" color="layer1">
+  <VCard rounded="xl" class="ma-4 mt-2" elevation="0" color="layer1">
     <VCardText class="pa-0 pb-0">
       <VSheet color="top" rounded="xl" class="pl-0 pt-4 pb-2 mb-2" elevation="4">
         <VRow class="ma-0 pa-0">

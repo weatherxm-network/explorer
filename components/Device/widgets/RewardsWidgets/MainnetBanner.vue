@@ -20,7 +20,10 @@
 </script>
 
 <template>
-  <VImg :src="bannerBackground" class="rounded-xl mb-4 d-flex justify-center align-center">
+  <VImg
+    :src="bannerBackground"
+    class="rounded-xl mb-4 d-flex justify-center align-center mx-2 mt-2"
+  >
     <div
       class="d-flex flex-column text-center align-center justify-center px-1"
       :class="theme.current.value.dark ? `text-text` : 'text-top'"

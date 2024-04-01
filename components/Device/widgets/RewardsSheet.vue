@@ -167,7 +167,7 @@
 
 <template>
   <div>
-    <div class="py-5 px- pt-0">
+    <div class="py-5 px-2 pt-0">
       <MainnetBanner v-if="mainnetShowFlag" :date="'14th of February'"></MainnetBanner>
       <EmptyRewards v-if="emptyStateFlag && !loading" />
       <TotalStationRewards
