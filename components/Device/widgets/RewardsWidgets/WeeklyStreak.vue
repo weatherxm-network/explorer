@@ -6,7 +6,7 @@
   dayjs.extend(timezone)
 
   interface BarGraphData {
-    base_reward_score?: float
+    base_reward_score?: number
     timestamp?: string
   }
 
@@ -27,12 +27,12 @@
   const cardTitleText = ref('Weekly Streak')
   const { selectValidationColor } = useValidationScoreColor()
 
-  const calcGraphValueHeight = (value: float) => {
+  const calcGraphValueHeight = (value: number) => {
     if (value === null) {
       return 0
     } else {
       const calcedHeightBasedOnValue = (value / 100) * 77
-      return calcedHeightBasedOnValue < 20 ? 20 : calcedHeightBasedOnValue
+      return calcedHeightBasedOnValue <= 20 ? 20 : calcedHeightBasedOnValue.toFixed(3)
     }
   }
 </script>
