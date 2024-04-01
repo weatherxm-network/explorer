@@ -65,10 +65,12 @@
     <VRow no-gutters class="ma-0 pa-0 pt-3 pb-0">
       <VCol class="pr-0 pl-0" align-self="center">
         <!---------------------------- Lottie Icon ------------------------------->
+
+        {{ index.icon }}
         <div class="d-flex justify-center">
           <client-only>
             <Vue3Lottie
-              :animation-data="index[icon]"
+              :animation-data="index[props.icon]"
               :height="display.smAndDown ? 50 : 70"
               :width="display.smAndDown ? 50 : 70"
             />

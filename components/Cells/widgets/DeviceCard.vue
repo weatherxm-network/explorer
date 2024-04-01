@@ -72,7 +72,7 @@
   const calcTimestampSheetColor = computed(() => {
     if (theme.global.name.value === 'dark') {
       return 'blueTint'
-    } else if (props.isActive) {
+    } else if (props.device.isActive) {
       return 'successTint'
     } else {
       return 'errorTint'
@@ -81,7 +81,7 @@
 
   const calcTimestampTextColor = computed(() => {
     if (theme.global.name.value === 'dark') {
-      if (props.isActive) {
+      if (props.device.isActive) {
         return 'text-success'
       } else {
         return 'text-error'
@@ -92,11 +92,11 @@
   })
 
   const timestamp = computed(() => {
-    return dayjs(props.lastActiveAt).fromNow()
+    return dayjs(props.device.lastWeatherStationActivity).fromNow()
   })
 
   const inActiveBorderStylesCard = computed(() => {
-    return !props.isActive
+    return !props.device.isActive
       ? {
           'border-left': '1px solid red',
           'border-right': '1px solid red',
@@ -111,7 +111,7 @@
   <!---------------------------- Device Card ------------------------------->
   <VCard
     class="transition-swing"
-    :class="props.isActive ? 'pa-5' : 'pa-0'"
+    :class="props.device.isActive ? 'pa-5' : 'pa-0'"
     rounded="xl"
     color="top"
     :elevation="isHovering"
@@ -168,7 +168,11 @@
     <VCardText class="pa-0 ma-0">
       <DeviceCardStateActive
         v-if="props.device.isActive"
-        :icon="props?.device?.current_weather?.icon ?? 'not_available'"
+        :icon="
+          props?.device?.current_weather?.icon
+            ? props.device.current_weather.icon.replaceAll('-', '_')
+            : 'not_available'
+        "
         :units="currentUnits"
         :device-measurements="currentDeviceMeasurements"
       />
