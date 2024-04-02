@@ -51,9 +51,9 @@
   const { trackGAevent } = useGAevents()
   const remoteConfig = await fetchRemoteConfig()
   const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
-  // rewards stuff
+  const mainnetBannerText = ref<string>(`${remoteConfig.feat_mainnet_message._value}`)
   const loading = ref(false)
-
+  // rewards stuff
   const totalStationRewards = ref('')
   const dailyRewardsDate = ref('')
   const dailyRewardsBaseReward = ref('')
@@ -168,7 +168,7 @@
 <template>
   <div>
     <div class="py-5 px-2 pt-0">
-      <MainnetBanner v-if="mainnetShowFlag" :date="'14th of February'"></MainnetBanner>
+      <MainnetBanner v-if="mainnetShowFlag" :text="mainnetBannerText"></MainnetBanner>
       <EmptyRewards v-if="emptyStateFlag && !loading" />
       <TotalStationRewards
         v-if="!emptyStateFlag && !loading && showRewards"

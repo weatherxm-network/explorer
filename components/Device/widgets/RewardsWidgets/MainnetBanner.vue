@@ -3,11 +3,11 @@
   import bannerBackground from '~/assets/bannerBackground.jpeg'
 
   interface Props {
-    date?: string
+    text?: string
   }
 
   const props = withDefaults(defineProps<Props>(), {
-    date: ''
+    text: ''
   })
 
   const theme = useTheme()
@@ -35,11 +35,8 @@
         <i class="fa-regular fa-badge-check"></i> <span>Welcome to Mainnet!</span>
       </div>
       <div class="text-body-2 my-2">
-        <div>{{ `Starting the ${props.date}` }}</div>
-        <div>all station rewards are distributed</div>
-        <div>on Abritrum Mainnet!</div>
+        <div>{{ props.text }}</div>
       </div>
-      <div class="text-body-2">Thank you for the support!</div>
     </div>
   </VImg>
 </template>
