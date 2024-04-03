@@ -14,13 +14,8 @@
   dayjs.extend(relativeTime)
 
   interface Props {
-    deviceName?: string
-    deviceAddress?: string
-    profile?: string
-    isActive?: boolean
-    lastActiveAt?: string
-    icon?: string
     device?: Device
+    deviceAddress?: string
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -77,7 +72,7 @@
   const calcTimestampSheetColor = computed(() => {
     if (theme.global.name.value === 'dark') {
       return 'blueTint'
-    } else if (props.isActive) {
+    } else if (props.device.isActive) {
       return 'successTint'
     } else {
       return 'errorTint'
@@ -86,7 +81,7 @@
 
   const calcTimestampTextColor = computed(() => {
     if (theme.global.name.value === 'dark') {
-      if (props.isActive) {
+      if (props.device.isActive) {
         return 'text-success'
       } else {
         return 'text-error'
@@ -97,11 +92,11 @@
   })
 
   const timestamp = computed(() => {
-    return dayjs(props.lastActiveAt).fromNow()
+    return dayjs(props.device.lastWeatherStationActivity).fromNow()
   })
 
   const inActiveBorderStylesCard = computed(() => {
-    return !props.isActive
+    return !props.device.isActive
       ? {
           'border-left': '1px solid red',
           'border-right': '1px solid red',
@@ -116,7 +111,7 @@
   <!---------------------------- Device Card ------------------------------->
   <VCard
     class="transition-swing"
-    :class="props.isActive ? 'pa-5' : 'pa-0'"
+    :class="props.device.isActive ? 'pa-5' : 'pa-0'"
     rounded="xl"
     color="top"
     :elevation="isHovering"
@@ -126,9 +121,9 @@
   >
     <VCardTitle class="pa-0 pb-1">
       <!---------------------------- Device name ------------------------------->
-      <VRow class="ma-0 pa-0 w-100 pb-2" :class="isActive ? 'px-0 pt-0' : 'px-5 pt-5'">
+      <VRow class="ma-0 pa-0 w-100 pb-2" :class="props.device.isActive ? 'px-0 pt-0' : 'px-5 pt-5'">
         <div class="font-weight-bold text-primary" style="font-size: 1.108rem; font-weight: 700">
-          {{ deviceName }}
+          {{ props.device.name }}
         </div>
       </VRow>
       <!---------------------------- Address ------------------------------->
@@ -136,7 +131,7 @@
         class="pa-0 ma-0"
         no-gutters
         style="flex-wrap: nowrap"
-        :class="isActive ? 'px-0' : 'px-5'"
+        :class="props.device.isActive ? 'px-0' : 'px-5'"
       >
         <div style="min-width: 100px" class="flex-shrink-1 flex-grow-0">
           <VSheet
@@ -161,7 +156,7 @@
             style="border-radius: 10px; font-weight: 400"
           >
             <div>
-              <DeviceCardIcon :is-active="isActive" :profile="profile" />
+              <DeviceCardIcon :is-active="props.device.isActive" :profile="props.device.profile" />
             </div>
             <div class="pl-3 text-no-wrap" :class="calcTimestampTextColor">
               {{ timestamp }}
@@ -172,13 +167,17 @@
     </VCardTitle>
     <VCardText class="pa-0 ma-0">
       <DeviceCardStateActive
-        v-if="isActive"
-        :icon="icon"
+        v-if="props.device.isActive"
+        :icon="
+          props?.device?.current_weather?.icon
+            ? props.device.current_weather.icon.replaceAll('-', '_')
+            : 'not_available'
+        "
         :units="currentUnits"
         :device-measurements="currentDeviceMeasurements"
       />
 
-      <DeviceCardStateInActive v-if="!isActive" />
+      <DeviceCardStateInActive v-if="!props.device.isActive" />
     </VCardText>
   </VCard>
 </template>

@@ -95,7 +95,9 @@
             .then((device) => {
               // calculate measurements
               resolvedDevice.value = device
-              timestamp.value = dayjs(device.current_weather.timestamp).fromNow()
+              timestamp.value = device?.current_weather?.timestamp
+                ? dayjs(device.current_weather.timestamp).fromNow()
+                : '-'
               isActive.value = device.isActive
               cellDeviceProfile.value = device.profile
               // show results
