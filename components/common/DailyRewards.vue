@@ -58,6 +58,7 @@
 </script>
 <template>
   <VCard
+    class="mx-2"
     rounded="xl"
     elevation="2"
     :color="calcSateColor(props.state)"
@@ -85,11 +86,28 @@
         <div class="d-flex" :class="props.state === null ? 'mb-0' : ''">
           <div class="d-flex me-4">
             <div
-              style="width: 24px; height: 24px"
+              v-if="props.state === 'INFO' || props.state === null"
+              style="width: 24px; height: 24px; font-size: 20px"
               class="d-flex align-center justify-center me-1"
               :style="{ color: props.validationScoreColor }"
             >
-              <i class="fa-regular fa-hexagon fa-rotate-90 fa-lg"></i>
+              <i class="fa-solid fa-hexagon-check"></i>
+            </div>
+            <div
+              v-if="props.state === 'WARNING'"
+              style="width: 24px; height: 24px; font-size: 20px"
+              class="d-flex align-center justify-center me-1"
+              :style="{ color: props.validationScoreColor }"
+            >
+              <i class="fa-solid fa-hexagon-exclamation"></i>
+            </div>
+            <div
+              v-if="props.state === 'ERROR'"
+              style="width: 24px; height: 24px; font-size: 20px"
+              class="d-flex align-center justify-center me-1"
+              :style="{ color: props.validationScoreColor }"
+            >
+              <i class="fa-solid fa-hexagon-xmark"></i>
             </div>
             <div class="text-caption" style="letter-spacing: normal">
               <div class="font-weight-bold">{{ `${props.baseRewardAmount} $WXM` }}</div>
@@ -98,11 +116,20 @@
           </div>
           <div class="d-flex">
             <div
-              style="width: 24px; height: 24px"
+              v-if="props.hasActiveBoosts"
+              style="width: 24px; height: 24px; font-size: 20px"
               class="d-flex align-center justify-center me-1"
-              :style="{ color: theme.current.value.colors.primary }"
+              :style="{ color: theme.current.value.colors.chartLine }"
             >
-              <i class="fa-regular fa-hexagon fa-rotate-90 fa-lg"></i>
+              <i class="fa-solid fa-hexagon-check"></i>
+            </div>
+            <div
+              v-else
+              style="width: 24px; height: 24px; font-size: 20px"
+              class="d-flex align-center justify-center me-1"
+              :style="{ color: theme.themes.value.light.colors.mediumGrey }"
+            >
+              <i class="fa-solid fa-hexagon-xmark"></i>
             </div>
             <div class="text-caption" style="letter-spacing: normal">
               <div :class="props.hasActiveBoosts ? 'font-weight-bold' : ''">
@@ -114,7 +141,7 @@
                     : 'No Active'
                 }}
               </div>
-              <div>{{ props.hasActiveBoosts ? 'Boost' : 'Boosts' }}</div>
+              <div>{{ 'Boosts' }}</div>
             </div>
           </div>
         </div>

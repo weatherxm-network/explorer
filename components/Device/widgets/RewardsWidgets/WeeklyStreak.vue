@@ -2,11 +2,11 @@
   import { useTheme } from 'vuetify'
   import dayjs from 'dayjs'
   import timezone from 'dayjs/plugin/timezone'
-  import { selectValidationScoreColor } from '../../../common/selectScoreColor'
+
   dayjs.extend(timezone)
 
   interface BarGraphData {
-    base_reward_score?: float
+    base_reward_score?: number
     timestamp?: string
   }
 
@@ -25,19 +25,20 @@
   const route = useRoute()
   const theme = useTheme()
   const cardTitleText = ref('Weekly Streak')
+  const { selectValidationColor } = useValidationScoreColor()
 
-  const calcGraphValueHeight = (value: float) => {
+  const calcGraphValueHeight = (value: number) => {
     if (value === null) {
       return 0
     } else {
       const calcedHeightBasedOnValue = (value / 100) * 77
-      return calcedHeightBasedOnValue < 20 ? 20 : calcedHeightBasedOnValue
+      return calcedHeightBasedOnValue <= 20 ? 20 : calcedHeightBasedOnValue.toFixed(3)
     }
   }
 </script>
 
 <template>
-  <VCard class="mt-4 pa-6" rounded="xl" elevation="2" color="top">
+  <VCard class="mt-4 pa-6 mx-2" rounded="xl" elevation="2" color="top">
     <div
       class="text-text font-weight-bold mb-1"
       style="font-size: 0.984rem; letter-spacing: normal"
@@ -62,7 +63,7 @@
               style="height: 20px"
               :style="{
                 height: `${calcGraphValueHeight(item.base_reward_score)}px`,
-                backgroundColor: selectValidationScoreColor(item.base_reward_score),
+                backgroundColor: selectValidationColor(item.base_reward_score),
                 width: '20px'
               }"
             ></div>

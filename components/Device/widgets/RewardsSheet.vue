@@ -2,8 +2,6 @@
   import dayjs from 'dayjs'
   import timezone from 'dayjs/plugin/timezone'
   import { useDisplay } from 'vuetify'
-  import { event } from 'vue-gtag'
-  import { selectValidationScoreColor } from '../../common/selectScoreColor'
   import type { Device } from '../types/device'
   import DailyRewards from '../../common/DailyRewards.vue'
   import EmptyRewards from '../../common/EmptyRewards.vue'
@@ -12,7 +10,6 @@
   import MainnetBanner from './RewardsWidgets/MainnetBanner.vue'
   import LottieComponent from '~/components/common/LottieComponent.vue'
   import wxmApi from '~/api/wxmApi'
-  import getGAEvent from '~/utils/getGAEvent'
 
   dayjs.extend(timezone)
 
@@ -49,13 +46,14 @@
   })
 
   const emit = defineEmits(['loadingRewardsTab'])
-
+  const { selectValidationColor } = useValidationScoreColor()
   const { fetchRemoteConfig } = useFirebase()
+  const { trackGAevent } = useGAevents()
   const remoteConfig = await fetchRemoteConfig()
   const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
-  // rewards stuff
+  const mainnetBannerText = ref<string>(`${remoteConfig.feat_mainnet_message._value}`)
   const loading = ref(false)
-
+  // rewards stuff
   const totalStationRewards = ref('')
   const dailyRewardsDate = ref('')
   const dailyRewardsBaseReward = ref('')
@@ -78,13 +76,6 @@
   const errorAnimationContainerHeight = computed(() => {
     return { marginTop: `calc(${display.value.height / 2}px - 281px)` }
   })
-
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
-  }
 
   const countDecimals = (number: number) => {
     if (Number.isInteger(number)) {
@@ -136,9 +127,10 @@
         dailyRewardsDate.value = dayjs(response.latest.timestamp).utc().format('MMM D, YYYY')
         dailyRewardsBaseReward.value = computeStringNumber(response.latest.base_reward.toString())
         dailyRewardsTotalReward.value = computeStringNumber(response.latest.total_reward.toString())
-        dailyRewardsValidationScoreColor.value = selectValidationScoreColor(
+        dailyRewardsValidationScoreColor.value = selectValidationColor(
           response.latest.base_reward_score
         )
+
         dailyRewardsSeverity.value = response?.latest?.annotation_summary[0]?.severity_level ?? null
         dailyRewardsNumberOfIssues.value = response?.latest?.annotation_summary
           ? response?.latest?.annotation_summary.length
@@ -158,7 +150,8 @@
         loading.value = false
         showRewards.value = true
       })
-      .catch(() => {
+      .catch((e) => {
+        console.log(e)
         emit('loadingRewardsTab', false)
         loading.value = false
         showRewards.value = false
@@ -167,15 +160,15 @@
 
   onMounted(() => {
     // track GA event
-    trackEvent('device_rewards')
+    trackGAevent('device_rewards')
     getSpecificDeviceTransactions(props.device.id)
   })
 </script>
 
 <template>
   <div>
-    <div class="py-5 px-4 pt-0">
-      <MainnetBanner v-if="mainnetShowFlag" :date="'14th of February'"></MainnetBanner>
+    <div class="py-5 px-2 pt-0">
+      <MainnetBanner v-if="mainnetShowFlag" :text="mainnetBannerText"></MainnetBanner>
       <EmptyRewards v-if="emptyStateFlag && !loading" />
       <TotalStationRewards
         v-if="!emptyStateFlag && !loading && showRewards"

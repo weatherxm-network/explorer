@@ -9,10 +9,9 @@
   })
 
   const title = ref('Rewards Coming Soon!')
-  const text =
-    ref(`Your station hasn't received any rewards yet. Sit back and relax, while our systems are
-          validating the station's location and data. You should start seeing rewards in the next
-          couple of days.`)
+  const text = ref(
+    `Station hasn't received any rewards yet. Sit back and relax, while our systems are validating the station's location and data. The station should start receiving rewards in the next couple of days.`
+  )
 
   const tipTitle = ref('Pro Tip')
   const tipText = ref(
@@ -31,7 +30,7 @@
   })
 </script>
 <template>
-  <VCard class="pa-6 mb-6" rounded="xl">
+  <VCard class="pa-6 mb-6 mx-2 mt-2" rounded="xl">
     <client-only>
       <Vue3Lottie
         :animation-data="index['wenMoonSimple']"

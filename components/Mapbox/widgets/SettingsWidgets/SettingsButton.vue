@@ -1,20 +1,11 @@
 <script setup lang="ts">
-  import { event } from 'vue-gtag'
-  import getGAEvent from '~/utils/getGAEvent'
-
   const emits = defineEmits(['handleSettings'])
+  const { trackGAevent } = useGAevents()
 
   const showSettings = () => {
     // track GA event
-    trackEvent('explorer_settings')
+    trackGAevent('explorer_settings')
     emits('handleSettings')
-  }
-
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
   }
 </script>
 

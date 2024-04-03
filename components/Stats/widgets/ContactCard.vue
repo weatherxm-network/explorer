@@ -1,10 +1,9 @@
 <script setup lang="ts">
   import { useDisplay } from 'vuetify'
-  import { event } from 'vue-gtag'
-  import getGAEvent from '~/utils/getGAEvent'
 
   const display = ref(useDisplay())
   const { fetchRemoteConfig } = useFirebase()
+  const { trackGAevent } = useGAevents()
   const remoteConfig = await fetchRemoteConfig()
   const contactCardTitle = computed(() => {
     return remoteConfig?.contact_card_title?._value ?? 'Are you a manufacturer?'
@@ -21,14 +20,6 @@
   const contactCardButtonLink = computed(() => {
     return remoteConfig?.contact_card_button_link?._value ?? 'https://weatherxm.com/contact/'
   })
-
-  // track event
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
-  }
 </script>
 
 <template>
@@ -63,7 +54,7 @@
               border-radius: 8px;
               letter-spacing: normal;
             "
-            @click="trackEvent('clickOnManufacturerContactUs')"
+            @click="trackGAevent('clickOnManufacturerContactUs')"
             >{{ contactCardButtonText }}</VBtn
           >
         </VCol>

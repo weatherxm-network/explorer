@@ -2,7 +2,6 @@
   import mapboxgl from 'mapbox-gl'
   import { useDisplay, useTheme } from 'vuetify/lib/framework.mjs'
   import _ from 'lodash'
-  import { event } from 'vue-gtag'
   import calcedMapboxData from './utils/calcedMapboxData'
   import mapCreation from './utils/mapCreation'
   import StatsButton from './widgets/StatsButton.vue'
@@ -13,25 +12,21 @@
   import { useMapboxStore } from '~/stores/mapboxStore'
   import { useMobileStore } from '~/stores/mobileStore'
   import wxmApi from '~/api/wxmApi'
-  import getGAEvent from '~/utils/getGAEvent'
 
   const config = useRuntimeConfig().public
   const mobileStore = useMobileStore()
   const mapboxStore = useMapboxStore()
-
+  const { trackGAevent } = useGAevents()
   const display = useDisplay()
   const theme = useTheme()
   const route = useRoute()
-
   let navControls = reactive({})
   let geolocate = reactive({})
   const map = ref({})
-
   const mapboxLoading = ref(false)
   const collections = ref<Collections>()
   const hoverCellId = ref('')
   const clickCellId = ref('')
-
   const snackbar = ref(false)
   const onLine = ref(navigator.onLine)
 
@@ -108,13 +103,6 @@
       mapsInitialPosition()
     }
   })
-
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
-  }
 
   const onResize = () => {
     // check if map is ready
@@ -402,7 +390,7 @@
       mobileStore.setPageState(true)
 
       // track GA event
-      trackEvent('explorer_cell', { ITEM_ID: clickCellId.value })
+      trackGAevent('explorer_cell', { ITEM_ID: clickCellId.value })
     })
   }
 

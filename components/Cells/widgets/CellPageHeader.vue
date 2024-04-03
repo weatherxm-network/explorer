@@ -1,11 +1,9 @@
 <script setup lang="ts">
   import { useClipboard, useShare } from '@vueuse/core'
   import { useDisplay, useTheme } from 'vuetify'
-  import { event } from 'vue-gtag'
   import TooltipComponent from '~/components/common/TooltipComponent.vue'
   import { getAddress } from '~/components/common/address'
   import { useMobileStore } from '~/stores/mobileStore'
-  import getGAEvent from '~/utils/getGAEvent'
 
   interface Props {
     activeStations: number
@@ -18,7 +16,7 @@
     totalStations: 0,
     loading: true
   })
-
+  const { trackGAevent } = useGAevents()
   const mobileStore = useMobileStore()
   const route = useRoute()
   const cellAddress = ref('')
@@ -75,14 +73,6 @@
   const getTheme = computed(() => {
     return theme.global.name.value === 'dark'
   })
-
-  // track event
-  const trackEvent = (eventKey: string, parameters: any) => {
-    const validEvent = getGAEvent.getEvent(eventKey, parameters)
-    if (validEvent) {
-      event(validEvent.eventName, validEvent.parameters)
-    }
-  }
 
   onBeforeUnmount(() => {
     clearTimeout(timer)
@@ -177,8 +167,8 @@
           >
             <span class="me-2">{{ props.totalStations }}/10 stations present</span>
             <div
-              @mouseenter="trackEvent('cell_capacity_info', { ITEM_ID: 'info_cell_capacity' })"
-              @click="trackEvent('cell_capacity_info', { ITEM_ID: 'info_cell_capacity' })"
+              @mouseenter="trackGAevent('cell_capacity_info', { ITEM_ID: 'info_cell_capacity' })"
+              @click="trackGAevent('cell_capacity_info', { ITEM_ID: 'info_cell_capacity' })"
             >
               <TooltipComponent :message="infoTooltipText" :tooltip-title="infoTooltipTitle" />
             </div>
