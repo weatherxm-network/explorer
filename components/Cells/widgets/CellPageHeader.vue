@@ -153,7 +153,8 @@
           style="border-radius: 10px"
           color="successTint"
         >
-          {{ props.activeStations }} active station</VSheet
+          {{ props.activeStations }} active
+          {{ props.activeStations > 1 ? 'stations' : 'station' }}</VSheet
         >
 
         <div v-if="props.loading" style="min-width: 100px">
