@@ -34,15 +34,15 @@ const msToBeaufort = (windSpeedinMs: number) => {
 // <------------------------ Calc current weather ----------------------->
 export function calcCurrentWeather(deviceCurrentWeather: CurrentWeather, units: Units) {
   // init local vars
-  let temp = '-'
-  let feels_like = '-'
-  let precip = '-'
-  let press = '-'
-  let windSpeed = '-'
-  let windDir = '-'
-  let windGust = '_'
-  let precipAccum = '-'
-  let dewPoint = '-'
+  let temp = '?'
+  let feels_like = '?'
+  let precip = '?'
+  let press = '?'
+  let windSpeed = '?'
+  let windDir = '?'
+  let windGust = '?'
+  let precipAccum = '?'
+  let dewPoint = '?'
 
   if (!_.isEmpty(deviceCurrentWeather)) {
     // calculate temp & feels like & dewPoint based on unit
@@ -132,13 +132,13 @@ export function calcCurrentWeather(deviceCurrentWeather: CurrentWeather, units: 
       solarIrradiance:
         deviceCurrentWeather.solar_irradiance !== undefined
           ? deviceCurrentWeather.solar_irradiance.toFixed(1)
-          : '-',
+          : '?',
       timestamp:
-        deviceCurrentWeather.timestamp !== undefined ? deviceCurrentWeather.timestamp : '-',
+        deviceCurrentWeather.timestamp !== undefined ? deviceCurrentWeather.timestamp : '?',
       humidity:
         deviceCurrentWeather.humidity !== undefined
           ? deviceCurrentWeather.humidity.toFixed(0)
-          : '-',
+          : '?',
       uv:
         deviceCurrentWeather.uv_index !== undefined
           ? deviceCurrentWeather.uv_index.toFixed(0)
@@ -159,11 +159,11 @@ export function calcCurrentWeather(deviceCurrentWeather: CurrentWeather, units: 
       windGust,
       precipAccum,
       dewPoint,
-      solarIrradiance: '-',
-      timestamp: '-',
-      humidity: '-',
-      uv: '-',
-      time: '-',
+      solarIrradiance: '?',
+      timestamp: '?',
+      humidity: '?',
+      uv: '?',
+      time: '?',
       lottie: 'not_available'
     }
   }

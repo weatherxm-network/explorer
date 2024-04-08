@@ -92,7 +92,9 @@
   })
 
   const timestamp = computed(() => {
-    return dayjs(props.device.lastWeatherStationActivity).fromNow()
+    return props?.device?.lastWeatherStationActivity
+      ? dayjs(props.device.lastWeatherStationActivity).fromNow()
+      : '-'
   })
 
   const inActiveBorderStylesCard = computed(() => {
@@ -122,7 +124,7 @@
     <VCardTitle class="pa-0 pb-1">
       <!---------------------------- Device name ------------------------------->
       <VRow class="ma-0 pa-0 w-100 pb-2" :class="props.device.isActive ? 'px-0 pt-0' : 'px-5 pt-5'">
-        <div class="font-weight-bold text-primary" style="font-size: 1.108rem; font-weight: 700">
+        <div class="font-weight-bold text-primary" style="font-size: 1.108rem">
           {{ props.device.name }}
         </div>
       </VRow>
@@ -137,7 +139,7 @@
           <VSheet
             class="d-flex align-center px-2 py-2 text-text text-caption"
             color="blueTint"
-            style="border-radius: 10px; font-weight: 400"
+            style="border-radius: 10px"
           >
             <div class="text-body-1 d-flex align-center">
               <i class="fa-regular fa-hexagon"></i>
@@ -153,7 +155,7 @@
           <VSheet
             class="d-flex align-center px-2 py-1 text-caption"
             :color="calcTimestampSheetColor"
-            style="border-radius: 10px; font-weight: 400"
+            style="border-radius: 10px"
           >
             <div>
               <DeviceCardIcon :is-active="props.device.isActive" :profile="props.device.profile" />
