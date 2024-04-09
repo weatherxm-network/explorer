@@ -8,13 +8,13 @@
   import RewardsSheet from './widgets/RewardsSheet.vue'
   import ObservationsSheet from './widgets/ObservationsSheet.vue'
   import Forecast from './widgets/Forecast.vue'
-  import { getAddress } from '~/components/common/address'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
 
   dayjs.extend(relativeTime)
 
   const { trackGAevent } = useGAevents()
+  const { getAddress } = useAddress()
   const mobileStore = useMobileStore()
   const display = ref(useDisplay())
   const route = useRoute()

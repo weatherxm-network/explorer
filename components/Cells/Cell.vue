@@ -4,11 +4,11 @@
   import DeviceCard from './widgets/DeviceCard.vue'
   import { getCellDevices } from './utils/cells'
   import type { Device } from './types/cell'
-  import { getAddress } from '~/components/common/address'
   import LottieComponent from '~/components/common/LottieComponent.vue'
 
   const display = ref(useDisplay())
   const route = useRoute()
+  const { getAddress } = useAddress()
   const showCellsDevices = ref(true)
   const loading = ref(false)
   const boldText = ref('Oops! Something went wrong.')
