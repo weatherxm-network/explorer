@@ -17,7 +17,7 @@
   const { trackGAevent } = useGAevents()
   const { selectValidationColor } = useValidationScoreColor()
   const deviceTimezone = dayjs.tz.guess()
-  const fromDate = dayjs().tz(deviceTimezone).subtract(1095, 'days').format('YYYY-MM-DD')
+  const fromDate = dayjs().tz(deviceTimezone).subtract(3, 'months').format('YYYY-MM-DD')
   const toDate = dayjs().tz(deviceTimezone).format('YYYY-MM-DD')
   const deviceId = ref<string | null>('')
   const pageSize = 10
