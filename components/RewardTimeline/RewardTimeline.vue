@@ -7,6 +7,7 @@
   import DailyRewards from '../common/DailyRewards.vue'
   import EmptyRewards from '../common/EmptyRewards.vue'
   import HeaderCard from './widgets/HeaderCard.vue'
+  import EndOfTimeline from './widgets/EndOfTimeline.vue'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
 
@@ -144,7 +145,7 @@
               }
             })
             timeline.value.push(...calcedResponseData)
-          } else {
+          } else if (response.data.length === 0 && timeline.value.length === 0) {
             emptyStateFlag.value = true
           }
           loading.value = false
@@ -168,7 +169,7 @@
       <HeaderCard @back-to-device-details="backToDeviceDetails" />
     </VCardTitle>
     <VCardText class="ma-0 pa-0">
-      <div v-if="emptyStateFlag && !loading" class="pa-6">
+      <div v-if="emptyStateFlag && !loading" class="pa-2">
         <EmptyRewards />
       </div>
 
@@ -241,7 +242,7 @@
                 />
               </template>
               <template #empty>
-                <span></span>
+                <EndOfTimeline />
               </template>
               <template #loading>
                 <VProgressCircular indeterminate color="primary" class="mt-4" />
