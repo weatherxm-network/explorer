@@ -7,7 +7,6 @@
   import units from '../../Mapbox/widgets/SettingsUtils/units'
   import type { Device } from '../types/device'
   import DetailsCardMeasurement from './DetailsCardMeasurement.vue'
-  import { calcCurrentWeather } from '~/components/common/weatherStuff'
   import index from '~/assets/animations/index'
   import { useSettingsStore } from '~/stores/settingsStore'
 
@@ -48,6 +47,7 @@
 
   const emits = defineEmits(['openWindow'])
   const { trackGAevent } = useGAevents()
+  const { calcCurrentWeather } = useWeatherStuff()
   const settingsStore = useSettingsStore()
   const currentUnits = ref(units.calcUnits())
 

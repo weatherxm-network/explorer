@@ -1,6 +1,7 @@
 import _ from 'lodash'
-import { getAddress } from '~/components/common/address'
 import api from '~/api/wxmApi'
+
+const { getAddress } = useAddress()
 
 interface CurrentWeather {
   dew_point: number

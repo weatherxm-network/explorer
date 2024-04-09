@@ -2,7 +2,6 @@
   import { useClipboard, useShare } from '@vueuse/core'
   import { useDisplay, useTheme } from 'vuetify'
   import TooltipComponent from '~/components/common/TooltipComponent.vue'
-  import { getAddress } from '~/components/common/address'
   import { useMobileStore } from '~/stores/mobileStore'
 
   interface Props {
@@ -17,6 +16,7 @@
     loading: true
   })
   const { trackGAevent } = useGAevents()
+  const { getAddress } = useAddress()
   const mobileStore = useMobileStore()
   const route = useRoute()
   const cellAddress = ref('')

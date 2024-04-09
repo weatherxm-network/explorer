@@ -8,7 +8,6 @@
   import type { Device } from '../types/cell'
   import DeviceCardStateActive from './DeviceCardStateActive.vue'
   import DeviceCardStateInActive from './DeviceCardStateInActive.vue'
-  import { calcCurrentWeather } from '~/components/common/weatherStuff'
   import { useSettingsStore } from '~/stores/settingsStore'
 
   dayjs.extend(relativeTime)
@@ -51,6 +50,7 @@
     })
   })
 
+  const { calcCurrentWeather } = useWeatherStuff()
   const isHovering = ref(2)
   const theme = useTheme()
   const settingsStore = useSettingsStore()
