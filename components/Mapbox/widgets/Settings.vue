@@ -434,7 +434,7 @@
                 color="darkGrey"
                 base-color="darkGrey"
                 bg-color="layer1"
-                @change="setUnits"
+                @update:model-value="setUnits"
               ></VSelect>
             </div>
           </div>
