@@ -4,6 +4,7 @@
   import dayjs from 'dayjs'
   import LottieComponent from '../common/LottieComponent.vue'
   import NoInternetComponent from '../common/NoInternetComponent.vue'
+  import MainnetBanner from '../Device/widgets/RewardsWidgets/MainnetBanner.vue'
   import CardHeader from './widgets/CardHeader.vue'
   import MobileHeader from './widgets/MobileHeader.vue'
   import DataDays from './widgets/DataDays.vue'
@@ -32,6 +33,12 @@
     'Server busy, site may have moved or you lost your dial-up Internet connection'
   )
 
+  // mainnet banner vars
+  const { fetchRemoteConfig } = useFirebase()
+  // const { trackGAevent } = useGAevents()
+  const remoteConfig = await fetchRemoteConfig()
+  // const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
+  const mainnetShowFlag = true
   // data days vars
   let dataDaysChartData = reactive([])
   let dataDaysLastAndProgress = reactive({ lastValue: '0', progress: '0' })
@@ -206,7 +213,11 @@
             />
           </div>
 
-          <div v-if="!loading && !showNoInternetComponent" class="pa-4">
+          <div
+            v-if="!loading && !showNoInternetComponent"
+            :class="display.smAndDown ? `pa-5` : `pa-4`"
+          >
+            <MainnetBanner v-if="mainnetShowFlag"></MainnetBanner>
             <!-------- Data days -------->
             <DataDays
               :data-days-chart-data="dataDaysChartData"

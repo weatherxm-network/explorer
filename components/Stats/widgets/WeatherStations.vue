@@ -110,12 +110,19 @@
 </script>
 
 <template>
-  <VSheet color="top" style="border-radius: 16px" class="pb-2" elevation="4">
-    <VRow class="px-5 pt-3 pb-3 ma-0 align-center justify-space-between">
-      <div class="text-body-1" style="font-weight: 700">{{ weatherStationsCardTitle }}</div>
+  <VSheet
+    color="top"
+    style="border-radius: 16px"
+    elevation="4"
+    :class="display.smAndDown ? ` pa-2 mb-3` : ` pa-2 mb-4`"
+  >
+    <VRow class="px-2 mb-3 ma-0 pt-1 align-center justify-space-between">
+      <div class="text-body-1" style="font-weight: 700">
+        {{ weatherStationsCardTitle }}
+      </div>
     </VRow>
     <!----------  Total -------->
-    <VSheet class="mx-2 mb-2" color="layer1" style="border-radius: 8px">
+    <VSheet class="mb-2" color="layer1" style="border-radius: 8px">
       <VRow class="pa-0 ma-0 pb-3 pt-3 justify-space-between align-center">
         <div class="text-body-2 pl-3">{{ weatherStationsCardTotalSectionHeader }}</div>
         <div
@@ -184,7 +191,7 @@
       </VRow>
     </VSheet>
     <!----------  Claimed -------->
-    <VSheet class="mx-2 mb-2" color="layer1" style="border-radius: 8px">
+    <VSheet class="mb-2" color="layer1" style="border-radius: 8px">
       <VRow class="pa-0 ma-0 pb-3 pt-3 justify-space-between align-center">
         <div class="text-body-2 pl-3">{{ weatherStationsCardClaimedSectionHeader }}</div>
         <div
@@ -253,7 +260,7 @@
       </VRow>
     </VSheet>
     <!----------  Active -------->
-    <VSheet class="mx-2 mb-2" color="layer1" style="border-radius: 8px">
+    <VSheet color="layer1" style="border-radius: 8px">
       <VRow class="pa-0 ma-0 pb-3 pt-3 justify-space-between align-center">
         <div class="text-body-2 pl-3">{{ weatherStationsCardActiveSectionHeader }}</div>
         <div

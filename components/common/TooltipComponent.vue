@@ -86,7 +86,9 @@
       :style="overlayColor"
     >
       <template #activator="{ props }">
-        <i class="fa-light fa-circle-info" :class="'text-text pa-1'" v-bind="props" />
+        <span style="font-size: 12px">
+          <i class="fa-light fa-circle-info" :class="'text-text pa-1'" v-bind="props" />
+        </span>
       </template>
       <div class="pt-1 pb-1 px-1 text-caption" :class="getTheme ? 'text-text' : 'text-top'">
         <span v-html="props.message" />

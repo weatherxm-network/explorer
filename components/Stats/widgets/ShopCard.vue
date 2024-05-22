@@ -44,7 +44,12 @@
 </script>
 
 <template>
-  <VCard class="pa-0 ma-0 mb-4" style="border-radius: 16px" color="blueTint" elevation="4">
+  <VCard
+    :class="display.smAndDown ? `pa-0 ma-0 mb-3` : `pa-0 ma-0 mb-4`"
+    style="border-radius: 16px"
+    color="blueTint"
+    elevation="4"
+  >
     <VCardText class="pa-0 ma-0">
       <VRow class="ma-0 pa-0" align="center" justify="space-between">
         <VCol class="ma-0 pr-0 pt-2 pb-2 pl-4" cols="8">

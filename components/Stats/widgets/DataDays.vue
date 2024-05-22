@@ -49,9 +49,14 @@
 </script>
 
 <template>
-  <VSheet color="top" style="border-radius: 16px" class="mb-4" elevation="4">
-    <div class="pl-5 pt-3 pr-2 text-body-2 d-flex align-center justify-space-between">
-      <div style="font-size: 1.094rem; font-weight: 700" class="text-text">
+  <VSheet
+    color="top"
+    style="border-radius: 16px"
+    :class="display.smAndDown ? `mb-3` : `mb-4`"
+    elevation="4"
+  >
+    <div class="px-2 pt-2 text-body-2 d-flex align-center justify-space-between">
+      <div style="font-size: 1.094rem; font-weight: 700" class="text-text pl-2 pt-1">
         {{ weatherStationDaysCardTitle }}
       </div>
       <div
