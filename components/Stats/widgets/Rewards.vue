@@ -13,6 +13,7 @@
     }
     rewardsChartLabels?: string[]
     rewards30DaysTotal?: number
+    rewardsLastRunLink?: string
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -22,7 +23,8 @@
       progress: '0'
     }),
     rewardsChartLabels: () => [],
-    rewards30DaysTotal: 0
+    rewards30DaysTotal: 0,
+    rewardsLastRunLink: ''
   })
 
   const { trackGAevent } = useGAevents()
@@ -74,18 +76,18 @@
       </div>
     </div>
     <div
+      class="px-2 text-primary font-weight-black d-flex align-center"
+      style="cursor: pointer"
+      @click="
+        navigateTo(arbiscanAddress, { open: { target: '_blank' } }),
+          trackGAevent('click_on_reward_contract_link')
+      "
       @mouseenter="trackGAevent('click_on_reward_contract_link')"
-      @click="trackGAevent('click_on_reward_contract_link')"
     >
-      <div
-        class="px-2 text-primary font-weight-black d-flex align-center"
-        style="cursor: pointer"
-        @click="navigateTo(arbiscanAddress, { open: { target: '_blank' } })"
-      >
-        <span class="pl-2 pr-1">{{ rewardsSubtitleLinkText }}</span>
-        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-      </div>
+      <span class="pl-2 pr-1">{{ rewardsSubtitleLinkText }}</span>
+      <i class="fa-solid fa-arrow-up-right-from-square"></i>
     </div>
+
     <VRow class="ma-0 pa-0 pl-5 pt-6 d-flex pb-4 pr-7">
       <VCol class="ma-0 pa-0" cols="9">
         <VRow class="ma-0 pa-0">
@@ -136,27 +138,26 @@
         </VSheet>
       </VCol>
       <VCol class="pa-0 ma-0" cols="6">
-        <div
+        <VSheet
+          class="px-4 pb-3 pt-3 ma-0 ml-1"
+          color="layer1"
+          style="border-radius: 8px; cursor: pointer"
           @mouseenter="trackGAevent('click_on_reward_last_run')"
-          @click="trackGAevent('click_on_reward_last_run')"
+          @click="
+            trackGAevent('click_on_reward_last_run'),
+              navigateTo(props.rewardsLastRunLink, { open: { target: '_blank' } })
+          "
         >
-          <VSheet
-            class="px-4 pb-3 pt-3 ma-0 ml-1"
-            color="layer1"
-            style="border-radius: 8px; cursor: pointer"
-            @click="navigateTo('http://www.google.com', { open: { target: '_blank' } })"
-          >
-            <div class="d-flex justify-space-between align-center mb-4 text-caption">
-              <div class="tex-text">{{ rewardsCardLastRunText }}</div>
-              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          <div class="d-flex justify-space-between align-center mb-4 text-caption">
+            <div class="tex-text">{{ rewardsCardLastRunText }}</div>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </div>
+          <div :style="responsiveTextStyles">
+            <div class="text-rewardVeryHigh d-flex justify-start">
+              +{{ props.rewardsLastAndProgress.progress }}
             </div>
-            <div :style="responsiveTextStyles">
-              <div class="text-rewardVeryHigh d-flex justify-start">
-                +{{ props.rewardsLastAndProgress.progress }}
-              </div>
-            </div>
-          </VSheet>
-        </div>
+          </div>
+        </VSheet>
       </VCol>
     </VRow>
   </VSheet>

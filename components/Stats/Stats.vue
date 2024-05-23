@@ -35,10 +35,9 @@
 
   // mainnet banner vars
   const { fetchRemoteConfig } = useFirebase()
-  // const { trackGAevent } = useGAevents()
-  const remoteConfig = await fetchRemoteConfig()
+  // const remoteConfig = await fetchRemoteConfig()
   // const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
-  const mainnetShowFlag = true
+  const mainnetShowFlag = ref(true)
   // data days vars
   let dataDaysChartData = reactive([])
   let dataDaysLastAndProgress = reactive({ lastValue: '0', progress: '0' })
@@ -49,11 +48,13 @@
   let rewardsLastAndProgress = reactive({ lastValue: '0', progress: '0' })
   let rewardsChartLabels = reactive([])
   const rewards30DaysTotal = ref(0)
+  const rewardsLastRunLink = ref('')
   // shop card var
   const avgMonthly = ref(0)
   // wxm token vars
   const wxmTokenTotalSupply = ref(0)
   const wxmTokenDailyMinted = ref(0)
+  const wxmTokenCirculatingSupply = ref(0)
   // weather stations vars
   let weatherStationsOnboarded = reactive({})
   let weatherStationsClaimed = reactive({})
@@ -107,7 +108,8 @@
         rewardsChartLabels = calcChartLabels(response.tokens.allocated_per_day)
         // calc 30 days total
         rewards30DaysTotal.value = calc30DaysTotal(response.tokens.allocated_per_day)
-
+        // rewards last tx url
+        rewardsLastRunLink.value = `https://arbiscan.io/tx/${response.tokens.last_tx_hash}`
         // pass monthly avg tokens
         avgMonthly.value = response.tokens.avg_monthly
 
@@ -115,6 +117,8 @@
         wxmTokenTotalSupply.value = response.tokens.total_supply
         // pass daily minted
         wxmTokenDailyMinted.value = response.tokens.daily_minted
+        // pass circulating supply
+        wxmTokenCirculatingSupply.value = response.tokens.circulating_supply
 
         // pass weather station data
         weatherStationsOnboarded = response.weather_stations.onboarded
@@ -231,6 +235,7 @@
               :rewards-last-and-progress="rewardsLastAndProgress"
               :rewards-chart-labels="rewardsChartLabels"
               :rewards30-days-total="rewards30DaysTotal"
+              :rewardsLastRunLink="rewardsLastRunLink"
             />
             <!------ Shop card ------>
             <ShopCard :avg-monthly="avgMonthly" />
@@ -238,6 +243,7 @@
             <WXMToken
               :wxm-token-total-supply="wxmTokenTotalSupply"
               :wxm-token-daily-minted="wxmTokenDailyMinted"
+              :wxm-token-circulating-supply="wxmTokenCirculatingSupply"
             />
             <!-------------------- Weather station ------------------>
             <WeatherStations

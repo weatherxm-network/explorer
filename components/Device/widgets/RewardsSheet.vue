@@ -149,8 +149,7 @@
         loading.value = false
         showRewards.value = true
       })
-      .catch((e) => {
-        console.log(e)
+      .catch(() => {
         emit('loadingRewardsTab', false)
         loading.value = false
         showRewards.value = false

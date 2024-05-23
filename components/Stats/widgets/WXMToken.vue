@@ -6,13 +6,13 @@
   interface Props {
     wxmTokenTotalSupply?: number
     wxmTokenDailyMinted?: number
-    wxmTokenCirculatingProgressBar?: number
+    wxmTokenCirculatingSupply?: number
   }
 
   const props = withDefaults(defineProps<Props>(), {
     wxmTokenDailyMinted: 0,
     wxmTokenTotalSupply: 0,
-    wxmTokenCirculatingProgressBar: 15
+    wxmTokenCirculatingSupply: 0
   })
 
   const { trackGAevent } = useGAevents()
@@ -43,7 +43,7 @@
   })
 
   const circulatingPercentage = computed(() => {
-    return props.wxmTokenCirculatingProgressBar
+    return (props.wxmTokenCirculatingSupply / props.wxmTokenTotalSupply) * 100
   })
 
   const nFormat = (number: number) => {
@@ -66,19 +66,20 @@
         {{ wxmTokenCardTitle }}
       </div>
     </div>
+
     <div
+      class="mb-3 text-primary font-weight-black d-flex align-center"
+      style="cursor: pointer"
+      @click="
+        trackGAevent('click_on_token_contract_link'),
+          navigateTo(wxmTokenSubtitleLink, { open: { target: '_blank' } })
+      "
       @mouseenter="trackGAevent('click_on_token_contract_link')"
-      @click="trackGAevent('click_on_token_contract_link')"
     >
-      <div
-        class="mb-3 text-primary font-weight-black d-flex align-center"
-        style="cursor: pointer"
-        @click="navigateTo(wxmTokenSubtitleLink, { open: { target: '_blank' } })"
-      >
-        <span class="pl-2 pr-1">{{ wxmTokenSubtitleLinkText }}</span>
-        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-      </div>
+      <span class="pl-2 pr-1">{{ wxmTokenSubtitleLinkText }}</span>
+      <i class="fa-solid fa-arrow-up-right-from-square"></i>
     </div>
+
     <VRow class="px-0 pb-0 ma-0">
       <VCol class="pa-0 ma-0" cols="6">
         <VSheet class="px-4 pb-3 pt-3 ma-0 mr-1 h-100" color="layer1" style="border-radius: 8px">
@@ -114,7 +115,7 @@
             />
           </div>
           <div :style="responsiveTextStyles" class="mb-4">
-            {{ nFormat(props.wxmTokenDailyMinted) }}
+            {{ nFormat(props.wxmTokenCirculatingSupply) }}
           </div>
           <div>
             <v-progress-linear
