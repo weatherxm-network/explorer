@@ -69,15 +69,13 @@
 
     <div
       class="mb-3 text-primary font-weight-black d-flex align-center"
-      style="cursor: pointer"
-      @click="
-        trackGAevent('click_on_token_contract_link'),
-          navigateTo(wxmTokenSubtitleLink, { open: { target: '_blank' } })
-      "
+      @click="trackGAevent('click_on_token_contract_link')"
       @mouseenter="trackGAevent('click_on_token_contract_link')"
     >
-      <span class="pl-2 pr-1">{{ wxmTokenSubtitleLinkText }}</span>
-      <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      <a :href="wxmTokenSubtitleLink" target="_blank" class="text-decoration-none">
+        <span class="pl-2 pr-1">{{ wxmTokenSubtitleLinkText }}</span>
+        <i class="fa-solid fa-arrow-up-right-from-square"></i
+      ></a>
     </div>
 
     <VRow class="px-0 pb-0 ma-0">

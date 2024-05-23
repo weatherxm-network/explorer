@@ -77,15 +77,13 @@
     </div>
     <div
       class="px-2 text-primary font-weight-black d-flex align-center"
-      style="cursor: pointer"
-      @click="
-        navigateTo(arbiscanAddress, { open: { target: '_blank' } }),
-          trackGAevent('click_on_reward_contract_link')
-      "
+      @click="trackGAevent('click_on_reward_contract_link')"
       @mouseenter="trackGAevent('click_on_reward_contract_link')"
     >
-      <span class="pl-2 pr-1">{{ rewardsSubtitleLinkText }}</span>
-      <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      <a :href="arbiscanAddress" target="_blank" class="text-decoration-none">
+        <span class="pl-2 pr-1">{{ rewardsSubtitleLinkText }}</span>
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      </a>
     </div>
 
     <VRow class="ma-0 pa-0 pl-5 pt-6 d-flex pb-4 pr-7">
@@ -138,26 +136,25 @@
         </VSheet>
       </VCol>
       <VCol class="pa-0 ma-0" cols="6">
-        <VSheet
-          class="px-4 pb-3 pt-3 ma-0 ml-1"
-          color="layer1"
-          style="border-radius: 8px; cursor: pointer"
-          @mouseenter="trackGAevent('click_on_reward_last_run')"
-          @click="
-            trackGAevent('click_on_reward_last_run'),
-              navigateTo(props.rewardsLastRunLink, { open: { target: '_blank' } })
-          "
-        >
-          <div class="d-flex justify-space-between align-center mb-4 text-caption">
-            <div class="tex-text">{{ rewardsCardLastRunText }}</div>
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          </div>
-          <div :style="responsiveTextStyles">
-            <div class="text-rewardVeryHigh d-flex justify-start">
-              +{{ props.rewardsLastAndProgress.progress }}
+        <a :href="props.rewardsLastRunLink" target="_blank" class="text-decoration-none">
+          <VSheet
+            class="px-4 pb-3 pt-3 ma-0 ml-1"
+            color="layer1"
+            style="border-radius: 8px"
+            @mouseenter="trackGAevent('click_on_reward_last_run')"
+            @click="trackGAevent('click_on_reward_last_run')"
+          >
+            <div class="d-flex justify-space-between align-center mb-4 text-caption">
+              <div class="tex-text">{{ rewardsCardLastRunText }}</div>
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
             </div>
-          </div>
-        </VSheet>
+            <div :style="responsiveTextStyles">
+              <div class="text-rewardVeryHigh d-flex justify-start">
+                +{{ props.rewardsLastAndProgress.progress }}
+              </div>
+            </div>
+          </VSheet>
+        </a>
       </VCol>
     </VRow>
   </VSheet>
