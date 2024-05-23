@@ -112,7 +112,7 @@
         rewardsLastRunLink.value = `https://arbiscan.io/tx/${response.tokens.last_tx_hash}`
         // pass monthly avg tokens
         avgMonthly.value = response.tokens.avg_monthly
-
+        console.log(response)
         // pass total supply
         wxmTokenTotalSupply.value = response.tokens.total_supply
         // pass daily minted

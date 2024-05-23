@@ -24,7 +24,7 @@
   const wxmTokenCardCirculatingText = ref('CIRCULATING SUPPLY')
   const wxmTokenSubtitleLinkText = ref('View token contract on Etherscan')
   const wxmTokenSubtitleLink = ref(
-    'https://etherscan.io/token/0xde654f497a563dd7a121c176a125dd2f11f13a83s'
+    'https://etherscan.io/token/0xde654f497a563dd7a121c176a125dd2f11f13a83'
   )
 
   const wxmTokenCardTotalSupplyTooltipTitle = ref('Total Supply')
