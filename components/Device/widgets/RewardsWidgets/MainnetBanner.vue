@@ -1,5 +1,4 @@
 <script setup lang="ts">
-  import { options } from 'joi'
   import { useTheme, useDisplay } from 'vuetify'
   import bannerBackground from '~/assets/bannerBackground.jpeg'
 
