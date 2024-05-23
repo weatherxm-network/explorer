@@ -39,7 +39,6 @@
   // const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
   const mainnetShowFlag = ref(true)
   const arbiscanRemoteDomain = ref<string>(remoteConfig.explorer_web_arbiscan_base_url._value)
-  console.log(arbiscanRemoteDomain.value)
   // data days vars
   let dataDaysChartData = reactive([])
   let dataDaysLastAndProgress = reactive({ lastValue: '0', progress: '0' })
@@ -114,7 +113,6 @@
         rewardsLastRunLink.value = `${arbiscanRemoteDomain.value}${response.tokens.last_tx_hash}`
         // pass monthly avg tokens
         avgMonthly.value = response.tokens.avg_monthly
-        console.log(response)
         // pass total supply
         wxmTokenTotalSupply.value = response.tokens.total_supply
         // pass daily minted
