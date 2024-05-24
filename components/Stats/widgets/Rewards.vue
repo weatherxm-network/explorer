@@ -13,7 +13,8 @@
     }
     rewardsChartLabels?: string[]
     rewards30DaysTotal?: number
-    rewardsLastRunLink?: string
+    rewardsLastRunUrl?: string
+    rewardsContractUrl?: string
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -24,7 +25,8 @@
     }),
     rewardsChartLabels: () => [],
     rewards30DaysTotal: 0,
-    rewardsLastRunLink: ''
+    rewardsLastRunUrl: '',
+    rewardsContractUrl: ''
   })
 
   const { trackGAevent } = useGAevents()
@@ -34,9 +36,6 @@
   const rewardsCardTotalText = ref('TOTAL')
   const rewardsCardLastRunText = ref('LAST RUN')
   const rewardsSubtitleLinkText = ref('View rewards contract on Arbiscan')
-  const arbiscanAddress = ref(
-    'https://arbiscan.io/address/0x3d5aA83d830398ad93fBAF98ee7079278b9DCD49'
-  )
   const tottalAllocatedRewardsMessage = ref(
     'Station owners are rewarded in $WXM for providing data to the WeatherXM Network.'
   )
@@ -80,7 +79,7 @@
       @click="trackGAevent('click_on_reward_contract_link')"
       @mouseenter="trackGAevent('click_on_reward_contract_link')"
     >
-      <a :href="arbiscanAddress" target="_blank" class="text-decoration-none">
+      <a :href="props.rewardsContractUrl" target="_blank" class="text-decoration-none">
         <span class="pl-2 pr-1">{{ rewardsSubtitleLinkText }}</span>
         <i class="fa-solid fa-arrow-up-right-from-square"></i>
       </a>
@@ -136,7 +135,7 @@
         </VSheet>
       </VCol>
       <VCol class="pa-0 ma-0" cols="6">
-        <a :href="props.rewardsLastRunLink" target="_blank" class="text-decoration-none">
+        <a :href="props.rewardsLastRunUrl" target="_blank" class="text-decoration-none">
           <VSheet
             class="px-4 pb-3 pt-3 ma-0 ml-1"
             color="layer1"

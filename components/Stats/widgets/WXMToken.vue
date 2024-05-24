@@ -7,12 +7,14 @@
     wxmTokenTotalSupply?: number
     wxmTokenDailyMinted?: number
     wxmTokenCirculatingSupply?: number
+    wxmTokenContractUrl?: string
   }
 
   const props = withDefaults(defineProps<Props>(), {
     wxmTokenDailyMinted: 0,
     wxmTokenTotalSupply: 0,
-    wxmTokenCirculatingSupply: 0
+    wxmTokenCirculatingSupply: 0,
+    wxmTokenContractUrl: ''
   })
 
   const { trackGAevent } = useGAevents()
@@ -23,9 +25,6 @@
   const wxmTokenCardTotalText = ref('TOTAL SUPPLY')
   const wxmTokenCardCirculatingText = ref('CIRCULATING SUPPLY')
   const wxmTokenSubtitleLinkText = ref('View token contract on Etherscan')
-  const wxmTokenSubtitleLink = ref(
-    'https://etherscan.io/token/0xde654f497a563dd7a121c176a125dd2f11f13a83'
-  )
 
   const wxmTokenCardTotalSupplyTooltipTitle = ref('Total Supply')
   const wxmTokenCardTotalSupplyTooltipText = ref(
@@ -72,7 +71,7 @@
       @click="trackGAevent('click_on_token_contract_link')"
       @mouseenter="trackGAevent('click_on_token_contract_link')"
     >
-      <a :href="wxmTokenSubtitleLink" target="_blank" class="text-decoration-none">
+      <a :href="props.wxmTokenContractUrl" target="_blank" class="text-decoration-none">
         <span class="pl-2 pr-1">{{ wxmTokenSubtitleLinkText }}</span>
         <i class="fa-solid fa-arrow-up-right-from-square"></i
       ></a>
