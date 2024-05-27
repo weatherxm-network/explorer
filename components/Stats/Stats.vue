@@ -36,8 +36,7 @@
   // mainnet banner vars
   const { fetchRemoteConfig } = useFirebase()
   const remoteConfig = await fetchRemoteConfig()
-  // const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
-  const mainnetShowFlag = ref(true)
+  const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
   // data days vars
   let dataDaysChartData = reactive([])
   let dataDaysLastAndProgress = reactive({ lastValue: '0', progress: '0' })
