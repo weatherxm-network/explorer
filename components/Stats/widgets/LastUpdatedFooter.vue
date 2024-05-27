@@ -28,7 +28,7 @@
 
 <template>
   <div
-    class="text-subtitle-2 text-right pt-4 text-text"
+    class="text-subtitle-2 text-right text-text"
     style="font-weight: 100; font-style: normal; line-height: 21px"
   >
     {{ calcedLastUpdated }}

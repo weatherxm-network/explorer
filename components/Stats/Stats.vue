@@ -4,6 +4,7 @@
   import dayjs from 'dayjs'
   import LottieComponent from '../common/LottieComponent.vue'
   import NoInternetComponent from '../common/NoInternetComponent.vue'
+  import MainnetBanner from '../Device/widgets/RewardsWidgets/MainnetBanner.vue'
   import CardHeader from './widgets/CardHeader.vue'
   import MobileHeader from './widgets/MobileHeader.vue'
   import DataDays from './widgets/DataDays.vue'
@@ -32,6 +33,10 @@
     'Server busy, site may have moved or you lost your dial-up Internet connection'
   )
 
+  // mainnet banner vars
+  const { fetchRemoteConfig } = useFirebase()
+  const remoteConfig = await fetchRemoteConfig()
+  const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
   // data days vars
   let dataDaysChartData = reactive([])
   let dataDaysLastAndProgress = reactive({ lastValue: '0', progress: '0' })
@@ -42,11 +47,15 @@
   let rewardsLastAndProgress = reactive({ lastValue: '0', progress: '0' })
   let rewardsChartLabels = reactive([])
   const rewards30DaysTotal = ref(0)
+  const rewardsLastRunUrl = ref('')
+  const rewardsContractUrl = ref('')
   // shop card var
   const avgMonthly = ref(0)
   // wxm token vars
   const wxmTokenTotalSupply = ref(0)
   const wxmTokenDailyMinted = ref(0)
+  const wxmTokenCirculatingSupply = ref(0)
+  const wxmTokenContractUrl = ref('')
   // weather stations vars
   let weatherStationsOnboarded = reactive({})
   let weatherStationsClaimed = reactive({})
@@ -100,15 +109,20 @@
         rewardsChartLabels = calcChartLabels(response.tokens.allocated_per_day)
         // calc 30 days total
         rewards30DaysTotal.value = calc30DaysTotal(response.tokens.allocated_per_day)
-
+        // pass rewards last tx url
+        rewardsLastRunUrl.value = response.tokens.last_tx_hash_url
+        // pass rewards contract url
+        rewardsContractUrl.value = response.contracts.rewards_url
         // pass monthly avg tokens
         avgMonthly.value = response.tokens.avg_monthly
-
         // pass total supply
         wxmTokenTotalSupply.value = response.tokens.total_supply
         // pass daily minted
         wxmTokenDailyMinted.value = response.tokens.daily_minted
-
+        // pass circulating supply
+        wxmTokenCirculatingSupply.value = response.tokens.circulating_supply
+        // pass wxmToken contract url
+        wxmTokenContractUrl.value = response.contracts.token_url
         // pass weather station data
         weatherStationsOnboarded = response.weather_stations.onboarded
         weatherStationsClaimed = response.weather_stations.claimed
@@ -206,7 +220,11 @@
             />
           </div>
 
-          <div v-if="!loading && !showNoInternetComponent" class="pa-4">
+          <div
+            v-if="!loading && !showNoInternetComponent"
+            :class="display.smAndDown ? `pa-5` : `pa-4`"
+          >
+            <MainnetBanner v-if="mainnetShowFlag"></MainnetBanner>
             <!-------- Data days -------->
             <DataDays
               :data-days-chart-data="dataDaysChartData"
@@ -220,6 +238,8 @@
               :rewards-last-and-progress="rewardsLastAndProgress"
               :rewards-chart-labels="rewardsChartLabels"
               :rewards30-days-total="rewards30DaysTotal"
+              :rewards-last-run-url="rewardsLastRunUrl"
+              :rewards-contract-url="rewardsContractUrl"
             />
             <!------ Shop card ------>
             <ShopCard :avg-monthly="avgMonthly" />
@@ -227,6 +247,8 @@
             <WXMToken
               :wxm-token-total-supply="wxmTokenTotalSupply"
               :wxm-token-daily-minted="wxmTokenDailyMinted"
+              :wxm-token-circulating-supply="wxmTokenCirculatingSupply"
+              :wxm-token-contract-url="wxmTokenContractUrl"
             />
             <!-------------------- Weather station ------------------>
             <WeatherStations

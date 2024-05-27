@@ -13,6 +13,8 @@
     }
     rewardsChartLabels?: string[]
     rewards30DaysTotal?: number
+    rewardsLastRunUrl?: string
+    rewardsContractUrl?: string
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -22,7 +24,9 @@
       progress: '0'
     }),
     rewardsChartLabels: () => [],
-    rewards30DaysTotal: 0
+    rewards30DaysTotal: 0,
+    rewardsLastRunUrl: '',
+    rewardsContractUrl: ''
   })
 
   const { trackGAevent } = useGAevents()
@@ -31,7 +35,7 @@
   const rewardsCardLast30DaysText = ref('Last 30 Days')
   const rewardsCardTotalText = ref('TOTAL')
   const rewardsCardLastRunText = ref('LAST RUN')
-
+  const rewardsSubtitleLinkText = ref('View rewards contract on Arbiscan')
   const tottalAllocatedRewardsMessage = ref(
     'Station owners are rewarded in $WXM for providing data to the WeatherXM Network.'
   )
@@ -49,9 +53,14 @@
 </script>
 
 <template>
-  <VSheet color="top" style="border-radius: 16px" class="mb-4" elevation="4">
-    <div class="pl-5 pt-3 pr-2 text-body-2 d-flex align-center justify-space-between">
-      <div style="font-size: 1.094rem; font-weight: 700" class="text-text">
+  <VSheet
+    color="top"
+    style="border-radius: 16px"
+    :class="display.smAndDown ? `mb-3` : `mb-4`"
+    elevation="4"
+  >
+    <div class="pl-2 pt-2 pr-2 mb-2 text-body-2 d-flex align-center justify-space-between">
+      <div style="font-size: 1.094rem; font-weight: 700" class="text-text pl-2 pt-1">
         {{ rewardsCardTitle }}
       </div>
       <div
@@ -65,6 +74,17 @@
         />
       </div>
     </div>
+    <div
+      class="px-2 text-primary font-weight-black d-flex align-center"
+      @click="trackGAevent('click_on_reward_contract_link')"
+      @mouseenter="trackGAevent('click_on_reward_contract_link')"
+    >
+      <a :href="props.rewardsContractUrl" target="_blank" class="text-decoration-none">
+        <span class="pl-2 pr-1">{{ rewardsSubtitleLinkText }}</span>
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      </a>
+    </div>
+
     <VRow class="ma-0 pa-0 pl-5 pt-6 d-flex pb-4 pr-7">
       <VCol class="ma-0 pa-0" cols="9">
         <VRow class="ma-0 pa-0">
@@ -115,16 +135,25 @@
         </VSheet>
       </VCol>
       <VCol class="pa-0 ma-0" cols="6">
-        <VSheet class="px-4 pb-3 pt-3 ma-0 ml-1" color="layer1" style="border-radius: 8px">
-          <div class="d-flex justify-space-between align-center mb-4">
-            <div class="tex-text text-caption">{{ rewardsCardLastRunText }}</div>
-          </div>
-          <div :style="responsiveTextStyles">
-            <div class="text-rewardVeryHigh d-flex justify-start">
-              +{{ props.rewardsLastAndProgress.progress }}
+        <a :href="props.rewardsLastRunUrl" target="_blank" class="text-decoration-none">
+          <VSheet
+            class="px-4 pb-3 pt-3 ma-0 ml-1"
+            color="layer1"
+            style="border-radius: 8px"
+            @mouseenter="trackGAevent('click_on_reward_last_run')"
+            @click="trackGAevent('click_on_reward_last_run')"
+          >
+            <div class="d-flex justify-space-between align-center mb-4 text-caption">
+              <div class="tex-text">{{ rewardsCardLastRunText }}</div>
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
             </div>
-          </div>
-        </VSheet>
+            <div :style="responsiveTextStyles">
+              <div class="text-rewardVeryHigh d-flex justify-start">
+                +{{ props.rewardsLastAndProgress.progress }}
+              </div>
+            </div>
+          </VSheet>
+        </a>
       </VCol>
     </VRow>
   </VSheet>

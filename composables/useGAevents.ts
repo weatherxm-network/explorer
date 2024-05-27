@@ -127,6 +127,30 @@ export const useGAevents = () => {
       parameters: {
         ACTION_NAME: 'Device Observations Download Button '
       }
+    },
+    {
+      eventKey: 'click_on_reward_contract_link',
+      eventName: 'SELECT_CONTENT',
+      parameters: {
+        CONTENT_TYPE: 'Network Stats',
+        SOURCE: 'reward_contract'
+      }
+    },
+    {
+      eventKey: 'click_on_token_contract_link',
+      eventName: 'SELECT_CONTENT',
+      parameters: {
+        CONTENT_TYPE: 'Network Stats',
+        SOURCE: 'token_contract'
+      }
+    },
+    {
+      eventKey: 'click_on_reward_last_run',
+      eventName: 'SELECT_CONTENT',
+      parameters: {
+        CONTENT_TYPE: 'Network Stats',
+        SOURCE: 'last_run_hash'
+      }
     }
   ]
 

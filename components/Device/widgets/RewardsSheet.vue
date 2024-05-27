@@ -51,7 +51,6 @@
   const { trackGAevent } = useGAevents()
   const remoteConfig = await fetchRemoteConfig()
   const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
-  const mainnetBannerText = ref<string>(`${remoteConfig.feat_mainnet_message._value}`)
   const loading = ref(false)
   // rewards stuff
   const totalStationRewards = ref('')
@@ -150,8 +149,7 @@
         loading.value = false
         showRewards.value = true
       })
-      .catch((e) => {
-        console.log(e)
+      .catch(() => {
         emit('loadingRewardsTab', false)
         loading.value = false
         showRewards.value = false
@@ -168,7 +166,9 @@
 <template>
   <div>
     <div class="py-5 px-2 pt-0">
-      <MainnetBanner v-if="mainnetShowFlag" :text="mainnetBannerText"></MainnetBanner>
+      <div class="mx-2 mt-2">
+        <MainnetBanner v-if="mainnetShowFlag"></MainnetBanner>
+      </div>
       <EmptyRewards v-if="emptyStateFlag && !loading" />
       <TotalStationRewards
         v-if="!emptyStateFlag && !loading && showRewards"
