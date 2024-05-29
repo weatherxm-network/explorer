@@ -98,10 +98,13 @@
         dataDays30DaysTotal.value = calc30DaysTotal(response.data_days)
         // calc chart data
         const arrayLength = response.tokens.allocated_per_day.length
-        response.tokens.allocated_per_day[arrayLength - 1].value ===
-        response.tokens.allocated_per_day[arrayLength - 2].value
-          ? response.tokens.allocated_per_day.splice(-1, 1)
-          : response.tokens.allocated_per_day
+        if (
+          arrayLength >= 2 &&
+          response.tokens.allocated_per_day[arrayLength - 1].value ===
+            response.tokens.allocated_per_day[arrayLength - 2].value
+        ) {
+          response.tokens.allocated_per_day.splice(-1, 1)
+        }
         rewardsChartData = calcLineChartData(response.tokens.allocated_per_day)
         // calc last and progress
         rewardsLastAndProgress = calcLastAndProgress(response.tokens.allocated_per_day)
@@ -153,23 +156,41 @@
   }
 
   const calcLastAndProgress = (array: LineChartData[]) => {
-    // get last & second to last values
-    const lastDay = array[array.length - 1].value
-    const secondToLast = array[array.length - 2].value
+    try {
+      // get last & second to last values
+      const lastDay = array[array.length - 1].value
+      const secondToLast = array[array.length - 2].value
 
-    // format numbers
-    return {
-      lastValue: numberFormater.nFormatter(lastDay),
-      progress: numberFormater.nFormatter(lastDay - secondToLast)
+      // format numbers
+      return {
+        lastValue: numberFormater.nFormatter(lastDay),
+        progress: numberFormater.nFormatter(lastDay - secondToLast)
+      }
+    } catch (err) {
+      return {
+        lastValue: 0,
+        progress: 0
+      }
     }
   }
 
   const calcChartLabels = (array: LineChartData[]) => {
-    return [dayjs(array[0].ts).format('MMM DD'), dayjs(array[array.length - 1].ts).format('MMM DD')]
+    try {
+      return [
+        dayjs(array[0].ts).format('MMM DD'),
+        dayjs(array[array.length - 1].ts).format('MMM DD')
+      ]
+    } catch (err) {
+      return 0
+    }
   }
 
   const calc30DaysTotal = (array: LineChartData[]) => {
-    return array[array.length - 1].value - array[0].value
+    try {
+      return array[array.length - 1].value - array[0].value
+    } catch (err) {
+      return 0
+    }
   }
 
   const reloadComponent = () => {
