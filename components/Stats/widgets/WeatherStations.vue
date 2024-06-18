@@ -101,7 +101,7 @@
   })
 
   const calcProgressBarPercentage = (percentage: number) => {
-    return percentage.toFixed(2) * 100
+    return (percentage * 100).toFixed(0)
   }
 
   const localizeNumber = (number: number) => {
