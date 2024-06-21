@@ -8,6 +8,9 @@ dist
 # Node dependencies
 node_modules
 
+# package manager
+.yarn/*
+
 # Logs
 logs
 *.log
