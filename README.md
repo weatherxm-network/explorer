@@ -8,6 +8,13 @@ We use **[GitHub Flow](https://githubflow.github.io/)** as our branching model.
 
 All contributors could use any IDE platform or code editor they want as long as they use the appropriate linter ([eslint](https://eslint.org)) and code formatter ([prettier](https://prettier.io)) as their config files exist inside the project's root folder.
 
+## Suggestions
+
+This project uses `yarn@4.3.0` as it's package manager.
+The respective field is delcared in the `package.json`.
+This can be an issue for lean or old `Node.js` installation that don't have corepack.
+So it is suggested to run this project under `node v18+` and `yarn@4.3.x`
+
 # Building
 
 To build the app from source, you need to create a `.env` file in the root directory, according to the `.env.template` and make sure to fill in all the required variables. Then, install all the required dependencies by running one of the following commands:
