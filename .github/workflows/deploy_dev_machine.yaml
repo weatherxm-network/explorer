@@ -3,10 +3,11 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - "staging"
+      - 'staging'
 jobs:
   build:
     runs-on: [self-hosted]
+    environment: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v3
       - name: Prepare environment
