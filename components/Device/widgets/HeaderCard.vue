@@ -3,12 +3,13 @@
   import { computed, toRef } from 'vue'
   import { useTheme } from 'vuetify'
   import DeviceCardIcon from '../../common/DeviceCardIcon.vue'
+  import type { Device } from '../types/device'
 
   interface Props {
     deviceName?: string
     deviceAddress?: string
     timestamp?: string
-    deviceProfile?: string
+    deviceProfile?: Device['profile']
     isActive?: boolean
     backTo?: string
     windowValue?: number
@@ -25,7 +26,7 @@
     backTo: 'stats',
     windowValue: 0,
     loading: true,
-    loadingRewardsTab: false
+    loadingRewardsTab: false,
   })
 
   const emits = defineEmits(['openWindow', 'backToCell'])
@@ -54,7 +55,7 @@
       share({
         title: 'WeatherXM',
         text: 'Check out this WeatherXM station',
-        url: constructedDeviceUrl.value
+        url: constructedDeviceUrl.value,
       })
     } else {
       copy(constructedDeviceUrl.value)
@@ -79,31 +80,18 @@
 
   const overlayColor = computed(() => {
     return {
-      '--background-color': theme.themes.value.dark.colors.background
+      '--background-color': theme.themes.value.dark.colors.background,
     }
   })
   const getTheme = computed(() => {
     return theme.global.name.value === 'dark'
   })
 
-  const calcTimestampSheetColor = computed(() => {
-    if (theme.global.name.value === 'dark') {
-      return 'blueTint'
-    } else if (props.isActive) {
-      return 'successTint'
+  const calcTimestampBulletColor = computed(() => {
+    if (props.isActive) {
+      return 'bg-success'
     } else {
-      return 'errorTint'
-    }
-  })
-  const calcTimestampTextColor = computed(() => {
-    if (theme.global.name.value === 'dark') {
-      if (props.isActive) {
-        return 'text-success'
-      } else {
-        return 'text-error'
-      }
-    } else {
-      return 'text-text'
+      return 'bg-error'
     }
   })
 </script>
@@ -113,7 +101,11 @@
     <VCardTitle class="ma-0 pt-4 pb-0 px-4">
       <div class="d-flex align-center justify-space-between">
         <div class="d-flex align-center">
-          <i class="fa fa-arrow-left text-primary" style="cursor: pointer" @click="backToCell"></i>
+          <i
+            class="fa fa-arrow-left text-primary"
+            style="cursor: pointer"
+            @click="backToCell"
+          ></i>
         </div>
         <div>
           <div v-if="!isSupported">
@@ -155,7 +147,11 @@
         <!---------------------------- Device name ------------------------------->
         <VRow class="ma-0 pa-0 w-100">
           <VCol class="ma-0 pa-0">
-            <v-skeleton-loader v-if="loading" type="text" height="32"></v-skeleton-loader>
+            <v-skeleton-loader
+              v-if="loading"
+              type="text"
+              height="32"
+            ></v-skeleton-loader>
             <div
               v-else
               class="font-weight-bold text-primary"
@@ -168,44 +164,56 @@
 
         <!---------------------------- Address ------------------------------->
 
-        <VRow class="pa-0 ma-0 pt-2" no-gutters style="flex-wrap: nowrap">
-          <div
-            style="min-width: 100px"
-            class="flex-shrink-1"
-            :class="!loading ? 'flex-grow-0' : 'flex-grow-1'"
-          >
-            <v-skeleton-loader v-if="loading" type="chip,chip"></v-skeleton-loader>
-            <div v-else style="min-width: 100px" class="flex-shrink-1 flex-grow-0">
-              <VSheet
-                class="d-flex align-center px-2 py-2 text-text text-caption"
-                color="blueTint"
-                style="border-radius: 10px; font-weight: 400"
-              >
-                <div class="text-body-1 d-flex align-center">
-                  <i class="fa-regular fa-hexagon"></i>
-                </div>
-
-                <span class="pl-3 text-truncate">
-                  {{ deviceAddress }}
-                </span>
-              </VSheet>
-            </div>
-          </div>
-          <v-skeleton-loader v-if="loading" type=""></v-skeleton-loader>
-          <VCol v-else cols="auto" class="flex-grow-0 flex-shrink-1 pl-2">
+        <VRow class="pa-0 ma-0 pt-2 ga-2" no-gutters style="flex-wrap: nowrap">
+          <VCol cols="auto" class="flex-grow-0 flex-shrink-1">
             <VSheet
-              class="d-flex align-center px-2 py-1 text-caption"
-              :color="calcTimestampSheetColor"
-              style="border-radius: 10px; font-weight: 400"
+              class="d-flex align-center pa-2 text-caption ga-2"
+              :color="props.isActive ? 'successTint' : 'errorTint'"
+              style="border-radius: 10px"
             >
-              <div>
-                <DeviceCardIcon :is-active="isActive" :profile="deviceProfile" />
-              </div>
-              <div class="pl-3 text-no-wrap" :class="calcTimestampTextColor">
+              <div
+                :class="calcTimestampBulletColor"
+                style="min-width: 12px; min-height: 12px; border-radius: 50%"
+              ></div>
+              <div class="text-no-wrap">
                 {{ timestamp }}
               </div>
             </VSheet>
           </VCol>
+
+          <VCol cols="auto" class="flex-grow-0 flex-shrink-1">
+            <VSheet
+              class="d-flex ga-1 align-center pa-2 text-caption"
+              color="blueTint"
+              style="border-radius: 10px"
+            >
+              <DeviceCardIcon
+                :is-active="props.isActive"
+                :profile="props.deviceProfile"
+              />
+
+              {{
+                props.deviceProfile.charAt(0).toUpperCase() +
+                props.deviceProfile.substring(1).toLowerCase()
+              }}
+            </VSheet>
+          </VCol>
+
+          <div style="min-width: 100px" class="flex-shrink-1 flex-grow-0">
+            <VSheet
+              class="d-flex align-center pa-2 text-text text-caption"
+              color="blueTint"
+              style="border-radius: 10px"
+            >
+              <div class="text-body-1 d-flex align-center">
+                <i class="fa-regular fa-hexagon"></i>
+              </div>
+
+              <span class="pl-3 text-truncate">
+                {{ deviceAddress }}
+              </span>
+            </VSheet>
+          </div>
         </VRow>
       </VCardTitle>
       <v-tabs
@@ -219,9 +227,15 @@
         density="comfortable"
         slider-color="primary"
       >
-        <v-tab :value="1" size="small" class="text-none" @click="openWindow(1)">Observations</v-tab>
-        <v-tab :value="2" size="small" class="text-none" @click="openWindow(2)">Forecast</v-tab>
-        <v-tab :value="3" size="small" class="text-none" @click="openWindow(3)">Rewards</v-tab>
+        <v-tab :value="1" size="small" class="text-none" @click="openWindow(1)"
+          >Observations</v-tab
+        >
+        <v-tab :value="2" size="small" class="text-none" @click="openWindow(2)"
+          >Forecast</v-tab
+        >
+        <v-tab :value="3" size="small" class="text-none" @click="openWindow(3)"
+          >Rewards</v-tab
+        >
       </v-tabs>
       <VProgressLinear
         v-if="props.loadingRewardsTab"

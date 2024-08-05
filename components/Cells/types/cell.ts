@@ -21,7 +21,7 @@ export interface Device {
   isActive: boolean
   lastWeatherStationActivity: string
   name: string
-  profile: string
+  profile: 'M5' | 'Helium' | 'PULSE' | 'D1'
   timezone: string
 }
 

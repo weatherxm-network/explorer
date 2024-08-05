@@ -1,6 +1,9 @@
 <script setup lang="ts">
   import { useTheme } from 'vuetify'
-  import type { SearchResultDevice, SearchResultLocation } from '../../types/mapbox'
+  import type {
+    SearchResultDevice,
+    SearchResultLocation,
+  } from '../../types/mapbox'
 
   interface Props {
     result?: SearchResultDevice | SearchResultLocation
@@ -12,12 +15,12 @@
     result: () => ({
       cell_center: {
         lat: 0,
-        lon: 0
+        lon: 0,
       },
       cell_index: '',
       connectivity: '',
-      name: ''
-    })
+      name: '',
+    }),
   })
 
   const theme = ref(useTheme())
@@ -57,7 +60,10 @@
             :style="{ background: layer1Color }"
             style="width: 40px; height: 40px"
           >
-            <div v-if="result.connectivity === 'wifi'" style="width: 30px; height: 30px">
+            <div
+              v-if="result.connectivity === 'wifi'"
+              style="width: 30px; height: 30px"
+            >
               <svg
                 height="30"
                 width="30"
@@ -71,7 +77,28 @@
                 />
               </svg>
             </div>
-            <div v-if="result.connectivity === 'helium'" style="width: 30px; height: 30px">
+            <div
+              v-if="result.connectivity === 'cellular'"
+              class="d-flex justify-center align-center"
+              style="width: 30px; height: 30px"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 18"
+                :fill="theme.current.colors.text"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 1C18.5312 1 19 1.46875 19 2V16C19 16.5625 18.5312 17 18 17C17.4375 17 17 16.5625 17 16V2C17 1.46875 17.4375 1 18 1ZM14 4C14.5312 4 15 4.46875 15 5V16C15 16.5625 14.5312 17 14 17C13.4375 17 13 16.5625 13 16V5C13 4.46875 13.4375 4 14 4ZM11 8V16C11 16.5625 10.5312 17 10 17C9.4375 17 9 16.5625 9 16V8C9 7.46875 9.4375 7 10 7C10.5312 7 11 7.46875 11 8ZM6 10C6.53125 10 7 10.4688 7 11V16C7 16.5625 6.53125 17 6 17C5.4375 17 5 16.5625 5 16V11C5 10.4688 5.4375 10 6 10ZM3 14V16C3 16.5625 2.53125 17 2 17C1.4375 17 1 16.5625 1 16V14C1 13.4688 1.4375 13 2 13C2.53125 13 3 13.4688 3 14Z"
+                  :fill="theme.current.colors.text"
+                />
+              </svg>
+            </div>
+            <div
+              v-if="result.connectivity === 'helium'"
+              style="width: 30px; height: 30px"
+            >
               <svg
                 height="30"
                 width="30"
@@ -113,7 +140,10 @@
             :style="{ background: layer1Color }"
             style="width: 40px; height: 40px"
           >
-            <i class="fa-sharp fa-regular fa-location-dot" :class="'text-text'"></i>
+            <i
+              class="fa-sharp fa-regular fa-location-dot"
+              :class="'text-text'"
+            ></i>
           </div>
         </template>
       </VListItem>

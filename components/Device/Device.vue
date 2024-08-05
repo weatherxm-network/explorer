@@ -10,6 +10,7 @@
   import Forecast from './widgets/Forecast.vue'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
+  import type { Device } from './types/device'
 
   dayjs.extend(relativeTime)
 
@@ -25,13 +26,15 @@
   const changeTabTo = ref(0)
   const cellAddress = ref('')
   const cellDeviceName = ref('')
-  const cellDeviceProfile = ref('M5')
+  const cellDeviceProfile = ref<Device['profile']>('M5')
   const timestamp = ref('-')
   const isActive = ref(false)
   const loadingRewardsTab = ref(false)
   const resolvedDevice = ref()
   const errorStateBoldText = ref('Oops! Something went wrong.')
-  const errorStateLightText = ref('Failed to get the details of the device: No data')
+  const errorStateLightText = ref(
+    'Failed to get the details of the device: No data',
+  )
   const backTo = ref('stats')
   const animationContainerHeight = computed(() => {
     return { marginTop: `calc(${display.value.height / 2}px - 244px)` }
@@ -70,7 +73,9 @@
   const fetchData = () => {
     loading.value = true
     showDeviceDetails.value = false
-    const normalizeRouteDeviceName = formatDeviceName.normalizeDeviceName(route.params.deviceName)
+    const normalizeRouteDeviceName = formatDeviceName.normalizeDeviceName(
+      route.params.deviceName,
+    )
     wxmApi
       .resolveDeviceName(normalizeRouteDeviceName)
       .then((searchedDevice) => {
@@ -146,7 +151,11 @@
       <VCard height="100%" class="w-100" color="background" elevation="0">
         <VCardText class="ma-0 pa-0">
           <div v-if="loading" :style="animationContainerHeight">
-            <LottieComponent :lottieName="'loaderLight'" :boldText="''" :lightText="''" />
+            <LottieComponent
+              :lottieName="'loaderLight'"
+              :boldText="''"
+              :lightText="''"
+            />
           </div>
           <div
             v-if="!showDeviceDetails && !loading"
@@ -178,13 +187,19 @@
               @update:model-value="updateTabs"
             >
               <v-window-item :value="1">
-                <ObservationsSheet :device="resolvedDevice" @open-window="openWindow" />
+                <ObservationsSheet
+                  :device="resolvedDevice"
+                  @open-window="openWindow"
+                />
               </v-window-item>
               <v-window-item :value="2">
                 <Forecast />
               </v-window-item>
               <v-window-item :value="3">
-                <RewardsSheet :device="resolvedDevice" @loading-rewards-tab="loadingRewards" />
+                <RewardsSheet
+                  :device="resolvedDevice"
+                  @loading-rewards-tab="loadingRewards"
+                />
               </v-window-item>
             </v-window>
           </v-card-text>
