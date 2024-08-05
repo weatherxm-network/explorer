@@ -1,6 +1,12 @@
 name: Deploy on Dev
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to target'
+        type: environment
+        required: true
+        default: 'development'
   push:
     tags:
       - 'staging'
