@@ -1,5 +1,5 @@
 import type { UnitsUserPrefs } from '../../types/mapbox'
-import type { Units } from '~/components/common/types/common.js'
+import type { Units } from '~/components/common/types/common'
 import localStorage from '~/cache/localStorage'
 const unitsKey: string = `units`
 

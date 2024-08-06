@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { useDisplay } from 'vuetify'
   import type { Measurements } from '../types/cell'
-  import type { Units } from '~/components/common/types/common.js'
+  import type { Units } from '~/components/common/types/common'
   import DeviceCardMeasurement from './DeviceCardMeasurements.vue'
   import index from '~/assets/animations/index'
 

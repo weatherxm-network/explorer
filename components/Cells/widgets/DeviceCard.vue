@@ -5,7 +5,7 @@
   import { useTheme } from 'vuetify'
   import units from '../../Mapbox/widgets/SettingsUtils/units'
   import DeviceCardIcon from '../../common/DeviceCardIcon.vue'
-  import type { Device, Units } from '~/components/common/types/common.js'
+  import type { Device, Units } from '~/components/common/types/common'
   import DeviceCardStateActive from './DeviceCardStateActive.vue'
   import DeviceCardStateInActive from './DeviceCardStateInActive.vue'
   import { useSettingsStore } from '~/stores/settingsStore'

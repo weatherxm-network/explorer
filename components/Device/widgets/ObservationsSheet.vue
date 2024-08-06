@@ -5,7 +5,7 @@
   import timezone from 'dayjs/plugin/timezone.js'
   import { computed } from 'vue'
   import units from '../../Mapbox/widgets/SettingsUtils/units'
-  import type { Device } from '~/components/common/types/common.js'
+  import type { Device } from '~/components/common/types/common'
   import DetailsCardMeasurement from './DetailsCardMeasurement.vue'
   import index from '~/assets/animations/index'
   import { useSettingsStore } from '~/stores/settingsStore'

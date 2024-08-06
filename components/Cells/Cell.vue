@@ -3,7 +3,7 @@
   import CellsHeader from './widgets/CellPageHeader.vue'
   import DeviceCard from './widgets/DeviceCard.vue'
   import { getCellDevices } from './utils/cells'
-  import type { Device } from '~/components/common/types/common.js'
+  import type { Device } from '~/components/common/types/common'
   import LottieComponent from '~/components/common/LottieComponent.vue'
 
   const display = ref(useDisplay())

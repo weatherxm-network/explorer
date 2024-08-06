@@ -2,7 +2,7 @@
   import dayjs from 'dayjs'
   import timezone from 'dayjs/plugin/timezone'
   import { useDisplay } from 'vuetify'
-  import type { Device } from '~/components/common/types/common.js'
+  import type { Device } from '~/components/common/types/common'
   import DailyRewards from '../../common/DailyRewards.vue'
   import EmptyRewards from '../../common/EmptyRewards.vue'
   import TotalStationRewards from './RewardsWidgets/TotalStationRewards.vue'

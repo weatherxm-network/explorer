@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import dayjs from 'dayjs'
-import type { CurrentWeather, Units } from '~/components/common/types/common.js'
+import type { CurrentWeather, Units } from '~/components/common/types/common'
 
 export const useWeatherStuff = () => {
   const degToCompass = (windDir: number) => {
