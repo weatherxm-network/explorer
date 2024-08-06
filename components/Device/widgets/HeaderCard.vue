@@ -172,7 +172,18 @@
         <!---------------------------- Address ------------------------------->
 
         <VRow class="pa-0 ma-0 pt-2 ga-2" no-gutters style="flex-wrap: nowrap">
-          <VCol cols="auto" class="flex-grow-0 flex-shrink-1">
+          <div
+            v-if="loading"
+            style="min-width: 100px"
+            class="flex-shrink-1"
+            :class="!loading ? 'flex-grow-0' : 'flex-grow-1'"
+          >
+            <v-skeleton-loader
+              v-if="loading"
+              type="chip,chip"
+            ></v-skeleton-loader>
+          </div>
+          <VCol v-if="!loading" cols="auto" class="flex-grow-0 flex-shrink-1">
             <VSheet
               class="d-flex align-center pa-2 text-caption ga-2"
               :color="props.isActive ? 'successTint' : 'errorTint'"
@@ -188,7 +199,7 @@
             </VSheet>
           </VCol>
 
-          <VCol cols="auto" class="flex-grow-0 flex-shrink-1">
+          <VCol v-if="!loading" cols="auto" class="flex-grow-0 flex-shrink-1">
             <VSheet
               class="d-flex ga-1 align-center pa-2 text-caption"
               color="blueTint"
@@ -206,7 +217,11 @@
             </VSheet>
           </VCol>
 
-          <div style="min-width: 100px" class="flex-shrink-1 flex-grow-0">
+          <div
+            v-if="!loading"
+            style="min-width: 100px"
+            class="flex-shrink-1 flex-grow-0"
+          >
             <VSheet
               class="d-flex align-center pa-2 text-text text-caption"
               color="blueTint"
