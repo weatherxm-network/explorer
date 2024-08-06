@@ -1,4 +1,5 @@
-import type { Units, UnitsUserPrefs } from '../../types/mapbox'
+import type { UnitsUserPrefs } from '../../types/mapbox'
+import type { Units } from '~/components/common/types/common.js'
 import localStorage from '~/cache/localStorage'
 const unitsKey: string = `units`
 
@@ -20,11 +21,14 @@ const defaultUnits = {
   windSpeed: 'm/s',
   windDir: '°',
   press: 'hPa',
-  solarIrradiance: 'W/m2'
+  solarIrradiance: 'W/m2',
 }
 
 // calc units based on users prefs if any or return default
-const calcUnitsBasedOnUserPrefs = (defaultUnits: Units, userPrefs: UnitsUserPrefs) => {
+const calcUnitsBasedOnUserPrefs = (
+  defaultUnits: Units,
+  userPrefs: UnitsUserPrefs,
+) => {
   // init empty obj
   let units = {}
   // regex to get text between ( )
@@ -50,7 +54,7 @@ const calcUnitsBasedOnUserPrefs = (defaultUnits: Units, userPrefs: UnitsUserPref
         : defaultUnits.windDir,
       press: regExp.exec(userPrefs.pressure.defaultUnit)[1]
         ? regExp.exec(userPrefs.pressure.defaultUnit)[1]
-        : defaultUnits.press
+        : defaultUnits.press,
     }
   } else {
     units = defaultUnits
@@ -76,5 +80,5 @@ const calcUnits = () => {
 export default {
   getUnits,
   setUnits,
-  calcUnits
+  calcUnits,
 }

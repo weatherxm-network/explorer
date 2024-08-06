@@ -1,7 +1,6 @@
-/* eslint-disable camelcase */
 import _ from 'lodash'
 import dayjs from 'dayjs'
-import type { CurrentWeather, Units } from '~/components/common/types/common'
+import type { CurrentWeather, Units } from '~/components/common/types/common.js'
 
 export const useWeatherStuff = () => {
   const degToCompass = (windDir: number) => {
@@ -22,7 +21,7 @@ export const useWeatherStuff = () => {
       'W',
       'WNW',
       'NW',
-      'NNW'
+      'NNW',
     ]
     return arr[val % 16]
   }
@@ -33,7 +32,10 @@ export const useWeatherStuff = () => {
   }
 
   // <------------------------ Calc current weather ----------------------->
-  const calcCurrentWeather = (deviceCurrentWeather: CurrentWeather, units: Units) => {
+  const calcCurrentWeather = (
+    deviceCurrentWeather: CurrentWeather,
+    units: Units,
+  ) => {
     // init local vars
     let temp = '?'
     let feels_like = '?'
@@ -66,11 +68,14 @@ export const useWeatherStuff = () => {
         switch (units.precip) {
           case 'mm':
             precip = deviceCurrentWeather.precipitation.toFixed(1)
-            precipAccum = deviceCurrentWeather.precipitation_accumulated.toFixed(1)
+            precipAccum =
+              deviceCurrentWeather.precipitation_accumulated.toFixed(1)
             break
           case 'in':
             precip = (deviceCurrentWeather.precipitation / 25.4).toFixed(1)
-            precipAccum = (deviceCurrentWeather.precipitation_accumulated / 25.4).toFixed(1)
+            precipAccum = (
+              deviceCurrentWeather.precipitation_accumulated / 25.4
+            ).toFixed(1)
         }
       }
       // calculate wind speed & wind gust based on unit
@@ -135,7 +140,9 @@ export const useWeatherStuff = () => {
             ? deviceCurrentWeather.solar_irradiance.toFixed(1)
             : '?',
         timestamp:
-          deviceCurrentWeather.timestamp !== undefined ? deviceCurrentWeather.timestamp : '?',
+          deviceCurrentWeather.timestamp !== undefined
+            ? deviceCurrentWeather.timestamp
+            : '?',
         humidity:
           deviceCurrentWeather.humidity !== undefined
             ? deviceCurrentWeather.humidity.toFixed(0)
@@ -147,7 +154,7 @@ export const useWeatherStuff = () => {
         time: dayjs(deviceCurrentWeather.timestamp).format(' h:mm A'),
         lottie: deviceCurrentWeather.icon
           ? deviceCurrentWeather.icon.replaceAll('-', '_')
-          : 'not_available'
+          : 'not_available',
       }
     } else {
       return {
@@ -165,7 +172,7 @@ export const useWeatherStuff = () => {
         humidity: '?',
         uv: '?',
         time: '?',
-        lottie: 'not_available'
+        lottie: 'not_available',
       }
     }
   }

@@ -1,31 +1,3 @@
-interface CurrentWeather {
-  dew_point: number
-  feels_like: number
-  humidity: number
-  icon: string
-  precipitation: number
-  precipitation_accumulated: number
-  solar_irradiance: number
-  pressure: number
-  temperature: number
-  timestamp: string
-  uv_index: number
-  wind_direction: number
-  wind_gust: number
-  wind_speed: number
-}
-
-export interface Device {
-  cellIndex: string
-  current_weather: CurrentWeather
-  id: string
-  isActive: boolean
-  lastWeatherStationActivity: string
-  name: string
-  profile: 'M5' | 'Helium' | 'PULSE' | 'D1'
-  timezone: string
-}
-
 interface Annotation {
   annotation: string
 }

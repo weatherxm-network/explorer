@@ -62,17 +62,6 @@ export interface Theme {
   options: [`Dark`, `Light`, `System`]
 }
 
-export interface Units {
-  uv: string
-  humidity: string
-  temp: string
-  precip: string
-  windSpeed: string
-  windDir: string
-  press: string
-  solarIrradiance: string
-}
-
 interface UnitPrefStruct {
   name: string
   defaultUnit: string

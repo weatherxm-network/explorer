@@ -3,7 +3,7 @@
   import CellsHeader from './widgets/CellPageHeader.vue'
   import DeviceCard from './widgets/DeviceCard.vue'
   import { getCellDevices } from './utils/cells'
-  import type { Device } from './types/cell'
+  import type { Device } from '~/components/common/types/common.js'
   import LottieComponent from '~/components/common/LottieComponent.vue'
 
   const display = ref(useDisplay())
@@ -25,7 +25,9 @@
   })
 
   const clickOnDevice = (deviceName: string) => {
-    navigateTo(`/stations/${formatDeviceName.denormalizeDeviceName(deviceName)}`)
+    navigateTo(
+      `/stations/${formatDeviceName.denormalizeDeviceName(deviceName)}`,
+    )
   }
 
   onMounted(async () => {
@@ -40,7 +42,7 @@
           orderedCellDevices.value = orderedDevices
           countTotalStations.value = orderedCellDevices.value.length
           countActiveStations.value = orderedCellDevices.value.filter(
-            (obj) => obj.isActive === true
+            (obj) => obj.isActive === true,
           ).length
 
           // show cell devices
@@ -74,7 +76,11 @@
             class="h-100 w-100 d-flex align-center justify-center"
             :style="animationContainerHeight"
           >
-            <LottieComponent :lottie-name="'loaderLight'" :bold-text="''" :light-text="''" />
+            <LottieComponent
+              :lottie-name="'loaderLight'"
+              :bold-text="''"
+              :light-text="''"
+            />
           </div>
 
           <div

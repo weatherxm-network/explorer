@@ -3,7 +3,7 @@
   import { computed, toRef } from 'vue'
   import { useTheme } from 'vuetify'
   import DeviceCardIcon from '../../common/DeviceCardIcon.vue'
-  import type { Device } from '../types/device'
+  import type { Device } from '~/components/common/types/common.js'
 
   interface Props {
     deviceName?: string

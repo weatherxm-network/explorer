@@ -1,3 +1,14 @@
+export interface Units {
+  humidity: string
+  precip: string
+  press: string
+  solarIrradiance: string
+  temp: string
+  uv: string
+  windDir: string
+  windSpeed: string
+}
+
 export interface CurrentWeather {
   dew_point: number
   feels_like: number
@@ -15,13 +26,22 @@ export interface CurrentWeather {
   wind_speed: number
 }
 
-export interface Units {
-  humidity: string
-  precip: string
-  press: string
-  solarIrradiance: string
-  temp: string
-  uv: string
-  windDir: string
-  windSpeed: string
+export interface Bundle {
+  name: string
+  title: string
+  connectivity: string
+  ws_model: string
+  gw_model: string
+}
+
+export interface Device {
+  cellIndex: string
+  current_weather: CurrentWeather
+  id: string
+  isActive: boolean
+  lastWeatherStationActivity: string
+  name: string
+  profile: string
+  timezone: string
+  bundle: Bundle
 }
