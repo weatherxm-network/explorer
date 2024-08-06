@@ -26,7 +26,13 @@
   const changeTabTo = ref(0)
   const cellAddress = ref('')
   const cellDeviceName = ref('')
-  const cellDeviceProfile = ref<Device['profile']>('M5')
+  const cellDeviceBundle = ref<Device['bundle']>({
+    name: 'm5',
+    title: 'M5',
+    connectivity: 'wifi',
+    ws_model: 'WS1000',
+    gw_model: 'WG1000',
+  })
   const timestamp = ref('-')
   const isActive = ref(false)
   const loadingRewardsTab = ref(false)
@@ -104,7 +110,7 @@
                 ? dayjs(device.current_weather.timestamp).fromNow()
                 : '-'
               isActive.value = device.isActive
-              cellDeviceProfile.value = device.profile
+              cellDeviceBundle.value = device.bundle
               // show results
               loading.value = false
               showDeviceDetails.value = true
@@ -140,7 +146,7 @@
       :deviceAddress="cellAddress"
       :timestamp="timestamp"
       :isActive="isActive"
-      :deviceProfile="cellDeviceProfile"
+      :bundle="cellDeviceBundle"
       :windowValue="changeTabTo"
       :loading="loading"
       :loading-rewards-tab="loadingRewardsTab"

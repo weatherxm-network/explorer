@@ -1,20 +1,29 @@
 <script setup lang="ts">
   import { computed } from 'vue'
   import { useTheme } from 'vuetify'
+  import type { Bundle } from '~/components/common/types/common.js'
+
   interface Props {
-    profile?: 'M5' | 'Helium' | 'PULSE' | 'D1'
+    bundle: Bundle
     isActive?: boolean
     size?: number
   }
 
   const props = withDefaults(defineProps<Props>(), {
-    profile: 'M5',
+    bundle: () =>
+      ({
+        name: 'm5',
+        title: 'M5',
+        connectivity: 'wifi',
+        ws_model: 'WS1000',
+        gw_model: 'WG1000',
+      }) as Bundle,
     isActive: false,
     size: 20,
   })
 
   const theme = useTheme()
-  const { profile, size } = props
+  const { bundle, size } = props
   const containerCss = `width: ${size}px; height ${size}px;`
 
   const fillColor = computed(() => {
@@ -29,7 +38,7 @@
       :style="containerCss"
     >
       <svg
-        v-if="profile.toLowerCase() === 'pulse'"
+        v-if="bundle.connectivity === 'cellular'"
         width="20"
         height="20"
         viewBox="0 0 20 18"
@@ -43,7 +52,7 @@
       </svg>
 
       <svg
-        v-if="profile.toLowerCase() === 'm5' || profile.toLowerCase() === 'd1'"
+        v-if="bundle.connectivity === 'wifi'"
         width="20"
         height="20"
         viewBox="0 0 22 18"
@@ -57,7 +66,7 @@
       </svg>
 
       <svg
-        v-if="profile.toLowerCase() === 'helium'"
+        v-if="bundle.connectivity === 'helium'"
         width="20"
         height="20"
         viewBox="0 0 18 18"

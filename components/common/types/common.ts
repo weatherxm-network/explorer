@@ -29,7 +29,7 @@ export interface CurrentWeather {
 export interface Bundle {
   name: string
   title: string
-  connectivity: string
+  connectivity: 'cellular' | 'wifi' | 'helium'
   ws_model: string
   gw_model: string
 }

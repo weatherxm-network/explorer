@@ -3,13 +3,13 @@
   import { computed, toRef } from 'vue'
   import { useTheme } from 'vuetify'
   import DeviceCardIcon from '../../common/DeviceCardIcon.vue'
-  import type { Device } from '~/components/common/types/common.js'
+  import type { Bundle } from '~/components/common/types/common.js'
 
   interface Props {
     deviceName?: string
     deviceAddress?: string
     timestamp?: string
-    deviceProfile?: Device['profile']
+    bundle: Bundle
     isActive?: boolean
     backTo?: string
     windowValue?: number
@@ -21,7 +21,14 @@
     deviceName: '-',
     deviceAddress: '-',
     timestamp: '-',
-    deviceProfile: 'M5',
+    bundle: () =>
+      ({
+        name: 'm5',
+        title: 'M5',
+        connectivity: 'wifi',
+        ws_model: 'WS1000',
+        gw_model: 'WG1000',
+      }) as Bundle,
     isActive: true,
     backTo: 'stats',
     windowValue: 0,
@@ -189,12 +196,12 @@
             >
               <DeviceCardIcon
                 :is-active="props.isActive"
-                :profile="props.deviceProfile"
+                :bundle="props.bundle"
               />
 
               {{
-                props.deviceProfile.charAt(0).toUpperCase() +
-                props.deviceProfile.substring(1).toLowerCase()
+                props.bundle.title.charAt(0).toUpperCase() +
+                props.bundle.title.substring(1).toLowerCase()
               }}
             </VSheet>
           </VCol>

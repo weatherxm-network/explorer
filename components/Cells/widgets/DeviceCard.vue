@@ -5,7 +5,7 @@
   import { useTheme } from 'vuetify'
   import units from '../../Mapbox/widgets/SettingsUtils/units'
   import DeviceCardIcon from '../../common/DeviceCardIcon.vue'
-  import type { Device } from '~/components/common/types/common.js'
+  import type { Device, Units } from '~/components/common/types/common.js'
   import DeviceCardStateActive from './DeviceCardStateActive.vue'
   import DeviceCardStateInActive from './DeviceCardStateInActive.vue'
   import { useSettingsStore } from '~/stores/settingsStore'
@@ -32,6 +32,13 @@
       name: '',
       profile: '',
       timezone: '',
+      bundle: {
+        name: 'm5',
+        title: 'M5',
+        connectivity: 'wifi',
+        ws_model: 'WS1000',
+        gw_model: 'WG1000',
+      },
       current_weather: {
         dew_point: 0,
         feels_like: 0,
@@ -148,12 +155,12 @@
           >
             <DeviceCardIcon
               :is-active="props.device.isActive"
-              :profile="props.device.profile"
+              :bundle="props.device.bundle"
             />
 
             {{
-              props.device.profile.charAt(0).toUpperCase() +
-              props.device.profile.substring(1).toLowerCase()
+              props.device.bundle.title.charAt(0).toUpperCase() +
+              props.device.bundle.title.substring(1).toLowerCase()
             }}
           </VSheet>
         </VCol>
@@ -183,7 +190,7 @@
             ? props.device.current_weather.icon.replaceAll('-', '_')
             : 'not_available'
         "
-        :units="currentUnits"
+        :units="currentUnits as Units"
         :device-measurements="currentDeviceMeasurements"
       />
 
