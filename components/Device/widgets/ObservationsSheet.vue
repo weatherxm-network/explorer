@@ -5,7 +5,7 @@
   import timezone from 'dayjs/plugin/timezone.js'
   import { computed } from 'vue'
   import units from '../../Mapbox/widgets/SettingsUtils/units'
-  import type { Device } from '../types/device'
+  import type { Device } from '~/components/common/types/common'
   import DetailsCardMeasurement from './DetailsCardMeasurement.vue'
   import index from '~/assets/animations/index'
   import { useSettingsStore } from '~/stores/settingsStore'
@@ -40,9 +40,9 @@
         uv_index: 0,
         wind_direction: 0,
         wind_gust: 0,
-        wind_speed: 0
-      }
-    })
+        wind_speed: 0,
+      },
+    }),
   })
 
   const emits = defineEmits(['openWindow'])
@@ -52,7 +52,7 @@
   const currentUnits = ref(units.calcUnits())
 
   const displayCurrentMeasurements = ref(
-    calcCurrentWeather(props.device.current_weather, currentUnits.value)
+    calcCurrentWeather(props.device.current_weather, currentUnits.value),
   )
 
   const nav = window.navigator.language
@@ -68,50 +68,55 @@
       measurement: 'Humidity',
       icon: 'fa-solid fa-droplet-percent',
       unit: 'humidity',
-      key: 'humidity'
+      key: 'humidity',
     },
-    { measurement: 'Wind', icon: 'fa-solid fa-wind', unit: 'windSpeed', key: 'windSpeed' },
+    {
+      measurement: 'Wind',
+      icon: 'fa-solid fa-wind',
+      unit: 'windSpeed',
+      key: 'windSpeed',
+    },
     {
       measurement: 'Precip Rate',
       icon: 'fa-solid fa-cloud-drizzle',
       unit: 'precip',
-      key: 'precip'
-    }
+      key: 'precip',
+    },
   ])
   const measurements2 = ref([
     {
       measurement: 'Wind Gust',
       icon: 'fa-solid fa-wind',
       unit: 'windSpeed',
-      key: 'windGust'
+      key: 'windGust',
     },
     {
       measurement: 'Pressure (abs)',
       icon: 'fa-solid fa-gauge',
       unit: 'press',
-      key: 'press'
+      key: 'press',
     },
     {
       measurement: 'Solar Radiation',
       icon: 'fa-solid fa-sun',
       unit: 'solarIrradiance',
-      key: 'solarIrradiance'
-    }
+      key: 'solarIrradiance',
+    },
   ])
   const measurements3 = ref([
     {
       measurement: 'Daily Precip',
       icon: 'fa-solid fa-cloud-drizzle',
       unit: 'precip',
-      key: 'precipAccum'
+      key: 'precipAccum',
     },
     {
       measurement: 'Dew Point',
       icon: 'fa-solid fa-droplet-degree',
       unit: 'temp',
-      key: 'dewPoint'
+      key: 'dewPoint',
     },
-    { measurement: 'UV', icon: 'fa-solid fa-sun', unit: 'uv', key: 'uv' }
+    { measurement: 'UV', icon: 'fa-solid fa-sun', unit: 'uv', key: 'uv' },
   ])
 
   settingsStore.$subscribe(() => {
@@ -119,7 +124,7 @@
     // calc measurements
     displayCurrentMeasurements.value = calcCurrentWeather(
       props.device.current_weather,
-      currentUnits.value
+      currentUnits.value,
     )
   })
 
@@ -128,14 +133,20 @@
       ? `Last updated on ${
           props?.device?.current_weather?.timestamp
             ? dayjs
-                .tz(dayjs(props.device.current_weather.timestamp), dayjs.tz.guess())
+                .tz(
+                  dayjs(props.device.current_weather.timestamp),
+                  dayjs.tz.guess(),
+                )
                 .format('MMM DD, YYYY, HH:mm')
             : '-'
         }`
       : `Last updated on ${
           props?.device?.current_weather?.timestamp
             ? dayjs
-                .tz(dayjs(props.device.current_weather.timestamp), dayjs.tz.guess())
+                .tz(
+                  dayjs(props.device.current_weather.timestamp),
+                  dayjs.tz.guess(),
+                )
                 .format('MMM DD, YYYY, hh:mm A')
             : '-'
         }`
@@ -157,7 +168,12 @@
 <template>
   <VCard rounded="xl" class="ma-4 mt-2" elevation="0" color="layer1">
     <VCardText class="pa-0 pb-0">
-      <VSheet color="top" rounded="xl" class="pl-0 pt-4 pb-2 mb-2" elevation="4">
+      <VSheet
+        color="top"
+        rounded="xl"
+        class="pl-0 pt-4 pb-2 mb-2"
+        elevation="4"
+      >
         <VRow class="ma-0 pa-0">
           <VCol class="pr-0 pl-0 pt-0 pb-0" align-self="center">
             <!---------------------------- Lottie Icon ------------------------------->
@@ -171,8 +187,12 @@
               </client-only>
             </div>
             <!---------------------------- Temp ------------------------------->
-            <div class="text-h3 font-weight-bold d-flex justify-center align-baseline">
-              <span class="text-text">{{ displayCurrentMeasurements.temp }}</span>
+            <div
+              class="text-h3 font-weight-bold d-flex justify-center align-baseline"
+            >
+              <span class="text-text">{{
+                displayCurrentMeasurements.temp
+              }}</span>
               <span class="text-h5 text-text">{{ currentUnits.temp }}</span>
             </div>
             <!---------------------------- Feels like ------------------------------->
@@ -187,14 +207,24 @@
 
           <VCol sm="6" md="6" xs="6" class="pa-0">
             <!---------------------------- Loop in measurements ------------------------------->
-            <VRow v-for="measurement in measurements" :key="measurement.key" class="ma-0 pa-0">
+            <VRow
+              v-for="measurement in measurements"
+              :key="measurement.key"
+              class="ma-0 pa-0"
+            >
               <DetailsCardMeasurement
                 :measurement-metadata="measurement"
                 :unit="currentUnits[measurement.unit]"
-                :device-measurement-value="displayCurrentMeasurements[measurement.key]"
+                :device-measurement-value="
+                  displayCurrentMeasurements[measurement.key]
+                "
                 :wind-dir-conditional-rendering="
-                  measurement.key === 'windSpeed' || measurement.key === 'windGust'
-                    ? { value: displayCurrentMeasurements.windDir, unit: currentUnits.windDir }
+                  measurement.key === 'windSpeed' ||
+                  measurement.key === 'windGust'
+                    ? {
+                        value: displayCurrentMeasurements.windDir,
+                        unit: currentUnits.windDir,
+                      }
                     : { value: '', currentUnits: '' }
                 "
               />
@@ -205,30 +235,50 @@
       <VSheet rounded="xl-b" class="pt-2" color="layer1">
         <VRow class="pa-0 ma-0">
           <VCol sm="6" md="6" xs="6" class="pa-0">
-            <VRow v-for="measurement in measurements2" :key="measurement.key" class="ma-0 pa-0">
+            <VRow
+              v-for="measurement in measurements2"
+              :key="measurement.key"
+              class="ma-0 pa-0"
+            >
               <DetailsCardMeasurement
                 class="text-truncate"
                 :measurement-metadata="measurement"
                 :unit="currentUnits[measurement.unit]"
-                :device-measurement-value="displayCurrentMeasurements[measurement.key]"
+                :device-measurement-value="
+                  displayCurrentMeasurements[measurement.key]
+                "
                 :wind-dir-conditional-rendering="
-                  measurement.key === 'windSpeed' || measurement.key === 'windGust'
-                    ? { value: displayCurrentMeasurements.windDir, unit: currentUnits.windDir }
+                  measurement.key === 'windSpeed' ||
+                  measurement.key === 'windGust'
+                    ? {
+                        value: displayCurrentMeasurements.windDir,
+                        unit: currentUnits.windDir,
+                      }
                     : { value: '', currentUnits: '' }
                 "
               />
             </VRow>
           </VCol>
           <VCol sm="6" md="6" xs="6" class="pa-0">
-            <VRow v-for="measurement in measurements3" :key="measurement.key" class="ma-0 pa-0">
+            <VRow
+              v-for="measurement in measurements3"
+              :key="measurement.key"
+              class="ma-0 pa-0"
+            >
               <DetailsCardMeasurement
                 class="text-truncate"
                 :measurement-metadata="measurement"
                 :unit="currentUnits[measurement.unit]"
-                :device-measurement-value="displayCurrentMeasurements[measurement.key]"
+                :device-measurement-value="
+                  displayCurrentMeasurements[measurement.key]
+                "
                 :wind-dir-conditional-rendering="
-                  measurement.key === 'windSpeed' || measurement.key === 'windGust'
-                    ? { value: displayCurrentMeasurements.windDir, unit: currentUnits.windDir }
+                  measurement.key === 'windSpeed' ||
+                  measurement.key === 'windGust'
+                    ? {
+                        value: displayCurrentMeasurements.windDir,
+                        unit: currentUnits.windDir,
+                      }
                     : { value: '', currentUnits: '' }
                 "
               />
@@ -258,14 +308,26 @@
     </VCardText>
   </VCard>
 
-  <VCard class="ma-4" style="border-radius: 16px" color="blueTint" elevation="0">
+  <VCard
+    class="ma-4"
+    style="border-radius: 16px"
+    color="blueTint"
+    elevation="0"
+  >
     <VCardText class="pa-0 ma-0">
       <VRow class="ma-0 pa-0" align="center" justify="space-between">
-        <VCol class="ma-0 pr-0 pt-2 pb-2" :class="display.smAndDown ? 'pl-3' : 'pl-4'" cols="8">
+        <VCol
+          class="ma-0 pr-0 pt-2 pb-2"
+          :class="display.smAndDown ? 'pl-3' : 'pl-4'"
+          cols="8"
+        >
           <div class="text-text d-flex align-center font-weight-regular">
             <div style="letter-spacing: normal">{{ footerTextFirstLine }}</div>
           </div>
-          <div style="letter-spacing: normal" class="text-text font-weight-regular">
+          <div
+            style="letter-spacing: normal"
+            class="text-text font-weight-regular"
+          >
             {{ footerTextSecondLine }}
           </div>
         </VCol>
@@ -285,7 +347,12 @@
               border-radius: 8px;
               letter-spacing: normal;
             "
-            @click="[openWindow(), trackGAevent('deviceObservationsClickOnDownloadButton')]"
+            @click="
+              [
+                openWindow(),
+                trackGAevent('deviceObservationsClickOnDownloadButton'),
+              ]
+            "
             >{{ downloadButtonText }}</VBtn
           >
         </VCol>

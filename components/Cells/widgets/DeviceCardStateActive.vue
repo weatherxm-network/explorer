@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { useDisplay } from 'vuetify'
-  import type { Units, Measurements } from '../types/cell'
+  import type { Measurements } from '../types/cell'
+  import type { Units } from '~/components/common/types/common'
   import DeviceCardMeasurement from './DeviceCardMeasurements.vue'
   import index from '~/assets/animations/index'
 
@@ -20,7 +21,7 @@
       temp: '',
       uv: '',
       windDir: '',
-      windSpeed: ''
+      windSpeed: '',
     }),
     deviceMeasurements: () => ({
       dewPoint: '',
@@ -37,8 +38,8 @@
       uv: '',
       windDir: '',
       windGust: '',
-      windSpeed: ''
-    })
+      windSpeed: '',
+    }),
   })
 
   const feelsLikeStaticText = ref('Feels Like')
@@ -48,15 +49,20 @@
       measurement: 'Humidity',
       icon: 'fa-solid fa-droplet-percent',
       unit: 'humidity',
-      key: 'humidity'
+      key: 'humidity',
     },
-    { measurement: 'Wind', icon: 'fa-solid fa-wind', unit: 'windSpeed', key: 'windSpeed' },
+    {
+      measurement: 'Wind',
+      icon: 'fa-solid fa-wind',
+      unit: 'windSpeed',
+      key: 'windSpeed',
+    },
     {
       measurement: 'Precip Rate',
       icon: 'fa-solid fa-cloud-drizzle',
       unit: 'precip',
-      key: 'precip'
-    }
+      key: 'precip',
+    },
   ])
 </script>
 
@@ -77,7 +83,9 @@
           </client-only>
         </div>
         <!---------------------------- Temp ------------------------------->
-        <div class="text-h3 font-weight-bold d-flex justify-center align-baseline">
+        <div
+          class="text-h3 font-weight-bold d-flex justify-center align-baseline"
+        >
           <span class="text-text">{{ deviceMeasurements.temp }}</span>
           <span class="text-h5 text-text">{{ units.temp }}</span>
         </div>
@@ -85,7 +93,9 @@
         <div class="text-caption d-flex align-center justify-center">
           <span class="text-darkestBlue">{{ feelsLikeStaticText }}</span
           ><span class="text-subtitle-1 pl-2 text-text d-flex"
-            ><div class="font-weight-bold">{{ deviceMeasurements.feels_like }}</div>
+            ><div class="font-weight-bold">
+              {{ deviceMeasurements.feels_like }}
+            </div>
             <span class="text-text">{{ units.temp }}</span></span
           >
         </div>

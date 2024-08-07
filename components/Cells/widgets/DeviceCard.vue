@@ -5,7 +5,7 @@
   import { useTheme } from 'vuetify'
   import units from '../../Mapbox/widgets/SettingsUtils/units'
   import DeviceCardIcon from '../../common/DeviceCardIcon.vue'
-  import type { Device } from '../types/cell'
+  import type { Device, Units } from '~/components/common/types/common'
   import DeviceCardStateActive from './DeviceCardStateActive.vue'
   import DeviceCardStateInActive from './DeviceCardStateInActive.vue'
   import { useSettingsStore } from '~/stores/settingsStore'
@@ -32,6 +32,13 @@
       name: '',
       profile: '',
       timezone: '',
+      bundle: {
+        name: 'm5',
+        title: 'M5',
+        connectivity: 'wifi',
+        ws_model: 'WS1000',
+        gw_model: 'WG1000',
+      },
       current_weather: {
         dew_point: 0,
         feels_like: 0,
@@ -45,9 +52,9 @@
         uv_index: 0,
         wind_direction: 0,
         wind_gust: 0,
-        wind_speed: 0
-      }
-    })
+        wind_speed: 0,
+      },
+    }),
   })
 
   const { calcCurrentWeather } = useWeatherStuff()
@@ -56,7 +63,7 @@
   const settingsStore = useSettingsStore()
   const currentUnits = ref(units.calcUnits())
   const currentDeviceMeasurements = ref(
-    calcCurrentWeather(props.device.current_weather, currentUnits.value)
+    calcCurrentWeather(props.device.current_weather, currentUnits.value),
   )
 
   settingsStore.$subscribe(() => {
@@ -65,29 +72,15 @@
     // recalc measurements
     currentDeviceMeasurements.value = calcCurrentWeather(
       props.device.current_weather,
-      currentUnits.value
+      currentUnits.value,
     )
   })
 
-  const calcTimestampSheetColor = computed(() => {
-    if (theme.global.name.value === 'dark') {
-      return 'blueTint'
-    } else if (props.device.isActive) {
-      return 'successTint'
+  const calcTimestampBulletColor = computed(() => {
+    if (props.device.isActive) {
+      return 'bg-success'
     } else {
-      return 'errorTint'
-    }
-  })
-
-  const calcTimestampTextColor = computed(() => {
-    if (theme.global.name.value === 'dark') {
-      if (props.device.isActive) {
-        return 'text-success'
-      } else {
-        return 'text-error'
-      }
-    } else {
-      return 'text-text'
+      return 'bg-error'
     }
   })
 
@@ -103,7 +96,7 @@
           'border-left': '1px solid red',
           'border-right': '1px solid red',
           'border-bottom': '1px solid red',
-          'border-top': '1px solid red'
+          'border-top': '1px solid red',
         }
       : {}
   })
@@ -123,21 +116,58 @@
   >
     <VCardTitle class="pa-0 pb-1">
       <!---------------------------- Device name ------------------------------->
-      <VRow class="ma-0 pa-0 w-100 pb-2" :class="props.device.isActive ? 'px-0 pt-0' : 'px-5 pt-5'">
+      <VRow
+        class="ma-0 pa-0 w-100 pb-2"
+        :class="props.device.isActive ? 'px-0 pt-0' : 'px-5 pt-5'"
+      >
         <div class="font-weight-bold text-primary" style="font-size: 1.108rem">
           {{ props.device.name }}
         </div>
       </VRow>
       <!---------------------------- Address ------------------------------->
       <VRow
-        class="pa-0 ma-0"
+        class="pa-0 ma-0 ga-2"
         no-gutters
         style="flex-wrap: nowrap"
         :class="props.device.isActive ? 'px-0' : 'px-5'"
       >
+        <VCol cols="auto" class="flex-grow-0 flex-shrink-1">
+          <VSheet
+            class="d-flex align-center pa-2 text-caption ga-2"
+            :color="props.device.isActive ? 'successTint' : 'errorTint'"
+            style="border-radius: 10px"
+          >
+            <div
+              :class="calcTimestampBulletColor"
+              style="min-width: 12px; min-height: 12px; border-radius: 50%"
+            ></div>
+            <div class="text-no-wrap">
+              {{ timestamp }}
+            </div>
+          </VSheet>
+        </VCol>
+
+        <VCol cols="auto" class="flex-grow-0 flex-shrink-1">
+          <VSheet
+            class="d-flex ga-1 align-center pa-2 text-caption"
+            color="blueTint"
+            style="border-radius: 10px"
+          >
+            <DeviceCardIcon
+              :is-active="props.device.isActive"
+              :bundle="props.device.bundle"
+            />
+
+            {{
+              props.device.bundle.title.charAt(0).toUpperCase() +
+              props.device.bundle.title.substring(1).toLowerCase()
+            }}
+          </VSheet>
+        </VCol>
+
         <div style="min-width: 100px" class="flex-shrink-1 flex-grow-0">
           <VSheet
-            class="d-flex align-center px-2 py-2 text-text text-caption"
+            class="d-flex align-center pa-2 text-text text-caption"
             color="blueTint"
             style="border-radius: 10px"
           >
@@ -150,21 +180,6 @@
             </span>
           </VSheet>
         </div>
-
-        <VCol cols="auto" class="flex-grow-0 flex-shrink-1 pl-2">
-          <VSheet
-            class="d-flex align-center px-2 py-1 text-caption"
-            :color="calcTimestampSheetColor"
-            style="border-radius: 10px"
-          >
-            <div>
-              <DeviceCardIcon :is-active="props.device.isActive" :profile="props.device.profile" />
-            </div>
-            <div class="pl-3 text-no-wrap" :class="calcTimestampTextColor">
-              {{ timestamp }}
-            </div>
-          </VSheet>
-        </VCol>
       </VRow>
     </VCardTitle>
     <VCardText class="pa-0 ma-0">
@@ -175,7 +190,7 @@
             ? props.device.current_weather.icon.replaceAll('-', '_')
             : 'not_available'
         "
-        :units="currentUnits"
+        :units="currentUnits as Units"
         :device-measurements="currentDeviceMeasurements"
       />
 

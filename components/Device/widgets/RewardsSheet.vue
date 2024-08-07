@@ -2,7 +2,7 @@
   import dayjs from 'dayjs'
   import timezone from 'dayjs/plugin/timezone'
   import { useDisplay } from 'vuetify'
-  import type { Device } from '../types/device'
+  import type { Device } from '~/components/common/types/common'
   import DailyRewards from '../../common/DailyRewards.vue'
   import EmptyRewards from '../../common/EmptyRewards.vue'
   import TotalStationRewards from './RewardsWidgets/TotalStationRewards.vue'
@@ -40,9 +40,9 @@
         uv_index: 0,
         wind_direction: 0,
         wind_gust: 0,
-        wind_speed: 0
-      }
-    })
+        wind_speed: 0,
+      },
+    }),
   })
 
   const emit = defineEmits(['loadingRewardsTab'])
@@ -50,7 +50,9 @@
   const { fetchRemoteConfig } = useFirebase()
   const { trackGAevent } = useGAevents()
   const remoteConfig = await fetchRemoteConfig()
-  const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
+  const mainnetShowFlag = ref<boolean>(
+    remoteConfig.feat_mainnet._value === 'true',
+  )
   const loading = ref(false)
   // rewards stuff
   const totalStationRewards = ref('')
@@ -59,7 +61,9 @@
   const dailyRewardsTotalBusinessBoostReward = ref('')
   const dailyRewardsTotalReward = ref('')
   const dailyRewardsValidationScoreColor = ref('')
-  const dailyRewardsSeverity = ref<'INFO' | 'WARNING' | 'ERROR' | null | undefined>(null)
+  const dailyRewardsSeverity = ref<
+    'INFO' | 'WARNING' | 'ERROR' | null | undefined
+  >(null)
   const dailyRewardsHasActiveBoosts = ref(false)
   const dailyRewardsNumberOfIssues = ref(0)
 
@@ -71,7 +75,9 @@
   const showRewards = ref(false)
   const display = ref(useDisplay())
   const errorStateBoldText = ref('Oops! Something went wrong.')
-  const errorStateLightText = ref('Failed to get the rewards of the device: No data')
+  const errorStateLightText = ref(
+    'Failed to get the rewards of the device: No data',
+  )
   const errorAnimationContainerHeight = computed(() => {
     return { marginTop: `calc(${display.value.height / 2}px - 281px)` }
   })
@@ -100,7 +106,12 @@
       const fixedFive = num.substring(0, num.indexOf('.') + 5)
       return countDecimals(removeTrailingZeros(fixedFive)) <= 2
         ? num.substring(0, num.indexOf('.') + 2)
-        : num.substring(0, num.indexOf('.') + countDecimals(removeTrailingZeros(fixedFive)) + 1)
+        : num.substring(
+            0,
+            num.indexOf('.') +
+              countDecimals(removeTrailingZeros(fixedFive)) +
+              1,
+          )
     }
   }
 
@@ -113,24 +124,35 @@
     wxmApi
       .getDeviceTokens(deviceId)
       .then((response) => {
-        emptyStateFlag.value = response.total_rewards === 0 && Object.keys(response).length === 1
+        emptyStateFlag.value =
+          response.total_rewards === 0 && Object.keys(response).length === 1
         /// ///// Total station rewards /////////
-        totalStationRewards.value = computeStringNumber(response.total_rewards.toString())
+        totalStationRewards.value = computeStringNumber(
+          response.total_rewards.toString(),
+        )
         /// ///// Daily Rewards /////////
-        dailyRewardsHasActiveBoosts.value = 'total_business_boost_reward' in response.latest
+        dailyRewardsHasActiveBoosts.value =
+          'total_business_boost_reward' in response.latest
         if (dailyRewardsHasActiveBoosts.value) {
           dailyRewardsTotalBusinessBoostReward.value = computeStringNumber(
-            response.latest.total_business_boost_reward.toString()
+            response.latest.total_business_boost_reward.toString(),
           )
         }
-        dailyRewardsDate.value = dayjs(response.latest.timestamp).utc().format('MMM D, YYYY')
-        dailyRewardsBaseReward.value = computeStringNumber(response.latest.base_reward.toString())
-        dailyRewardsTotalReward.value = computeStringNumber(response.latest.total_reward.toString())
+        dailyRewardsDate.value = dayjs(response.latest.timestamp)
+          .utc()
+          .format('MMM D, YYYY')
+        dailyRewardsBaseReward.value = computeStringNumber(
+          response.latest.base_reward.toString(),
+        )
+        dailyRewardsTotalReward.value = computeStringNumber(
+          response.latest.total_reward.toString(),
+        )
         dailyRewardsValidationScoreColor.value = selectValidationColor(
-          response.latest.base_reward_score
+          response.latest.base_reward_score,
         )
 
-        dailyRewardsSeverity.value = response?.latest?.annotation_summary[0]?.severity_level ?? null
+        dailyRewardsSeverity.value =
+          response?.latest?.annotation_summary[0]?.severity_level ?? null
         dailyRewardsNumberOfIssues.value = response?.latest?.annotation_summary
           ? response?.latest?.annotation_summary.length
           : 0
@@ -139,7 +161,7 @@
           .utc()
           .format('MMM D')
         weeklyStreakToDate.value = dayjs(
-          response?.timeline[response.timeline.length - 1]?.timestamp
+          response?.timeline[response.timeline.length - 1]?.timestamp,
         )
           .utc()
           .format('MMM D')
