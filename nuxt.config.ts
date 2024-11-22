@@ -4,7 +4,7 @@ import Joi from 'joi'
 import pkg from './package.json'
 
 const config = {
-  apiUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
+  apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
   mapboxAccessToken: process.env.MAPBOX_ACCESS_TOKEN,
   mapboxStyle: process.env.MAPBOX_STYLE,
   fontAwesomeProkitKey: process.env.FONT_AWESOME_PRO_KIT_KEY,
@@ -12,7 +12,7 @@ const config = {
 }
 
 const configSchema = Joi.object({
-  apiUrl: Joi.string().uri().required(),
+  apiBaseUrl: Joi.string().uri().required(),
   mapboxAccessToken: Joi.string().required(),
   mapboxStyle: Joi.string().required(),
   fontAwesomeProkitKey: Joi.string().required(),
@@ -48,7 +48,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBaseUrl: config.apiUrl,
+      apiBaseUrl: config.apiBaseUrl,
       mapboxAccessToken: config.mapboxAccessToken,
       mapboxStyle: config.mapboxStyle,
       initGoogleServices: config.initGoogleServices,
