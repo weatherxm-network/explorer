@@ -1,6 +1,6 @@
 # Base
 FROM node:20-alpine AS base
-RUN apk add git
+RUN apk add git --no-cache
 WORKDIR /src
 
 # Build
