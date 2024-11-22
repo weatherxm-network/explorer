@@ -11,7 +11,7 @@
   const firebaseId = await getFirebaseId()
 
   onBeforeMount(() => {
-    wxmApi.setupAxios(config.apiUrl, userAgent, firebaseId)
+    wxmApi.setupAxios(config.apiBaseUrl, userAgent, firebaseId)
   })
 </script>
 

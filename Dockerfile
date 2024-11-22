@@ -1,10 +1,10 @@
 # Base
-FROM node:20-alpine as base
+FROM node:20-alpine AS base
 RUN apk add git
 WORKDIR /src
 
 # Build
-FROM base as build
+FROM base AS build
 COPY package*.json ./
 RUN npm install
 COPY . .
