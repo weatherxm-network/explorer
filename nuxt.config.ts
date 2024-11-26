@@ -1,29 +1,6 @@
 import { defineNuxtConfig } from 'nuxt/config'
 
-import Joi from 'joi'
 import pkg from './package.json'
-
-const config = {
-  apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
-  mapboxAccessToken: process.env.MAPBOX_ACCESS_TOKEN,
-  mapboxStyle: process.env.MAPBOX_STYLE,
-  fontAwesomeProkitKey: process.env.FONT_AWESOME_PRO_KIT_KEY,
-  initGoogleServices: process.env.INIT_GOOGLE_SERVICES === 'true',
-}
-
-const configSchema = Joi.object({
-  apiBaseUrl: Joi.string().uri().required(),
-  mapboxAccessToken: Joi.string().required(),
-  mapboxStyle: Joi.string().required(),
-  fontAwesomeProkitKey: Joi.string().required(),
-  initGoogleServices: Joi.boolean().required(),
-}).strict()
-
-// Validate configuration
-const { error } = configSchema.validate(config)
-if (error) {
-  throw new Error(`Configuration error: ${error.message}`)
-}
 
 export default defineNuxtConfig({
   // devtools: { enabled: true },
@@ -48,10 +25,10 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBaseUrl: config.apiBaseUrl,
-      mapboxAccessToken: config.mapboxAccessToken,
-      mapboxStyle: config.mapboxStyle,
-      initGoogleServices: config.initGoogleServices,
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
+      mapboxAccessToken: process.env.MAPBOX_ACCESS_TOKEN,
+      mapboxStyle: process.env.MAPBOX_STYLE,
+      initGoogleServices: process.env.INIT_GOOGLE_SERVICES === 'true',
       version: process.env.GIT_COMMIT_HASH
         ? `${pkg.version}-${process.env.GIT_COMMIT_HASH}`
         : pkg.version,
@@ -95,7 +72,7 @@ export default defineNuxtConfig({
           href: 'https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/7.0.96/css/materialdesignicons.min.css',
         },
         {
-          href: `https://kit.fontawesome.com/${config.fontAwesomeProkitKey}.css`,
+          href: `https://kit.fontawesome.com/${process.env.FONT_AWESOME_PRO_KIT_KEY}.css`,
           rel: 'stylesheet',
           crossorigin: 'anonymous',
         },
@@ -103,7 +80,7 @@ export default defineNuxtConfig({
       ],
       script: [
         {
-          src: `https://kit.fontawesome.com/${config.fontAwesomeProkitKey}.js`,
+          src: `https://kit.fontawesome.com/${process.env.FONT_AWESOME_PRO_KIT_KEY}.js`,
           crossorigin: 'anonymous',
         },
       ],
