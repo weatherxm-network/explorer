@@ -42,20 +42,25 @@
     }),
   })
 
-  const feelsLikeStaticText = ref('Feels Like')
   const display = ref(useDisplay())
   const measurements = ref([
     {
-      measurement: 'Humidity',
-      icon: 'fa-solid fa-droplet-percent',
-      unit: 'humidity',
-      key: 'humidity',
+      measurement: 'Temperature',
+      icon: 'fa-solid fa-temperature-three-quarters',
+      unit: 'temperature',
+      key: 'temp',
     },
     {
       measurement: 'Wind',
       icon: 'fa-solid fa-wind',
       unit: 'windSpeed',
       key: 'windSpeed',
+    },
+    {
+      measurement: 'Humidity',
+      icon: 'fa-solid fa-droplet-percent',
+      unit: 'humidity',
+      key: 'humidity',
     },
     {
       measurement: 'Precip Rate',
@@ -68,59 +73,66 @@
 
 <template>
   <VSheet color="top" rounded="xl" class="pl-0">
-    <VRow no-gutters class="ma-0 pa-0 pt-3 pb-0">
-      <VCol class="pr-0 pl-0" align-self="center">
-        <!---------------------------- Lottie Icon ------------------------------->
-
-        {{ index.icon }}
-        <div class="d-flex justify-center">
-          <client-only>
-            <Vue3Lottie
-              :animation-data="index[props.icon]"
-              :height="display.smAndDown ? 50 : 70"
-              :width="display.smAndDown ? 50 : 70"
-            />
-          </client-only>
-        </div>
-        <!---------------------------- Temp ------------------------------->
-        <div
-          class="text-h3 font-weight-bold d-flex justify-center align-baseline"
-        >
-          <span class="text-text">{{ deviceMeasurements.temp }}</span>
-          <span class="text-h5 text-text">{{ units.temp }}</span>
-        </div>
-        <!---------------------------- Feels like ------------------------------->
-        <div class="text-caption d-flex align-center justify-center">
-          <span class="text-darkestBlue">{{ feelsLikeStaticText }}</span
-          ><span class="text-subtitle-1 pl-2 text-text d-flex"
-            ><div class="font-weight-bold">
-              {{ deviceMeasurements.feels_like }}
-            </div>
-            <span class="text-text">{{ units.temp }}</span></span
-          >
-        </div>
-      </VCol>
-
-      <VCol align-self="center" class="ma-0 pa-0">
-        <!---------------------------- Loop in measurements ------------------------------->
-        <VRow
-          v-for="(measurement, i) in measurements"
-          :key="measurement.key"
-          class="ma-0 pa-0"
-          :class="i === measurements.length - 1 ? 'pb-0' : 'pb-2'"
-        >
+    <div class="d-flex justify-space-between align-center pa-4">
+      <div>
+        <client-only>
+          <Vue3Lottie
+            :animation-data="index[props.icon]"
+            :height="display.smAndDown ? 50 : 70"
+            :width="display.smAndDown ? 50 : 70"
+          />
+        </client-only>
+      </div>
+      <div class="ml-4">
+        <div class="d-flex justify-start align-center ga-4 flex-grow-1">
           <DeviceCardMeasurement
-            :measurement-metadata="measurement"
-            :unit="props.units[measurement.unit]"
-            :device-measurement-value="deviceMeasurements[measurement.key]"
+            class="flex-grow-1"
+            :measurement-metadata="measurements[0]"
+            :unit="props.units[measurements[0].unit]"
+            :device-measurement-value="deviceMeasurements[measurements[0].key]"
             :wind-dir-conditional-rendering="
-              measurement.key === 'windSpeed'
+              measurements[0].key === 'windSpeed'
                 ? { value: deviceMeasurements.windDir, unit: units.windDir }
                 : { value: '', units: '' }
             "
           />
-        </VRow>
-      </VCol>
-    </VRow>
+          <DeviceCardMeasurement
+            class="flex-grow-1"
+            :measurement-metadata="measurements[1]"
+            :unit="props.units[measurements[1].unit]"
+            :device-measurement-value="deviceMeasurements[measurements[1].key]"
+            :wind-dir-conditional-rendering="
+              measurements[1].key === 'windSpeed'
+                ? { value: deviceMeasurements.windDir, unit: units.windDir }
+                : { value: '', units: '' }
+            "
+          />
+        </div>
+        <div class="d-flex justify-start align-center ga-4 flex-grow-1">
+          <DeviceCardMeasurement
+            class="flex-grow-1"
+            :measurement-metadata="measurements[2]"
+            :unit="props.units[measurements[2].unit]"
+            :device-measurement-value="deviceMeasurements[measurements[2].key]"
+            :wind-dir-conditional-rendering="
+              measurements[2].key === 'windSpeed'
+                ? { value: deviceMeasurements.windDir, unit: units.windDir }
+                : { value: '', units: '' }
+            "
+          />
+          <DeviceCardMeasurement
+            class="flex-grow-1"
+            :measurement-metadata="measurements[3]"
+            :unit="props.units[measurements[3].unit]"
+            :device-measurement-value="deviceMeasurements[measurements[3].key]"
+            :wind-dir-conditional-rendering="
+              measurements[3].key === 'windSpeed'
+                ? { value: deviceMeasurements.windDir, unit: units.windDir }
+                : { value: '', units: '' }
+            "
+          />
+        </div>
+      </div>
+    </div>
   </VSheet>
 </template>

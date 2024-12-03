@@ -35,13 +35,23 @@ export interface Bundle {
 }
 
 export interface Device {
+  address: string
+  bundle: Bundle
+  cellCenter: {
+    lat: number
+    lon: number
+  }
   cellIndex: string
   current_weather: CurrentWeather
   id: string
   isActive: boolean
   lastWeatherStationActivity: string
+  metrics: {
+    qod_score: number
+    pol_reason: 'LOCATION_NOT_VERIFIED' | 'NO_LOCATION_DATA' | null
+    ts: string
+  }
   name: string
   profile: string
   timezone: string
-  bundle: Bundle
 }

@@ -13,7 +13,7 @@
   const props = withDefaults(defineProps<Props>(), {
     activeStations: 1,
     totalStations: 0,
-    loading: true
+    loading: true,
   })
   const { trackGAevent } = useGAevents()
   const { getAddress } = useAddress()
@@ -32,7 +32,7 @@
   const infoTooltipText = ref(
     !display.value.smAndDown
       ? `<p>Cell capacity is a parameter that is used to define the maximum number of stations that are eligible for rewards in a specific cell. Every cell has a predefined capacity that depends on its geospatial characteristics*.<br><br> Every station is ranked in its cell daily, based on its reward score and its seniority. As long as the station's ranking is above the capacity threshold, it will be rewarded, whereas getting below it will lead to zero rewards. For example, in a cell with a max capacity of 5 stations, if a station is ranked 3rd it will get rewarded, but if it is ranked 7th, it won't receive any rewards.<br><br><i>* The cell capacity is currently set to the fixed value of 10 rewardable stations, for every cell.</i></p>`
-      : `<p>Cell capacity is a parameter that is used to define the maximum number of stations that are eligible for rewards in a specific cell. Every cell has a predefined capacity that depends on its geospatial characteristics*.<br><br> Every station is ranked in its cell daily, based on its reward score and its seniority. As long as the station's ranking is above the capacity threshold, it will be rewarded, whereas getting below it will lead to zero rewards. For example, in a cell with a max capacity of 5 stations, if a station is ranked 3rd it will get rewarded, but if it is ranked 7th, it won't receive any rewards.<br><br>Read more about how our Cell Capacity algorithm works.<br><br><i>* The cell capacity is currently set to the fixed value of 10 rewardable stations, for every cell.</i></p>`
+      : `<p>Cell capacity is a parameter that is used to define the maximum number of stations that are eligible for rewards in a specific cell. Every cell has a predefined capacity that depends on its geospatial characteristics*.<br><br> Every station is ranked in its cell daily, based on its reward score and its seniority. As long as the station's ranking is above the capacity threshold, it will be rewarded, whereas getting below it will lead to zero rewards. For example, in a cell with a max capacity of 5 stations, if a station is ranked 3rd it will get rewarded, but if it is ranked 7th, it won't receive any rewards.<br><br>Read more about how our Cell Capacity algorithm works.<br><br><i>* The cell capacity is currently set to the fixed value of 10 rewardable stations, for every cell.</i></p>`,
   )
 
   const closeCellsPage = () => {
@@ -46,7 +46,7 @@
       share({
         title: 'WeatherXM',
         text: 'Check out this WeatherXM cell',
-        url: constructedDeviceUrl.value
+        url: constructedDeviceUrl.value,
       })
     } else {
       copy(constructedDeviceUrl.value)
@@ -67,7 +67,7 @@
 
   const overlayColor = computed(() => {
     return {
-      '--background-color': theme.themes.value.dark.colors.background
+      '--background-color': theme.themes.value.dark.colors.background,
     }
   })
   const getTheme = computed(() => {
@@ -79,16 +79,22 @@
   })
 
   onMounted(async () => {
-    cellAddress.value = await getAddress(route.params.cellIndex).then((response) =>
-      response === null ? '-' : response
+    cellAddress.value = await getAddress(route.params.cellIndex).then(
+      (response) => (response === null ? '-' : response),
     )
   })
 </script>
 
 <template>
-  <VCard color="top" elevation="0" rounded="b-xl" style="margin-bottom: 2px" class="pa-4 pt-2">
+  <VCard
+    color="top"
+    elevation="0"
+    rounded="b-xl"
+    style="margin-bottom: 2px"
+    class="pa-4 pt-2"
+  >
     <VCardTitle class="pa-0 pb-2">
-      <div class="d-flex justify-space-between align-center">
+      <div class="d-flex justify-start align-center">
         <div class="text-h6 text-text pa-2 ps-0" align="center">
           <i
             class="fa fa-arrow-left text-primary"
@@ -97,6 +103,16 @@
           ></i>
         </div>
 
+        <div class="mr-auto ml-2">
+          <v-skeleton-loader
+            v-if="props.loading"
+            type="text"
+            height="32"
+          ></v-skeleton-loader>
+          <div v-else class="text-h6 font-weight-bold text-text">
+            {{ cellAddress }}
+          </div>
+        </div>
         <div>
           <div v-if="!isSupported">
             <i
@@ -134,14 +150,7 @@
       </div>
     </VCardTitle>
 
-    <VCardText class="pa-0">
-      <div class="mb-4">
-        <v-skeleton-loader v-if="props.loading" type="text" height="32"></v-skeleton-loader>
-        <div v-else class="text-h5 font-weight-bold text-text">
-          {{ cellAddress }}
-        </div>
-      </div>
-
+    <VCardText class="pa-0 pl-7">
       <div class="d-flex">
         <div v-if="props.loading" style="min-width: 100px">
           <v-skeleton-loader type="chip"></v-skeleton-loader>
@@ -166,12 +175,25 @@
             style="border-radius: 10px"
             color="blueTint"
           >
-            <span class="me-2">{{ props.totalStations }}/10 stations present</span>
-            <div
-              @mouseenter="trackGAevent('cell_capacity_info', { ITEM_ID: 'info_cell_capacity' })"
-              @click="trackGAevent('cell_capacity_info', { ITEM_ID: 'info_cell_capacity' })"
+            <span class="me-2"
+              >{{ props.totalStations }}/10 stations present</span
             >
-              <TooltipComponent :message="infoTooltipText" :tooltip-title="infoTooltipTitle" />
+            <div
+              @mouseenter="
+                trackGAevent('cell_capacity_info', {
+                  ITEM_ID: 'info_cell_capacity',
+                })
+              "
+              @click="
+                trackGAevent('cell_capacity_info', {
+                  ITEM_ID: 'info_cell_capacity',
+                })
+              "
+            >
+              <TooltipComponent
+                :message="infoTooltipText"
+                :tooltip-title="infoTooltipTitle"
+              />
             </div>
           </VSheet>
         </div>
