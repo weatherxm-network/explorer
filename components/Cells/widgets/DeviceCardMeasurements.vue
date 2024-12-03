@@ -23,19 +23,19 @@
       measurement: '',
       icon: '',
       unit: '',
-      key: ''
+      key: '',
     }),
     unit: '',
     deviceMeasurementValue: '',
     windDirConditionalRendering: () => ({
       value: '',
-      unit: ''
-    })
+      unit: '',
+    }),
   })
 </script>
 
 <template>
-  <div class="pl-4 d-flex align-center">
+  <div class="d-flex align-center">
     <!---------------------------- Font awesome icon ------------------------------->
     <div
       class="text-h6 d-inline text-darkestBlue d-flex justify-center align-center"
@@ -43,20 +43,26 @@
     >
       <i :class="props.measurementMetadata.icon"></i>
     </div>
-    <div class="d-inline">
+    <div class="d-inline" :style="{ minWidth: '90px' }">
       <!---------------------------- Measurement name ------------------------------->
       <div
         class="pl-3 text-caption font-weight-bold text-darkestBlue text-truncate"
-        style="margin-bottom: -6px; max-width: 100%"
+        style="margin-bottom: -6px; max-width: 100%; min-width: 100%"
       >
         {{ props.measurementMetadata.measurement }}
       </div>
       <!---------------------------- Measurement value ------------------------------->
       <div class="font-weight-bold pl-3 d-flex align-baseline pt-1">
-        <span lass=" text-body-2 text-text">{{ props.deviceMeasurementValue }} </span>
+        <span lass=" text-body-2 text-text"
+          >{{ props.deviceMeasurementValue }}
+        </span>
         <!---------------------------- Measurement unit ------------------------------->
         <span class="pl-1 text-caption text-mediumGray">
-          {{ props.unit === 'mm' || props.unit === 'in' ? `${props.unit}/h` : `${props.unit}` }}
+          {{
+            props.unit === 'mm' || props.unit === 'in'
+              ? `${props.unit}/h`
+              : `${props.unit}`
+          }}
           <!------------ Conditional rendering for wind dir ----------->
           <span>{{
             props.windDirConditionalRendering.unit === '°'

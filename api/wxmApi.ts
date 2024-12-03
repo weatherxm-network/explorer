@@ -1,7 +1,8 @@
 import axios from 'axios'
+import type { Device } from '~/components/common/types/common'
 
 const client = axios.create({
-  baseURL: ''
+  baseURL: '',
 })
 
 const setupAxios = (baseURL: string, userAgent: string, firebaseId: string) => {
@@ -14,7 +15,7 @@ const setupAxios = (baseURL: string, userAgent: string, firebaseId: string) => {
     },
     function (error) {
       return Promise.reject(error)
-    }
+    },
   )
 }
 
@@ -33,7 +34,9 @@ const getNetStats = () => {
 }
 
 const getSearchResults = (query: string) => {
-  return client.get(`/api/v1/network/search?query=${query}`).then((response) => response.data)
+  return client
+    .get(`/api/v1/network/search?query=${query}`)
+    .then((response) => response.data)
 }
 
 const resolveDeviceName = (deviceName: string) => {
@@ -42,8 +45,9 @@ const resolveDeviceName = (deviceName: string) => {
     .then((response) => response.data)
 }
 
-const getCellsData = (cellIndex: string) => {
-  return client.get(`/api/v1/cells/${cellIndex}/devices`).then((response) => response.data)
+const getCellsData = async (cellIndex: string) => {
+  const response = await client.get(`/api/v1/cells/${cellIndex}/devices`)
+  return response.data as Device[]
 }
 
 const getDeviceByID = (cellIndex: string, deviceId: string) => {
@@ -53,7 +57,9 @@ const getDeviceByID = (cellIndex: string, deviceId: string) => {
 }
 
 const getDeviceTokens = (deviceId: string) => {
-  return client.get(`/api/v1/devices/${deviceId}/rewards`).then((response) => response.data)
+  return client
+    .get(`/api/v1/devices/${deviceId}/rewards`)
+    .then((response) => response.data)
 }
 
 const getRewardTimeline = (
@@ -62,11 +68,11 @@ const getRewardTimeline = (
   page: number,
   pageSize: number,
   fromDate: string,
-  toDate: string
+  toDate: string,
 ) => {
   return client
     .get(
-      `/api/v1/devices/${deviceId}/rewards/timeline?timezone=${timezone}&page=${page}&pageSize=${pageSize}&fromDate=${fromDate}&toDate=${toDate}`
+      `/api/v1/devices/${deviceId}/rewards/timeline?timezone=${timezone}&page=${page}&pageSize=${pageSize}&fromDate=${fromDate}&toDate=${toDate}`,
     )
     .then((response) => response.data)
 }
@@ -80,5 +86,5 @@ export default {
   getSearchResults,
   resolveDeviceName,
   getDeviceTokens,
-  getRewardTimeline
+  getRewardTimeline,
 }
