@@ -160,25 +160,7 @@
         </div>
       </div>
 
-      <VCardTitle class="px-0 pt-4 pb-0">
-        <!---------------------------- Device name ------------------------------->
-        <!-- <VRow class="ma-0 pa-0 w-100"> -->
-        <!--   <VCol class="ma-0 pa-0"> -->
-        <!--     <v-skeleton-loader -->
-        <!--       v-if="loading" -->
-        <!--       type="text" -->
-        <!--       height="32" -->
-        <!--     ></v-skeleton-loader> -->
-        <!--     <div -->
-        <!--       v-else -->
-        <!--       class="font-weight-bold text-primary" -->
-        <!--       style="font-size: 1.108rem; font-weight: 700" -->
-        <!--     > -->
-        <!--       {{ deviceName }} -->
-        <!--     </div> -->
-        <!--   </VCol> -->
-        <!-- </VRow> -->
-        <!---->
+      <VCardTitle class="px-0 pt-2 pb-0">
         <!---------------------------- Address ------------------------------->
 
         <VRow class="pa-0 ma-0 pt-2 ga-2" no-gutters style="flex-wrap: nowrap">
