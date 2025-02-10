@@ -1,103 +1,30 @@
-name: Flow for PRs on develop and main for `wxm-explorer`
+name: Flow for PRs
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [ opened, reopened, synchronize ]
     branches:
-      - 'develop'
-      - 'main'
+    - 'develop'
+    - 'main'
 
 env:
-  SHORT_SHA: $(echo ${{ github.sha }} | cut -c 1-8)
+  SHORT_SHA: $(echo ${{ github.sha }} | cut -c 1-7)
 
 concurrency:
-  group: wxm-explorer-pr-${{ github.ref }}-1
+  group: pr-${{ github.ref }}-1
   cancel-in-progress: true
 
 jobs:
   perform_local_tests:
-    name: Build wxm-explorer with Docker images
+    name: Build container images
     runs-on: ubuntu-latest
 
     steps:
-      # fetch the code of the repo
-      - name: Clone
-        uses: actions/checkout@v3
+    # fetch the code of the repo
+    - name: Clone
+      uses: actions/checkout@v4
 
-      # configure aws cli; necessary to pull secrets and login to Amazon ECR
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      # docker login to Amazon ECR; necessary to push docker images
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      # pull the respective Secret from AWS and expose it as env vars
-      - name: Read secrets from AWS Secrets Manager into environment variables
-        uses: aws-actions/aws-secretsmanager-get-secrets@v1
-        with:
-          secret-ids: |
-            wxm.explorer.dev.env
-          parse-json-secrets: true
-
-      # clone repo with k8s deployment scripts/yamls; necessary to
-      # deploy Thingsboard on our k8s cluster
-      - name: Checkout k8s yaml definitionsrepo
-        uses: actions/checkout@v3
-        env:
-          GH_ACCESS_TOKEN: ${{ env.WXM_EXPLORER_DEV_ENV_GH_ACCESS_TOKEN }}
-        with:
-          repository: WeatherXM/platform-deployment
-          token: ${{ env.GH_ACCESS_TOKEN }}
-          path: k8sinstall
-
-      # Install Minikube and swawn a local k8s cluster
-      - name: Download and start Minikube
-        id: minikube
-        with:
-          kubernetes-version: v1.21.5
-        uses: medyagh/setup-minikube@master
-
-      # write .env file
-      - name: Download .env
-        run: |
-          aws s3api get-object --bucket ${{ env.WXM_EXPLORER_DEV_ENV_S3_BUCKET }} --key ${{ env.WXM_EXPLORER_DEV_ENV_S3_OBJECT_PATH }} .env
-
-      # invoke wxm-explorer compilation
-      - name: Build wxm-explorer docker images
-        env:
-          IMAGE_REGISTRY: wxm-explorer
-          TAG_NAME: dev
-        run: |
-          export SHELL=/bin/bash
-
-          eval $(minikube -p minikube docker-env)
-
-          docker build -t ${{ env.IMAGE_REGISTRY }}/wxm-explorer:${{ env.TAG_NAME }} .
-
-      # deploy the new images on the minikube cluster
-      - name: Install wxm-explorer in minikube
-        id: deploymentTest
-        env:
-          K8S_ENVIROMENT: dev
-          IMAGE_REGISTRY: wxm-explorer
-          IMAGE_TAG: dev
-        run: |
-          export SHELL=/bin/bash
-
-          cd ./k8sinstall/k8s/wxm-explorer
-          bash ./install.sh -e ${{ env.K8S_ENVIROMENT }}
-
-      # dump all k8s-related resources
-      - name: Failure
-        if: failure() && steps.deploymentTest.outcome == 'failure'
-        run: |
-          export SHELL=/bin/bash
-
-          cd ./k8sinstall/k8s/wxm-explorer
-          bash ./log.all.sh
+    - name: Build the respective container images
+      run: |
+        export SHELL=/bin/bash
+        docker build -t dev/dev:dev .

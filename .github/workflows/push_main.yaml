@@ -1,20 +1,20 @@
-name: CD production
+name: CD staging
 
 on:
   push:
-    tags:
-    - "[0-9]+.[0-9]+.[0-9]+"
+    branches:
+    - main
 
 env:
   SHORT_SHA: $(echo ${{ github.sha }} | cut -c 1-7)
 
 concurrency:
-  group: production-${{ github.ref }}-1
+  group: staging-${{ github.ref }}-1
   cancel-in-progress: true
 
 jobs:
   deploy:
-    name: Build and publish to production
+    name: Build and publish to staging
     runs-on: ubuntu-latest
     steps:
     - name: Clone
@@ -48,16 +48,16 @@ jobs:
         token: ${{ env.GH_ACCESS_TOKEN }}
         path: argocd
 
-    - name: Update production argocd app definitions
+    - name: Update staging argocd app definitions
       env:
         IMAGE_REPO: ${{ secrets.IMAGE_REPOSITORY }}
         ARGOCD_APP_NAME: ${{ secrets.ARGOCD_APP_NAME }}
       run: |
         export SHELL=/bin/bash
         cd argocd
-        ./scripts/update_app_image.py production ${{ env.ARGOCD_APP_NAME }} ${{ env.IMAGE_REPO }}:${{ env.SHORT_SHA }}
+        ./scripts/update_app_image.py staging ${{ env.ARGOCD_APP_NAME }} ${{ env.IMAGE_REPO }}:${{ env.SHORT_SHA }}
 
-    - name: Promote to production PR
+    - name: Promote to staging PR
       uses: peter-evans/create-pull-request@v7
       env:
         GH_ACCESS_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -66,7 +66,7 @@ jobs:
         repository: WeatherXM/platform-argocd
         token: ${{ env.GH_ACCESS_TOKEN }}
         path: argocd
-        labels: production, automated
+        labels: staging, automated
         commit-message: update ${{ env.ARGOCD_APP_NAME }} to ${{ github.sha }}
-        title: "[production] update ${{ env.ARGOCD_APP_NAME }} to ${{ github.sha }}"
+        title: "[staging] update ${{ env.ARGOCD_APP_NAME }} to ${{ github.sha }}"
         body: Update ${{ env.ARGOCD_APP_NAME }} to ${{ github.sha }}
