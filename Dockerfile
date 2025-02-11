@@ -12,13 +12,13 @@ WORKDIR /src
 
 # Build
 FROM base as build
-COPY package*.json ./
-COPY . .
 
-COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn ./.yarn
+# Copy package files
+COPY package*.json yarn.lock .yarnrc.yml ./
+
 RUN yarn install --immutable
 
+COPY . .
 RUN GIT_COMMIT_HASH=$(git rev-parse --short HEAD) yarn build
 
 # Run
