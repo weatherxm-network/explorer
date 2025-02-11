@@ -1,15 +1,25 @@
 # Base
 FROM node:20-alpine AS base
-RUN apk add git --no-cache
+ENV YARN_VERSION=4.3.0
+
+RUN apk update && apk upgrade && apk add git
+
+# prepare yarn
+RUN corepack enable && corepack prepare yarn@${YARN_VERSION}
+
+# set workdir
 WORKDIR /src
 
 # Build
-FROM base AS build
+FROM base as build
 COPY package*.json ./
-RUN npm install
 COPY . .
-RUN GIT_COMMIT_HASH=$(git rev-parse --short HEAD) npm run build
-RUN npm prune
+
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn ./.yarn
+RUN yarn install --immutable
+
+RUN GIT_COMMIT_HASH=$(git rev-parse --short HEAD) yarn build
 
 # Run
 FROM base
