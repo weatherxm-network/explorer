@@ -69,4 +69,5 @@ jobs:
         labels: staging, automated
         commit-message: update ${{ env.ARGOCD_APP_NAME }} to ${{ github.sha }}
         title: "[staging] update ${{ env.ARGOCD_APP_NAME }} to ${{ github.sha }}"
-        body: Update ${{ env.ARGOCD_APP_NAME }} to ${{ github.sha }}
+        body: Staging update ${{ env.ARGOCD_APP_NAME }} to ${{ github.sha }}
+        branch: ${{ env.ARGOCD_APP_NAME }}_staging
