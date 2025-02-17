@@ -2,16 +2,31 @@
   import { useDisplay } from 'vuetify'
   import { storeToRefs } from 'pinia'
   import { useMobileStore } from '~/stores/mobileStore'
+  import { useInfoBannerStore } from '~/stores/infoBannerStore'
   import Mapbox from '~/components/Mapbox/Mapbox.vue'
+  import InfoBanner from '~/components/common/InfoBanner.vue'
 
   const { pageState } = storeToRefs(useMobileStore())
+  const infoBannerStore = useInfoBannerStore()
+  const { isInfoBannerShown } = storeToRefs(infoBannerStore)
   const display = ref(useDisplay())
 </script>
 
 <template>
   <VApp>
-    <div v-if="!display.smAndDown">
-      <VNavigationDrawer width="440" permanent location="left" color="background" :border="false">
+    <InfoBanner />
+    <div v-if="!display.smAndDown" class="position-relative">
+      <VNavigationDrawer
+        width="440"
+        permanent
+        location="left"
+        color="background"
+        class="position-absolute"
+        :style="[
+          isInfoBannerShown ? 'height: calc(98vh - 0px)' : 'height: 100vh',
+        ]"
+        :border="false"
+      >
         <div class="h-100 w-100">
           <VLayout>
             <slot />
@@ -19,7 +34,7 @@
         </div>
       </VNavigationDrawer>
     </div>
-    <div v-if="display.smAndDown" style="z-index: 99">
+    <div v-if="display.smAndDown" class="position-relative" style="z-index: 50">
       <VNavigationDrawer
         :v-model="pageState"
         :width="display.width"
@@ -35,7 +50,7 @@
         </div>
       </VNavigationDrawer>
     </div>
-    <VRow class="ma-0 pa-0 h-100 w-100" no-gutters>
+    <VRow class="ma-0 pa-0 h-100 w-100 position-relative" no-gutters>
       <VCol class="pa-0 ma-0">
         <div style="width: 100%; height: 100%">
           <Mapbox />
@@ -55,7 +70,8 @@
     width: 0px;
   }
 
-  .v-navigation-drawer:not(.v-navigation-drawer--floating) .v-navigation-drawer__border {
+  .v-navigation-drawer:not(.v-navigation-drawer--floating)
+    .v-navigation-drawer__border {
     background-color: transparent !important;
   }
 </style>
