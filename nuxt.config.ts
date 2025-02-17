@@ -16,7 +16,13 @@ export default defineNuxtConfig({
   devServer: {
     port: 3001,
   },
-  modules: ['@pinia/nuxt', 'nuxt-snackbar', '@vueuse/nuxt', '@nuxt/eslint'],
+  modules: [
+    '@pinia/nuxt',
+    'pinia-plugin-persistedstate/nuxt',
+    'nuxt-snackbar',
+    '@vueuse/nuxt',
+    '@nuxt/eslint',
+  ],
   snackbar: {
     bottom: true,
     duration: 2000,

@@ -1,3 +1,5 @@
+import { type RemoteConfig, type Value } from 'firebase/remote-config'
+
 export interface Units {
   humidity: string
   precip: string
@@ -54,4 +56,16 @@ export interface Device {
   name: string
   profile: string
   timezone: string
+}
+
+export interface InfoBannerConfig {
+  web_info_banner_action_label: Value
+  web_info_banner_background_url: Value
+  web_info_banner_dismissable: Value
+  web_info_banner_id: Value
+  web_info_banner_message: Value
+  web_info_banner_show: Value
+  web_info_banner_title: Value
+  web_info_banner_url: Value
+  web_info_button_show: Value
 }

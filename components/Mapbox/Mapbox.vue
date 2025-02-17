@@ -8,7 +8,12 @@
   import RefreshSnackbar from './widgets/RefreshSnackbar.vue'
   import SearchBar from './widgets/SearchBar.vue'
   import TrackingConcentComponent from './widgets/TrackingConcentComponent.vue'
-  import type { SearchResultLocation, Point, SearchResultDevice, Collections } from './types/mapbox'
+  import type {
+    SearchResultLocation,
+    Point,
+    SearchResultDevice,
+    Collections,
+  } from './types/mapbox'
   import { useMapboxStore } from '~/stores/mapboxStore'
   import { useMobileStore } from '~/stores/mobileStore'
   import wxmApi from '~/api/wxmApi'
@@ -47,7 +52,7 @@
         : 'invert(24%) sepia(86%) saturate(1662%) hue-rotate(202deg) brightness(86%) contrast(103%)',
       '--overlap-filter-color': theme.current.value.dark
         ? 'brightness(0) invert(1)'
-        : 'invert(0%) sepia(0%) saturate(3351%) hue-rotate(142deg) brightness(87%) contrast(100%)'
+        : 'invert(0%) sepia(0%) saturate(3351%) hue-rotate(142deg) brightness(87%) contrast(100%)',
     }
   })
 
@@ -70,14 +75,14 @@
   watch(searchedAddressToFly, (newAddress: SearchResultLocation) => {
     map.value.flyTo({
       center: [newAddress.center.lon, newAddress.center.lat],
-      zoom: 13
+      zoom: 13,
     })
   })
 
   watch(searchedDeviceToFly, (newDevice: SearchResultDevice) => {
     const coords: Point = {
       lon: newDevice.cell_center.lon,
-      lat: newDevice.cell_center.lat
+      lat: newDevice.cell_center.lat,
     }
     // check if any polygon is already clicked
     if (clickCellId.value) {
@@ -91,10 +96,12 @@
     // zoom to cell
     map.value.flyTo({
       center: [coords.lon, coords.lat],
-      zoom: 13
+      zoom: 13,
     })
     // navigato to cells page
-    navigateTo(`/stations/${formatDeviceName.denormalizeDeviceName(newDevice.name)}`)
+    navigateTo(
+      `/stations/${formatDeviceName.denormalizeDeviceName(newDevice.name)}`,
+    )
     mobileStore.setPageState(true)
   })
 
@@ -118,6 +125,7 @@
         removeNavControlFromMap()
         changeMapboxLogoPosition()
       }
+      map.value.resize()
     }
   }
 
@@ -130,23 +138,23 @@
     // zoom out to initial position
     map.value.flyTo({
       center: [24.162572, 38.667284],
-      zoom: 3
+      zoom: 3,
     })
   }
 
   const createNavControls = () => {
     return new mapboxgl.NavigationControl({
-      showCompass: false
+      showCompass: false,
     })
   }
 
   const createGeolocate = () => {
     return new mapboxgl.GeolocateControl({
       positionOptions: {
-        enableHighAccuracy: true
+        enableHighAccuracy: true,
       },
       showUserLocation: true,
-      trackUserLocation: true
+      trackUserLocation: true,
     })
   }
 
@@ -167,21 +175,25 @@
   }
 
   const changeMapboxLogoPosition = () => {
-    const mapboxLogo = document.getElementsByClassName('mapboxgl-ctrl-bottom-left')[0]
-    smBreakpoint.value ? (mapboxLogo.style.left = '0px') : (mapboxLogo.style.left = '440px')
+    const mapboxLogo = document.getElementsByClassName(
+      'mapboxgl-ctrl-bottom-left',
+    )[0]
+    smBreakpoint.value
+      ? (mapboxLogo.style.left = '0px')
+      : (mapboxLogo.style.left = '440px')
   }
 
   const addCellsSource = () => {
     map.value.addSource('cells', {
       type: 'geojson',
-      data: collections.value.cellsCollection
+      data: collections.value.cellsCollection,
     })
   }
 
   const addHeatSource = () => {
     map.value.addSource('heatmap', {
       type: 'geojson',
-      data: collections.value.heatmapCollection
+      data: collections.value.heatmapCollection,
     })
   }
 
@@ -191,13 +203,13 @@
       type: 'fill',
       source: 'cells',
       layout: {
-        visibility: 'visible'
+        visibility: 'visible',
       },
       paint: {
         'fill-color': '#3a86ff',
-        'fill-opacity': 0.5
+        'fill-opacity': 0.5,
       },
-      filter: ['==', '$type', 'Polygon']
+      filter: ['==', '$type', 'Polygon'],
     })
   }
 
@@ -211,7 +223,15 @@
         minzoom: 0,
         paint: {
           // Increase the heatmap weight based on frequency and property magnitude
-          'heatmap-weight': ['interpolate', ['linear'], ['get', 'device_count'], 0, 0, 1000, 1000],
+          'heatmap-weight': [
+            'interpolate',
+            ['linear'],
+            ['get', 'device_count'],
+            0,
+            0,
+            1000,
+            1000,
+          ],
           // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
           // Begin color ramp at 0-stop with a 0-transparancy color
           // to create a blur-like effect.
@@ -230,14 +250,14 @@
             0.8,
             'rgb(103.0, 118.0, 247.0)',
             1,
-            'rgb(0.0, 255.0, 206.0)'
+            'rgb(0.0, 255.0, 206.0)',
           ],
           // Adjust the heatmap radius by zoom level
           'heatmap-radius': {
             stops: [
               [0, 2],
-              [9, 20]
-            ]
+              [9, 20],
+            ],
           },
           // Transition from heatmap to circle layer by zoom level
           'heatmap-opacity': [
@@ -254,11 +274,11 @@
             9.5,
             0.1,
             10,
-            0.0
-          ]
-        }
+            0.0,
+          ],
+        },
       },
-      'waterway-label'
+      'waterway-label',
     )
   }
 
@@ -307,7 +327,7 @@
   const addOutLineLayer = (cellIndex: string) => {
     // search in collection based on cell index
     const cell = _.find(collections.value.cellsCollection.features, {
-      properties: { index: cellIndex }
+      properties: { index: cellIndex },
     })
     // check if source already exists
     if (!map.value.getSource(`outline${cellIndex}`)) {
@@ -318,9 +338,9 @@
           type: 'Feature',
           geometry: {
             type: 'Polygon',
-            coordinates: [cell.geometry.coordinates[0]]
-          }
-        }
+            coordinates: [cell.geometry.coordinates[0]],
+          },
+        },
       })
     }
     // check if layer already exists
@@ -333,8 +353,8 @@
         layout: {},
         paint: {
           'line-color': '#6ca1f5',
-          'line-width': 3.5
-        }
+          'line-width': 3.5,
+        },
       })
     }
   }
@@ -351,7 +371,7 @@
 
   const clickOnMap = () => {
     // remove outline layer if any
-    if (clickCellId) {
+    if (clickCellId.value) {
       removeOutLineLayer(clickCellId.value)
       clickCellId.value = ''
     }
@@ -382,7 +402,7 @@
       // zoom to cell
       map.value.flyTo({
         center: [coords.lon, coords.lat],
-        zoom: 13
+        zoom: 13,
       })
 
       // navigato to cells page
@@ -401,7 +421,9 @@
       mobileStore.setPageState(true)
     }
     if (splittedUrl[1] === 'stations' || splittedUrl[1] === 'reward_timeline') {
-      const normalizeRouteDeviceName = formatDeviceName.normalizeDeviceName(splittedUrl[2])
+      const normalizeRouteDeviceName = formatDeviceName.normalizeDeviceName(
+        splittedUrl[2],
+      )
       await wxmApi
         .resolveDeviceName(normalizeRouteDeviceName)
         .then((searchedDevice) => {
@@ -421,8 +443,8 @@
     try {
       const cell = _.find(collections.value.cellsCollection.features, {
         properties: {
-          index: `${urlCellIndex}`
-        }
+          index: `${urlCellIndex}`,
+        },
       }).properties
       // check if any polygon is already clicked
       if (clickCellId.value) {
@@ -436,7 +458,7 @@
       // zoom to cell
       map.value.flyTo({
         center: [cell.center.lon, cell.center.lat],
-        zoom: 13
+        zoom: 13,
       })
     } catch (e) {}
   }
@@ -455,7 +477,7 @@
       // zoom to cell
       map.value.flyTo({
         center: [device.cell_center.lon, device.cell_center.lat],
-        zoom: 13
+        zoom: 13,
       })
     } catch (e) {}
   }
@@ -468,7 +490,10 @@
     window.addEventListener('online', updateOnlineStatus.value)
     window.addEventListener('offline', updateOnlineStatus.value)
 
-    map.value = await mapCreation.createMap(config.mapboxAccessToken, config.mapboxStyle)
+    map.value = await mapCreation.createMap(
+      config.mapboxAccessToken,
+      config.mapboxStyle,
+    )
     navControls = createNavControls()
     geolocate = createGeolocate()
 
@@ -484,7 +509,9 @@
       // create map collections
       collections.value = await calcedMapboxData.getCollections()
       // error handling on empty collection
-      _.isEmpty(collections.value) ? (snackbar.value = true) : (snackbar.value = false)
+      _.isEmpty(collections.value)
+        ? (snackbar.value = true)
+        : (snackbar.value = false)
       // add sources to map
       await addCellsSource()
       await addHeatSource()
@@ -517,7 +544,12 @@
 
 <template>
   <div>
-    <VProgressLinear v-if="mapboxLoading" indeterminate color="primary" absolute></VProgressLinear>
+    <VProgressLinear
+      v-if="mapboxLoading"
+      indeterminate
+      color="primary"
+      absolute
+    ></VProgressLinear>
     <SearchBar />
     <div id="map" :style="navButtonsStyles"></div>
 
