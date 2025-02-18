@@ -1,11 +1,12 @@
 <script setup lang="ts">
-  import { useDisplay } from 'vuetify'
+  import { useTheme, useDisplay } from 'vuetify'
 
   import { useInfoBannerStore } from '~/stores/infoBannerStore'
   import { storeToRefs } from 'pinia'
   import type { InfoBannerConfig } from './types/common'
 
   const display = ref(useDisplay())
+  const theme = useTheme()
 
   const { fetchRemoteConfig } = useFirebase()
   const infoBannerStore = useInfoBannerStore()
@@ -15,7 +16,7 @@
     title,
     showActionBtn,
     actionBtnLabel,
-    // backgroundUrl,
+    backgroundUrl,
     actionBtnUrl,
     isDismissable,
   } = storeToRefs(infoBannerStore)
@@ -48,7 +49,9 @@
     ]"
     :style="[
       'z-index: 60',
-      'background: linear-gradient(90deg, #1E1B4E 0%, #4E2672 48.5%, #381F69 100%);',
+      backgroundUrl
+        ? `background-image: url(${backgroundUrl}); background-repeat: no-repeat; background-position: center; background-size: cover;`
+        : `background: ${theme.current.value.colors.surface}`,
     ]"
   >
     <h5
@@ -57,19 +60,27 @@
         ' font-weight-bold',
         display.smAndDown ? 'text-body-2' : 'text-body-1',
       ]"
+      :style="[`color: ${theme.current.value.colors.text}`]"
     >
       {{ title }}:
-      <span :class="[display.smAndDown ? 'text-body-2' : 'text-body-1']">
+      <span
+        :class="[display.smAndDown ? 'text-body-2' : 'text-body-1']"
+        :style="[`color: ${theme.current.value.colors.text}`]"
+      >
         {{ message }}
       </span>
     </h5>
     <button
       v-if="showActionBtn"
       :class="[
-        'px-4 py-2 text-caption font-weight-bold rounded-xl border-md border-solid',
+        'px-4 py-2 text-caption font-weight-bold rounded-xl',
         display.smAndDown ? 'mr-auto' : 'ml-4',
       ]"
-      :style="['min-width: 106px']"
+      :style="[
+        'min-width: 106px',
+        `color: ${theme.current.value.colors.text};`,
+        `border: 1px solid ${theme.current.value.colors.text} !important`,
+      ]"
       @click="onBtnClick"
     >
       {{ actionBtnLabel }}
@@ -77,10 +88,16 @@
     <button
       v-if="isDismissable"
       :class="['position-absolute']"
-      :style="['right: 16px', 'top: 16px', 'width: 34px', 'height: 34px']"
+      :style="[
+        'right: 16px',
+        'top: 16px',
+        'width: 34px',
+        'height: 34px',
+        `color: ${theme.current.value.colors.text}`,
+      ]"
       @click="dismissInfoBanner"
     >
-      <i class="fa-regular fa-xmark" :style="['height: 19px', 'width: 20px']" />
+      <i class="fa-regular fa-xmark" :style="['font-size: 18px']" />
     </button>
   </div>
 </template>
