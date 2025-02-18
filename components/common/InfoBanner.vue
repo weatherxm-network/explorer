@@ -90,7 +90,7 @@
       :class="['position-absolute']"
       :style="[
         'right: 16px',
-        'top: 16px',
+        'top: calc(50% - 15px)',
         'width: 34px',
         'height: 34px',
         `color: ${theme.current.value.colors.text}`,
