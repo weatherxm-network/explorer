@@ -12,10 +12,11 @@
     showSettings?: boolean
   }
   const props = withDefaults(defineProps<Props>(), {
-    showSettings: false
+    showSettings: false,
   })
 
   const emits = defineEmits(['closeSettings'])
+  const { elementHeight } = storeToRefs(useInfoBannerStore())
   const snackbar = useSnackbar()
   const display = ref(useDisplay())
   const currentTheme = useTheme()
@@ -28,8 +29,11 @@
   const weatherUnitsSectionTitle = ref('Weather Units')
   const helpSectionTitle = ref('Help')
   const contactSupportHeader = ref('Contact Support')
-  const contactSupportLinkText = ref(`Visit our support portal's knowledge base`)
-  const contactSupportBodyText = ref(` or open a new ticket and we'll get back to you as
+  const contactSupportLinkText = ref(
+    `Visit our support portal's knowledge base`,
+  )
+  const contactSupportBodyText =
+    ref(` or open a new ticket and we'll get back to you as
               soon as possible.`)
   const privacySectionTitle = ref('Privacy')
   const privacySectionBodyText = ref('Collect Anonymous Data')
@@ -39,7 +43,7 @@
   const theme = ref<Theme>({
     currentTheme: 'light',
     name: 'System',
-    options: [`Dark`, `Light`, `System`]
+    options: [`Dark`, `Light`, `System`],
   })
 
   // default measurements
@@ -47,12 +51,12 @@
     temp: {
       name: `Temperature`,
       defaultUnit: `Celsius (°C)`,
-      options: [`Celsius (°C)`, `Fahrenheit (°F)`]
+      options: [`Celsius (°C)`, `Fahrenheit (°F)`],
     },
     precipitation: {
       name: `Precipitation`,
       defaultUnit: `Millimeters (mm)`,
-      options: [`Millimeters (mm)`, `Inches (in)`]
+      options: [`Millimeters (mm)`, `Inches (in)`],
     },
     wind_speed: {
       name: `Wind Speed`,
@@ -62,25 +66,25 @@
         `Kilometers per hour (km/h)`,
         `Miles per hour (mph)`,
         `Knots (kn)`,
-        `Beaufort (bf)`
-      ]
+        `Beaufort (bf)`,
+      ],
     },
     wind_direction: {
       name: `Wind Direction`,
       defaultUnit: `Degrees (°)`,
-      options: [`Degrees (°)`, `Cardinal (e.g. N, SW, NE, etc)`]
+      options: [`Degrees (°)`, `Cardinal (e.g. N, SW, NE, etc)`],
     },
     pressure: {
       name: `Pressure`,
       defaultUnit: `Hectopascal (hPa)`,
-      options: [`Hectopascal (hPa)`, `Inch of mercury (inHg)`]
-    }
+      options: [`Hectopascal (hPa)`, `Inch of mercury (inHg)`],
+    },
   })
   const privacySwitch = ref(false)
 
-  const smDreakpoint = computed(() => {
-    return display.value.smAndDown
-  })
+  // const smDreakpoint = computed(() => {
+  //   return display.value.smAndDown
+  // })
 
   const layer1Color = computed(() => {
     return currentTheme.current.value.colors.layer1
@@ -90,7 +94,7 @@
     () => props.showSettings,
     () => {
       privacySwitch.value = getTrackingValue()
-    }
+    },
   )
   watch(privacySwitch, (newValue) => {
     if (newValue === true) {
@@ -163,7 +167,7 @@
     snackbar.add({
       text: 'Settings Saved!',
       dismissible: false,
-      background: '#212121'
+      background: '#212121',
     })
   }
 
@@ -172,7 +176,7 @@
   }
   const disablePlugin = async () => {
     setOptions({
-      config: { id: '' }
+      config: { id: '' },
     })
     await bootstrap()
     localStorage.set('tracking', false)
@@ -180,7 +184,7 @@
 
   const enablePlugin = async () => {
     setOptions({
-      config: { id: useRuntimeConfig().public.gtag }
+      config: { id: useRuntimeConfig().public.gtag },
     })
     await bootstrap()
     localStorage.set('tracking', true)
@@ -208,20 +212,26 @@
 <template>
   <div v-if="showSettings">
     <!------------------------------------ Desktop settings menu ------------------------------------>
-    <div v-if="!smDreakpoint" class="mt-2">
+    <div v-if="!display.smAndDown" class="mt-2">
       <VCard
         v-click-outside="{
           handler: closeSettings,
-          include: includeFunction
+          include: includeFunction,
         }"
         color="top"
         style="border-radius: 16px; overflow-y: scroll"
         class="pa-4 scroll"
         elevation="4"
-        :height="windowHeight - 76 < 1082 ? `${windowHeight - 76}px` : '1082'"
+        :height="[
+          windowHeight - elementHeight - 76 < 1082
+            ? `${windowHeight - elementHeight - 76}px`
+            : '1082',
+        ]"
       >
         <VCardTitle class="pa-0 pb-4">
-          <span class="ml-2 text-text" style="font-weight: 700">{{ settingsMenuHeader }}</span>
+          <span class="ml-2 text-text" style="font-weight: 700">{{
+            settingsMenuHeader
+          }}</span>
         </VCardTitle>
         <VCardText class="pa-0" style="z-index: 99999">
           <!-- -------------------- Display section ---------------------->
@@ -230,13 +240,19 @@
             class="pt-4 pb-1 px-4 mb-4"
             :style="{
               'background-color': layer1Color,
-              'borderRadius': '8px'
+              'borderRadius': '8px',
             }"
           >
-            <div class="text-subtitle-1 text-text mb-4" style="font-weight: 700">
+            <div
+              class="text-subtitle-1 text-text mb-4"
+              style="font-weight: 700"
+            >
               {{ displaySectionTitle }}
             </div>
-            <div class="text-subtitle-2 text-darkestBlue" style="font-weight: 700">
+            <div
+              class="text-subtitle-2 text-darkestBlue"
+              style="font-weight: 700"
+            >
               {{ displaySectionContentHeader }}
             </div>
             <VSelect
@@ -259,15 +275,21 @@
             class="pt-4 pb-4 px-4 mb-4"
             :style="{
               'background-color': layer1Color,
-              'borderRadius': '8px'
+              'borderRadius': '8px',
             }"
           >
-            <div class="text-subtitle-1 text--text mb-4" style="font-weight: 700">
+            <div
+              class="text-subtitle-1 text--text mb-4"
+              style="font-weight: 700"
+            >
               {{ weatherUnitsSectionTitle }}
             </div>
 
             <div v-for="i in measurements" :key="i.defaultUnit">
-              <div class="text-subtitle-2 text-darkestBlue" style="font-weight: 700">
+              <div
+                class="text-subtitle-2 text-darkestBlue"
+                style="font-weight: 700"
+              >
                 {{ i.name }}
               </div>
               <VSelect
@@ -290,13 +312,19 @@
             class="pt-4 pb-4 px-4 mb-4"
             :style="{
               'background-color': layer1Color,
-              'borderRadius': '8px'
+              'borderRadius': '8px',
             }"
           >
-            <div class="text-text text-subtitle-1 text--text mb-3" style="font-weight: 700">
+            <div
+              class="text-text text-subtitle-1 text--text mb-3"
+              style="font-weight: 700"
+            >
               {{ helpSectionTitle }}
             </div>
-            <div class="text-darkestBlue text-subtitle-2" style="font-weight: 700">
+            <div
+              class="text-darkestBlue text-subtitle-2"
+              style="font-weight: 700"
+            >
               {{ contactSupportHeader }}
             </div>
             <div class="mt-2 text-text text-subtitle-2">
@@ -306,8 +334,8 @@
                 @click="
                   navigateTo('https://support.weatherxm.com/hc/en-us', {
                     open: {
-                      target: '_blank'
-                    }
+                      target: '_blank',
+                    },
                   })
                 "
               >
@@ -322,15 +350,21 @@
             class="pt-4 pb-4 px-4 mb-3"
             :style="{
               'background-color': layer1Color,
-              'borderRadius': '8px'
+              'borderRadius': '8px',
             }"
           >
-            <div class="text-subtitle-1 text--text mb-1" style="font-weight: 700">
+            <div
+              class="text-subtitle-1 text--text mb-1"
+              style="font-weight: 700"
+            >
               {{ privacySectionTitle }}
             </div>
 
             <v-row class="ma-0 pa-0 d-flex justify-space-between align-center">
-              <div style="font-size: 0.984rem; font-weight: 700" class="text-text">
+              <div
+                style="font-size: 0.984rem; font-weight: 700"
+                class="text-text"
+              >
                 {{ privacySectionBodyText }}
               </div>
               <VSwitch
@@ -350,13 +384,16 @@
             class="pt-4 pb-4 px-4"
             :style="{
               'background-color': layer1Color,
-              'borderRadius': '8px'
+              'borderRadius': '8px',
             }"
           >
             <div class="text-subtitle-1 text--text" style="font-weight: 700">
               {{ aboutSectionTitle }}
             </div>
-            <div class="mt-4 text-darkestBlue text-subtitle-2" style="font-weight: 700">
+            <div
+              class="mt-4 text-darkestBlue text-subtitle-2"
+              style="font-weight: 700"
+            >
               {{ aboutSectionBodyText }}
             </div>
             <div class="mt-2 text-text text-subtitle-2">
@@ -369,7 +406,16 @@
 
     <!------------------------------------ Mobile settings menu ------------------------------------>
 
-    <VDialog v-model="smDreakpoint" fullscreen style="z-index: 9">
+    <div
+      v-if="display.smAndDown"
+      class="mobile-settings-container"
+      :style="[
+        'position: fixed; z-index: 9;',
+        `left: 0; right: 0; bottom: 0; top: ${elementHeight}px;`,
+        `height: calc(100%-${elementHeight}px)`,
+        'overflow-y: auto;',
+      ]"
+    >
       <VCard color="top">
         <VCardTitle class="px-4 pt-4 pb-4 d-flex justify-space-between">
           <span class="ml-2 text-text">{{ settingsMenuHeader }}</span>
@@ -386,13 +432,19 @@
             class="pt-4 pb-4 px-4 mb-4"
             :style="{
               'background-color': layer1Color,
-              'borderRadius': '8px'
+              'borderRadius': '8px',
             }"
           >
-            <div class="text-subtitle-1 text--text mb-4" style="font-weight: 700">
+            <div
+              class="text-subtitle-1 text--text mb-4"
+              style="font-weight: 700"
+            >
               {{ displaySectionTitle }}
             </div>
-            <div class="text-subtitle-2 text-darkestBlue" style="font-weight: 700">
+            <div
+              class="text-subtitle-2 text-darkestBlue"
+              style="font-weight: 700"
+            >
               {{ displaySectionContentHeader }}
             </div>
             <v-select
@@ -415,15 +467,21 @@
             class="pt-4 pb-4 px-4 mb-4"
             :style="{
               'background-color': layer1Color,
-              'borderRadius': '8px'
+              'borderRadius': '8px',
             }"
           >
-            <div class="text-text text-subtitle-1 text--text mb-4" style="font-weight: 700">
+            <div
+              class="text-text text-subtitle-1 text--text mb-4"
+              style="font-weight: 700"
+            >
               {{ weatherUnitsSectionTitle }}
             </div>
 
             <div v-for="i in measurements" :key="i.defaultUnit">
-              <div class="text-subtitle-2 text-darkestBlue" style="font-weight: 700">
+              <div
+                class="text-subtitle-2 text-darkestBlue"
+                style="font-weight: 700"
+              >
                 {{ i.name }}
               </div>
               <VSelect
@@ -444,13 +502,19 @@
             class="pt-4 pb-4 px-4 mb-4"
             :style="{
               'background-color': layer1Color,
-              'borderRadius': '8px'
+              'borderRadius': '8px',
             }"
           >
-            <div class="text-text text-subtitle-1 text--text mb-3" style="font-weight: 700">
+            <div
+              class="text-text text-subtitle-1 text--text mb-3"
+              style="font-weight: 700"
+            >
               {{ helpSectionTitle }}
             </div>
-            <div class="text-darkestBlue text-subtitle-2" style="font-weight: 700">
+            <div
+              class="text-darkestBlue text-subtitle-2"
+              style="font-weight: 700"
+            >
               {{ contactSupportHeader }}
             </div>
             <div class="mt-2 text-text text-subtitle-2">
@@ -460,8 +524,8 @@
                 @click="
                   navigateTo('https://support.weatherxm.com/hc/en-us', {
                     open: {
-                      target: '_blank'
-                    }
+                      target: '_blank',
+                    },
                   })
                 "
               >
@@ -476,15 +540,21 @@
             class="pt-4 pb-4 px-4 mb-4"
             :style="{
               'background-color': layer1Color,
-              'borderRadius': '8px'
+              'borderRadius': '8px',
             }"
           >
-            <div class="text-subtitle-1 text--text mb-4" style="font-weight: 700">
+            <div
+              class="text-subtitle-1 text--text mb-4"
+              style="font-weight: 700"
+            >
               {{ privacySectionTitle }}
             </div>
 
             <VRow class="ma-0 pa-0 d-flex justify-space-between align-center">
-              <div style="font-size: 0.984rem; font-weight: 700" class="text-text">
+              <div
+                style="font-size: 0.984rem; font-weight: 700"
+                class="text-text"
+              >
                 {{ privacySectionBodyText }}
               </div>
               <VSwitch
@@ -504,13 +574,19 @@
             class="pt-4 pb-4 px-4"
             :style="{
               'background-color': layer1Color,
-              'borderRadius': '8px'
+              'borderRadius': '8px',
             }"
           >
-            <div class="text-text text-subtitle-1 text--text mb-3" style="font-weight: 700">
+            <div
+              class="text-text text-subtitle-1 text--text mb-3"
+              style="font-weight: 700"
+            >
               {{ aboutSectionTitle }}
             </div>
-            <div class="text-darkestBlue text-subtitle-2" style="font-weight: 700">
+            <div
+              class="text-darkestBlue text-subtitle-2"
+              style="font-weight: 700"
+            >
               {{ aboutSectionBodyText }}
             </div>
             <div class="mt-2 text-text text-subtitle-2">
@@ -519,7 +595,7 @@
           </div>
         </VCardText>
       </VCard>
-    </VDialog>
+    </div>
   </div>
 </template>
 

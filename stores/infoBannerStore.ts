@@ -14,6 +14,7 @@ export const useInfoBannerStore = defineStore('InfoBannerStore', {
     message: undefined,
     backgroundUrl: undefined,
     showBanner: undefined,
+    elementHeight: 0,
   }),
   getters: {
     isInfoBannerShown(): boolean {
@@ -25,6 +26,9 @@ export const useInfoBannerStore = defineStore('InfoBannerStore', {
   actions: {
     setDismissed() {
       this.dismissed = true
+    },
+    updateHeight(height: number) {
+      this.elementHeight = height
     },
     updateState(data: InfoBannerConfig) {
       if (data.web_info_banner_id?.asString()) {
@@ -60,4 +64,5 @@ interface InfoBannerState {
   message?: string
   backgroundUrl?: string
   showBanner?: boolean
+  elementHeight: number
 }
