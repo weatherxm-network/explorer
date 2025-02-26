@@ -10,6 +10,7 @@
 
   const { fetchRemoteConfig } = useFirebase()
   const infoBannerStore = useInfoBannerStore()
+  const { elementHeight } = storeToRefs(infoBannerStore)
   const {
     isInfoBannerShown,
     message,
@@ -20,6 +21,18 @@
     actionBtnUrl,
     isDismissable,
   } = storeToRefs(infoBannerStore)
+
+  const elRef = ref<HTMLDivElement>()
+
+  watch(
+    () => elRef.value,
+    (newInfoBannerEl) => {
+      const newHeight = Number(newInfoBannerEl?.clientHeight)
+      if (!isNaN(newHeight) && elementHeight.value !== newHeight) {
+        detectAndUpdateSelfHeight(newInfoBannerEl?.clientHeight)
+      }
+    },
+  )
 
   const dismissInfoBanner = () => {
     infoBannerStore.setDismissed()
@@ -34,6 +47,12 @@
     }
   }
 
+  const detectAndUpdateSelfHeight = (h?: number) => {
+    if (elRef.value) {
+      infoBannerStore.updateHeight(h ? h : elRef.value.clientHeight)
+    }
+  }
+
   onBeforeMount(async () => {
     const config = (await fetchRemoteConfig()) as unknown as InfoBannerConfig
     infoBannerStore.updateState(config)
@@ -42,6 +61,7 @@
 <template>
   <div
     v-if="isInfoBannerShown"
+    ref="elRef"
     :class="[
       'w-100 h-10 pl-4  py-2 position-relative',
       'd-flex justify-center align-center ga-1 flex-wrap',

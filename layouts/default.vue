@@ -8,7 +8,7 @@
 
   const { pageState } = storeToRefs(useMobileStore())
   const infoBannerStore = useInfoBannerStore()
-  const { isInfoBannerShown } = storeToRefs(infoBannerStore)
+  const { isInfoBannerShown, elementHeight } = storeToRefs(infoBannerStore)
   const display = ref(useDisplay())
   const infoBannerRef = ref<HTMLDivElement>()
 </script>
@@ -25,7 +25,7 @@
         class="position-absolute"
         :style="[
           isInfoBannerShown
-            ? `height: calc(100vh - ${infoBannerRef?.clientHeight || 0}px)`
+            ? `height: calc(100vh - ${elementHeight || 0}px)`
             : 'height: 100vh',
         ]"
         :border="false"
@@ -37,17 +37,16 @@
         </div>
       </VNavigationDrawer>
     </div>
-    <div v-if="display.smAndDown" class="position-relative" style="z-index: 50">
+    <div
+      v-if="display.smAndDown"
+      class="position-relative"
+      :style="[`z-index: 50;`]"
+    >
       <VNavigationDrawer
         :v-model="pageState"
         :width="display.width"
         :permanent="pageState"
-        class="position-absolute"
-        :style="[
-          isInfoBannerShown
-            ? `height: calc(100vh - ${infoBannerRef?.clientHeight || 0}px)`
-            : 'height: 100vh',
-        ]"
+        :style="[`padding-top: ${elementHeight}px`]"
         touchless
         location="right"
         color="background"

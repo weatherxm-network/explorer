@@ -9,8 +9,8 @@
     position: 'absolute',
     right: 'calc(50% - 94px)',
     top: 'calc(100% - 96px)',
-    zIndex: '9',
-    height: '42px !important'
+    zIndex: '8',
+    height: '42px !important',
   })
 
   const theme = useTheme()
@@ -34,7 +34,10 @@
     :style="netStatStyle"
     @click="openNetStat"
   >
-    <i class="fa-regular fa-chart-line" :class="currentTheme ? 'text-top' : 'text-text'"></i>
+    <i
+      class="fa-regular fa-chart-line"
+      :class="currentTheme ? 'text-top' : 'text-text'"
+    ></i>
     <div
       class="pl-3 text-body-2"
       :class="currentTheme ? 'top-text' : 'text-text'"
