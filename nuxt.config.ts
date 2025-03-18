@@ -39,7 +39,7 @@ export default defineNuxtConfig({
       version: process.env.GIT_COMMIT_HASH
         ? `${pkg.version}-${process.env.GIT_COMMIT_HASH}`
         : pkg.version,
-      gtag: process.env.NUXT_PUBLIC_GOOGLE_ANALYTICS_ID,
+      googleAnalyticsId: process.env.NUXT_PUBLIC_GOOGLE_ANALYTICS_ID,
       firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY,
       firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
       firebaseProjectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID,

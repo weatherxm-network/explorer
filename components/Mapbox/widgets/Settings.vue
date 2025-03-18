@@ -184,7 +184,7 @@
 
   const enablePlugin = async () => {
     setOptions({
-      config: { id: useRuntimeConfig().public.gtag },
+      config: { id: useRuntimeConfig().public.googleAnalyticsId },
     })
     await bootstrap()
     localStorage.set('tracking', true)

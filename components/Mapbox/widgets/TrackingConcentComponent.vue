@@ -21,7 +21,7 @@
           right: '0',
           top: 'auto',
           bottom: '0',
-          zIndex: 9999
+          zIndex: 9999,
         }
       : {
           position: 'absolute',
@@ -30,7 +30,7 @@
           bottom: '20px',
           zIndex: 9999,
           width: '412px',
-          borderRadius: '16px'
+          borderRadius: '16px',
         }
   })
 
@@ -40,7 +40,7 @@
 
   const disablePlugin = async () => {
     setOptions({
-      config: { id: '' }
+      config: { id: '' },
     })
     await bootstrap()
     localStorage.set('tracking', false)
@@ -48,7 +48,7 @@
   }
   const enablePlugin = async () => {
     setOptions({
-      config: { id: useRuntimeConfig().public.gtag }
+      config: { id: useRuntimeConfig().public.googleAnalyticsId },
     })
     await bootstrap()
     localStorage.set('tracking', true)
@@ -68,10 +68,10 @@
               borderBottomleftRadius: '0px',
               borderBottomRightRadius: '0px',
               borderTopRightRadius: '16px',
-              borderTopLeftRadius: '16px'
+              borderTopLeftRadius: '16px',
             }
           : {
-              borderRadius: '16px'
+              borderRadius: '16px',
             }
       "
     >

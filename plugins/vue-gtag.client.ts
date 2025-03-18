@@ -4,10 +4,13 @@ export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.use(VueGtag, {
     disableScriptLoad: true,
     config: {
-      id: config.gtag && config.initGoogleServices ? config.gtag : '',
+      id:
+        config.googleAnalyticsId && config.initGoogleServices
+          ? config.googleAnalyticsId
+          : '',
       params: {
-        anonymize_ip: true
-      }
-    }
+        anonymize_ip: true,
+      },
+    },
   })
 })
