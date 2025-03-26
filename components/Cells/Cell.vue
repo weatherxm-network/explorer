@@ -8,7 +8,6 @@
 
   const display = ref(useDisplay())
   const route = useRoute()
-  const { getAddress } = useAddress()
   const showCellsDevices = ref(true)
   const loading = ref(false)
   const boldText = ref('Oops! Something went wrong.')
@@ -32,13 +31,12 @@
 
   onMounted(async () => {
     loading.value = true
-    // get cell address based on cell id
-    cellAddress.value = await getAddress(route.params.cellIndex)
     // get cell devices through api
     getCellDevices(route.params.cellIndex)
       .then(async (orderedDevices) => {
         if (orderedDevices.length !== 0) {
           // compute icon for cell devices
+          cellAddress.value = orderedDevices[0].address
           orderedCellDevices.value = orderedDevices
           countTotalStations.value = orderedCellDevices.value.length
           countActiveStations.value = orderedCellDevices.value.filter(
@@ -65,6 +63,7 @@
     <CellsHeader
       :active-stations="countActiveStations"
       :total-stations="countTotalStations"
+      :cell-address="cellAddress"
       :loading="loading"
     />
     <!--------------- Main Content -------------->

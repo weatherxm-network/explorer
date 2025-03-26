@@ -8,18 +8,17 @@
     activeStations: number
     totalStations: number
     loading: boolean
+    cellAddress?: string
   }
 
   const props = withDefaults(defineProps<Props>(), {
     activeStations: 1,
     totalStations: 0,
     loading: true,
+    cellAddress: '-',
   })
   const { trackGAevent } = useGAevents()
-  const { getAddress } = useAddress()
   const mobileStore = useMobileStore()
-  const route = useRoute()
-  const cellAddress = ref('')
   const display = ref(useDisplay())
   const showTooltip = ref(false)
   const tooltipText = ref('Cell shareable link copied to clipboard')
@@ -79,9 +78,9 @@
   })
 
   onMounted(async () => {
-    cellAddress.value = await getAddress(route.params.cellIndex).then(
-      (response) => (response === null ? '-' : response),
-    )
+    // cellAddress.value = await getAddress(route.params.cellIndex).then(
+    //   (response) => (response === null ? '-' : response),
+    // )
   })
 </script>
 
@@ -110,7 +109,7 @@
             height="32"
           ></v-skeleton-loader>
           <div v-else class="text-h6 font-weight-bold text-text">
-            {{ cellAddress }}
+            {{ props.cellAddress }}
           </div>
         </div>
         <div>

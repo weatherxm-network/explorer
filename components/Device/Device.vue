@@ -89,22 +89,12 @@
           const device = searchedDevice.devices[0]
           cellDeviceName.value = device.name
           backTo.value = device.cell_index
-          getAddress(device.cell_index)
-            .then((address) => {
-              if (address) {
-                cellAddress.value = address
-              } else {
-                cellAddress.value = '-'
-              }
-            })
-            .catch(() => {
-              cellAddress.value = '-'
-            })
 
           wxmApi
             .getDeviceByID(device.cell_index, device.id)
             .then((device) => {
               // calculate measurements
+              cellAddress.value = device.address || '-'
               resolvedDevice.value = device
               timestamp.value = device?.current_weather?.timestamp
                 ? dayjs(device.current_weather.timestamp).fromNow()
