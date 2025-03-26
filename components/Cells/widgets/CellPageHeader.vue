@@ -76,12 +76,6 @@
   onBeforeUnmount(() => {
     clearTimeout(timer)
   })
-
-  onMounted(async () => {
-    // cellAddress.value = await getAddress(route.params.cellIndex).then(
-    //   (response) => (response === null ? '-' : response),
-    // )
-  })
 </script>
 
 <template>

@@ -10,12 +10,11 @@
   import Forecast from './widgets/Forecast.vue'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
-  import type { Device } from './types/device'
+  import type { Device } from '~/components/common/types/common'
 
   dayjs.extend(relativeTime)
 
   const { trackGAevent } = useGAevents()
-  const { getAddress } = useAddress()
   const mobileStore = useMobileStore()
   const display = ref(useDisplay())
   const route = useRoute()
@@ -80,7 +79,7 @@
     loading.value = true
     showDeviceDetails.value = false
     const normalizeRouteDeviceName = formatDeviceName.normalizeDeviceName(
-      route.params.deviceName,
+      route.params.deviceName as string,
     )
     wxmApi
       .resolveDeviceName(normalizeRouteDeviceName)
