@@ -80,7 +80,7 @@ export default defineNuxtConfig({
           href: 'https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/7.0.96/css/materialdesignicons.min.css',
         },
         {
-          href: `https://kit.fontawesome.com/${process.env.NUXT_PUBLIC_MAPBOX_STYLE}.css`,
+          href: `https://kit.fontawesome.com/${process.env.NUXT_PUBLIC_FONT_AWESOME_PRO_KIT_KEY}.css`,
           rel: 'stylesheet',
           crossorigin: 'anonymous',
         },
@@ -88,7 +88,7 @@ export default defineNuxtConfig({
       ],
       script: [
         {
-          src: `https://kit.fontawesome.com/${process.env.NUXT_PUBLIC_MAPBOX_STYLE}.js`,
+          src: `https://kit.fontawesome.com/${process.env.NUXT_PUBLIC_FONT_AWESOME_PRO_KIT_KEY}.js`,
           crossorigin: 'anonymous',
         },
       ],
