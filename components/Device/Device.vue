@@ -233,7 +233,7 @@
     </div>
 
     <!--------------- Main Content -------------->
-    <VCardText class="ma-0 pa-0 h-100 w-100 test-1">
+    <VCardText class="ma-0 pa-0 h-100 w-100">
       <VCard height="100%" class="w-100" color="background" elevation="0">
         <VCardText class="ma-0 pa-0">
           <div v-if="loading" :style="animationContainerHeight">
