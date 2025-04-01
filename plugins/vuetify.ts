@@ -7,6 +7,7 @@ const light = {
   dark: false,
   colors: {
     // theme palette
+    outline: '#79747e',
     surface: '#FEFBFF',
     background: '#DFE2F6',
     top: '#FEFBFF',
@@ -36,14 +37,15 @@ const light = {
 
     chartLine: '#2780FF',
     netStatProgressBar: '#BED6FF',
-    anchor: '#45464F'
-  }
+    anchor: '#45464F',
+  },
 }
 // Dark mode theme
 export const dark = {
   dark: true,
   colors: {
     // theme palette
+    outline: '#79747e',
     surface: '#31364A',
     background: '#111216',
     top: '#31364A',
@@ -78,8 +80,8 @@ export const dark = {
     netStatButtonColor: '#B8C6FF',
     netStatProgressBar: '#2E4C80',
     // anchor tag overide color
-    anchor: '#C6C6D0'
-  }
+    anchor: '#C6C6D0',
+  },
 }
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -92,9 +94,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       defaultTheme: 'light',
       themes: {
         light,
-        dark
-      }
-    }
+        dark,
+      },
+    },
   })
   nuxtApp.vueApp.use(vuetify)
 })
