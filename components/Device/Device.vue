@@ -8,19 +8,10 @@
   import RewardsSheet from './widgets/RewardsSheet.vue'
   import ObservationsSheet from './widgets/ObservationsSheet.vue'
   import Forecast from './widgets/Forecast.vue'
+  import StationHealth from './widgets/StationHealth.vue'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
   import type { Device } from '~/components/common/types/common'
-
-  import qodGreen from '~/assets/metrics/qod-green.svg'
-  import qodOrange from '~/assets/metrics/qod-orange.svg'
-  import qodRed from '~/assets/metrics/qod-red.svg'
-  import qodGrey from '~/assets/metrics/qod-grey.svg'
-
-  import polGreen from '~/assets/metrics/pol-green.svg'
-  import polOrange from '~/assets/metrics/pol-orange.svg'
-  import polGrey from '~/assets/metrics/pol-grey.svg'
-  import polRed from '~/assets/metrics/pol-red.svg'
 
   dayjs.extend(relativeTime)
 
@@ -33,6 +24,7 @@
   const windowValue = ref(1)
   const enableReverse = ref(false)
   const changeTabTo = ref(0)
+  const bottomSheetContainer = ref<HTMLElement>()
   const cellAddress = ref('')
   const cellDeviceName = ref('')
   const cellDeviceBundle = ref<Device['bundle']>({
@@ -59,41 +51,6 @@
 
   const errorAnimationContainerHeight = computed(() => {
     return { marginTop: `calc(${display.value.height / 2}px - 281px)` }
-  })
-
-  const qodIcon = computed(() => {
-    if (!resolvedDevice.value?.metrics.qod_score) return qodGrey
-    if (resolvedDevice.value?.metrics.qod_score < 20) return qodRed
-    if (resolvedDevice.value?.metrics.qod_score < 80) return qodOrange
-    return qodGreen
-  })
-
-  const polIcon = computed(() => {
-    if (
-      !resolvedDevice.value?.metrics.pol_reason &&
-      !resolvedDevice.value?.metrics.qod_score &&
-      !resolvedDevice.value?.metrics.ts
-    )
-      return polGrey
-    if (resolvedDevice.value?.metrics.pol_reason === 'NO_LOCATION_DATA')
-      return polRed
-    if (resolvedDevice.value?.metrics.pol_reason === 'LOCATION_NOT_VERIFIED')
-      return polOrange
-    return polGreen
-  })
-
-  const polStatus = computed(() => {
-    if (
-      !resolvedDevice.value?.metrics.pol_reason &&
-      !resolvedDevice.value?.metrics.qod_score &&
-      !resolvedDevice.value?.metrics.ts
-    )
-      return 'Pending verification'
-    if (resolvedDevice.value?.metrics.pol_reason === 'NO_LOCATION_DATA')
-      return 'No location data'
-    if (resolvedDevice.value?.metrics.pol_reason === 'LOCATION_NOT_VERIFIED')
-      return 'Not verified'
-    return 'Verified'
   })
 
   watch(windowValue, (newValue, oldValue) => {
@@ -188,49 +145,8 @@
       :loading="loading"
       :loading-rewards-tab="loadingRewardsTab"
       @open-window="openWindow"
-      @back-to-cell="backToCell" />
-
-    <!-- Station Health -->
-
-    <div class="w-100 pa-4">
-      <h5
-        :class="[
-          'd-flex justify-space-between align-center w-100 mb-4',
-          'text-body-1 text-darkestBlue font-weight-bold',
-        ]"
-      >
-        Station Health
-        <i class="fa-regular fa-circle-info" />
-      </h5>
-
-      <div class="d-flex justify-between align-center ga-2 w-100">
-        <div class="bg-blueTint px-4 py-3 w-50 rounded-xl">
-          <h6 class="text-darkestBlue font-weight-bold text-caption">
-            Data Quality Score
-          </h6>
-          <div class="d-flex justify-between align-center ga-2">
-            <img :src="qodIcon" :style="{ width: '18px', height: '18px' }" />
-            <span
-              v-if="resolvedDevice?.metrics.qod_score"
-              class="font-weight-bold"
-            >
-              {{ resolvedDevice?.metrics.qod_score }}%
-            </span>
-          </div>
-        </div>
-        <div class="bg-blueTint px-4 py-3 w-50 rounded-xl">
-          <h6
-            class="text-darkestBlue font-weight-bold text-caption text-truncate"
-          >
-            {{ cellAddress }}
-          </h6>
-          <div class="d-flex justify-between align-center ga-2">
-            <img :src="polIcon" :style="{ width: '18px', height: '18px' }" />
-            <span class="font-weight-bold">{{ polStatus }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+      @back-to-cell="backToCell"
+    />
 
     <!--------------- Main Content -------------->
     <VCardText class="ma-0 pa-0 h-100 w-100">
@@ -273,6 +189,12 @@
               @update:model-value="updateTabs"
             >
               <v-window-item :value="1">
+                <StationHealth
+                  :loading="loading"
+                  :device="resolvedDevice"
+                  :address="cellAddress"
+                  :sheetElemRef="bottomSheetContainer"
+                />
                 <ObservationsSheet
                   :device="resolvedDevice"
                   @open-window="openWindow"
@@ -290,6 +212,8 @@
             </v-window>
           </v-card-text>
         </VCardText>
-      </VCard> </VCardText
-  ></VCard>
+      </VCard>
+    </VCardText>
+    <div ref="bottomSheetContainer"></div>
+  </VCard>
 </template>
