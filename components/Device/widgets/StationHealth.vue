@@ -8,13 +8,13 @@
   import polOrange from '~/assets/metrics/pol-orange.svg'
   import polGrey from '~/assets/metrics/pol-grey.svg'
   import polRed from '~/assets/metrics/pol-red.svg'
+
   import type { Device } from '~/components/common/types/common'
 
   interface Props {
     loading?: boolean
     device?: Device
     address: string
-    sheetElemRef: HTMLElement | undefined
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -22,8 +22,10 @@
     device: () => ({}) as Device,
   })
 
+  const isBottomSheetOpen = ref(false)
+
   const qodIcon = computed(() => {
-    if (!props.device.metrics.qod_score) return qodGrey
+    if (props.device.metrics.qod_score == null) return qodGrey
     if (props.device.metrics.qod_score < 20) return qodRed
     if (props.device.metrics.qod_score < 80) return qodOrange
     return qodGreen
@@ -65,15 +67,15 @@
       ]"
     >
       Station Health
-      <div>
-        <v-bottom-sheet contained :scrim="false">
+      <div class="position-relative">
+        <v-bottom-sheet v-model="isBottomSheetOpen" :attach="true" eager>
           <template #activator="{ props: activatorProps }">
             <i v-bind="activatorProps" class="fa-regular fa-circle-info" />
           </template>
 
-          <div class="bg-layer1 pa-6 rounded-t-xl">
+          <div class="bg-layer1 pa-6 rounded-t-xl mb-4">
             <div
-              class="bg-outline mx-auto mb-6"
+              class="bg-outline mx-auto mb-5"
               :style="{ height: '4px', width: '32px' }"
             ></div>
             <h5
@@ -108,7 +110,9 @@
                 generating a confidence score for its position.
               </p>
             </div>
-            <button class="w-100 bg-top mt-4"></button>
+            <button class="w-100 bg-top mt-4 py-3 rounded-md text-primary">
+              Read More
+            </button>
           </div>
         </v-bottom-sheet>
       </div>
@@ -121,7 +125,10 @@
         </h6>
         <div class="d-flex justify-between align-center ga-2">
           <img :src="qodIcon" :style="{ width: '18px', height: '18px' }" />
-          <span v-if="props.device.metrics.qod_score" class="font-weight-bold">
+          <span
+            v-if="props.device.metrics.qod_score != null"
+            class="font-weight-bold"
+          >
             {{ props.device.metrics.qod_score }}%
           </span>
         </div>
