@@ -9,6 +9,9 @@
   import DetailsCardMeasurement from './DetailsCardMeasurement.vue'
   import index from '~/assets/animations/index'
   import { useSettingsStore } from '~/stores/settingsStore'
+  import { hasPartialObservationData } from '~/utils/common'
+
+  import appPromoImg from '~/assets/app-promo.png'
 
   dayjs.extend(utc)
   dayjs.extend(timezone)
@@ -58,10 +61,6 @@
   const nav = window.navigator.language
 
   const display = ref(useDisplay())
-  const viewHistoricalDataButtonText = ref('View Historical Data')
-  const footerTextFirstLine = ref('Download WeatherXM app')
-  const footerTextSecondLine = ref('to see historical & forecast data')
-  const downloadButtonText = ref('Download')
   const feelsLikeStaticText = ref('Feels Like')
   const measurements = ref([
     {
@@ -128,6 +127,10 @@
     )
   })
 
+  const hasPartialData = computed(() => {
+    return hasPartialObservationData(props.device.current_weather)
+  })
+
   const calcedLastUpdated = computed(() => {
     return isBrowserLocaleClockType24h(nav) === true
       ? `Last updated on ${
@@ -162,201 +165,238 @@
 
   const openWindow = () => {
     emits('openWindow', 2)
+    trackGAevent('deviceObservationsClickOnDownloadButton')
   }
 </script>
 
 <template>
-  <VCard rounded="xl" class="ma-4 mt-2" elevation="0" color="layer1">
-    <VCardText class="pa-0 pb-0">
-      <VSheet
-        color="top"
-        rounded="xl"
-        class="pl-0 pt-4 pb-2 mb-2"
-        elevation="4"
-      >
-        <VRow class="ma-0 pa-0">
-          <VCol class="pr-0 pl-0 pt-0 pb-0" align-self="center">
-            <!---------------------------- Lottie Icon ------------------------------->
-            <div class="d-flex justify-center">
-              <client-only>
-                <Vue3Lottie
-                  :animation-data="index[displayCurrentMeasurements.lottie]"
-                  :height="display.smAndDown ? 50 : 70"
-                  :width="display.smAndDown ? 50 : 70"
-                />
-              </client-only>
-            </div>
-            <!---------------------------- Temp ------------------------------->
-            <div
-              class="text-h3 font-weight-bold d-flex justify-center align-baseline"
-            >
-              <span class="text-text">{{
-                displayCurrentMeasurements.temp
-              }}</span>
-              <span class="text-h5 text-text">{{ currentUnits.temp }}</span>
-            </div>
-            <!---------------------------- Feels like ------------------------------->
-            <div class="text-caption d-flex align-center justify-center">
-              <span class="text-darkestBlue">{{ feelsLikeStaticText }}</span
-              ><span class="text-subtitle-1 pl-2 text-text"
-                >{{ displayCurrentMeasurements.feels_like
-                }}<span class="text--text">{{ currentUnits.temp }}</span></span
-              >
-            </div>
-          </VCol>
-
-          <VCol sm="6" md="6" xs="6" class="pa-0">
-            <!---------------------------- Loop in measurements ------------------------------->
-            <VRow
-              v-for="measurement in measurements"
-              :key="measurement.key"
-              class="ma-0 pa-0"
-            >
-              <DetailsCardMeasurement
-                :measurement-metadata="measurement"
-                :unit="currentUnits[measurement.unit]"
-                :device-measurement-value="
-                  displayCurrentMeasurements[measurement.key]
-                "
-                :wind-dir-conditional-rendering="
-                  measurement.key === 'windSpeed' ||
-                  measurement.key === 'windGust'
-                    ? {
-                        value: displayCurrentMeasurements.windDir,
-                        unit: currentUnits.windDir,
-                      }
-                    : { value: '', currentUnits: '' }
-                "
-              />
-            </VRow>
-          </VCol>
-        </VRow>
-      </VSheet>
-      <VSheet rounded="xl-b" class="pt-2" color="layer1">
-        <VRow class="pa-0 ma-0">
-          <VCol sm="6" md="6" xs="6" class="pa-0">
-            <VRow
-              v-for="measurement in measurements2"
-              :key="measurement.key"
-              class="ma-0 pa-0"
-            >
-              <DetailsCardMeasurement
-                class="text-truncate"
-                :measurement-metadata="measurement"
-                :unit="currentUnits[measurement.unit]"
-                :device-measurement-value="
-                  displayCurrentMeasurements[measurement.key]
-                "
-                :wind-dir-conditional-rendering="
-                  measurement.key === 'windSpeed' ||
-                  measurement.key === 'windGust'
-                    ? {
-                        value: displayCurrentMeasurements.windDir,
-                        unit: currentUnits.windDir,
-                      }
-                    : { value: '', currentUnits: '' }
-                "
-              />
-            </VRow>
-          </VCol>
-          <VCol sm="6" md="6" xs="6" class="pa-0">
-            <VRow
-              v-for="measurement in measurements3"
-              :key="measurement.key"
-              class="ma-0 pa-0"
-            >
-              <DetailsCardMeasurement
-                class="text-truncate"
-                :measurement-metadata="measurement"
-                :unit="currentUnits[measurement.unit]"
-                :device-measurement-value="
-                  displayCurrentMeasurements[measurement.key]
-                "
-                :wind-dir-conditional-rendering="
-                  measurement.key === 'windSpeed' ||
-                  measurement.key === 'windGust'
-                    ? {
-                        value: displayCurrentMeasurements.windDir,
-                        unit: currentUnits.windDir,
-                      }
-                    : { value: '', currentUnits: '' }
-                "
-              />
-            </VRow>
-          </VCol>
-        </VRow>
-        <div class="d-flex justify-end px-5 pt-5 text-darkGrey">
-          {{ calcedLastUpdated }}
-        </div>
-        <div class="pa-5">
-          <VBtn
-            :block="true"
-            height="50"
-            variant="outlined"
-            :disabled="true"
-            color="midGrey"
-            style="border-radius: 10px; border-width: 2px"
-            ><VSheet
-              color="midGrey"
-              class="w-100 h-100 text-none font-weight-bold text--midGrey"
-              style="letter-spacing: normal"
-              >{{ viewHistoricalDataButtonText }}</VSheet
-            ></VBtn
-          >
-        </div>
-      </VSheet>
-    </VCardText>
-  </VCard>
-
-  <VCard
-    class="ma-4"
-    style="border-radius: 16px"
-    color="blueTint"
-    elevation="0"
-  >
-    <VCardText class="pa-0 ma-0">
-      <VRow class="ma-0 pa-0" align="center" justify="space-between">
-        <VCol
-          class="ma-0 pr-0 pt-2 pb-2"
-          :class="display.smAndDown ? 'pl-3' : 'pl-4'"
-          cols="8"
+  <div>
+    <h5
+      :class="[
+        'd-flex justify-space-between align-center w-100 mb-4 mx-4 mt-4',
+        'text-body-1 text-darkestBlue font-weight-bold',
+      ]"
+    >
+      Latest Weather
+    </h5>
+    <div
+      v-if="!hasPartialData"
+      :class="[
+        'ma-4 rounded-xl',
+        'bg-layer1 pa-5',
+        'd-flex ga-4 justify-space-between align-center',
+      ]"
+    >
+      <CellsWidgetsNoDataIcon />
+      <div>
+        <h5 class="text-h6 font-weight-bold">No Data</h5>
+        <p class="text-subtitle-2">
+          We’re unable to show updated station data. Please make sure your
+          station is operational and connected to the internet
+        </p>
+      </div>
+    </div>
+    <VCard
+      v-if="hasPartialData"
+      rounded="xl"
+      class="ma-4 mt-2 pb-4"
+      elevation="0"
+      color="layer1"
+    >
+      <VCardText class="pa-0 pb-0">
+        <VSheet
+          color="top"
+          rounded="xl"
+          class="pl-0 pt-4 pb-2 mb-4"
+          elevation="1"
         >
-          <div class="text-text d-flex align-center font-weight-regular">
-            <div style="letter-spacing: normal">{{ footerTextFirstLine }}</div>
+          <VRow class="ma-0 pa-0">
+            <VCol class="pr-0 pl-0 pt-0 pb-0" align-self="center">
+              <!---------------------------- Lottie Icon ------------------------------->
+              <div class="d-flex justify-center">
+                <client-only>
+                  <Vue3Lottie
+                    :animation-data="index[displayCurrentMeasurements.lottie]"
+                    :height="display.smAndDown ? 50 : 70"
+                    :width="display.smAndDown ? 50 : 70"
+                  />
+                </client-only>
+              </div>
+              <!---------------------------- Temp ------------------------------->
+              <div
+                class="text-h3 font-weight-bold d-flex justify-center align-baseline"
+              >
+                <span class="text-text">
+                  {{ displayCurrentMeasurements.temp }}
+                </span>
+                <span class="text-h5 text-text">{{ currentUnits.temp }}</span>
+              </div>
+              <!---------------------------- Feels like ------------------------------->
+              <div class="text-caption d-flex align-center justify-center">
+                <span class="text-darkestBlue">
+                  {{ feelsLikeStaticText }}
+                </span>
+                <span class="text-subtitle-1 pl-2 text-text">
+                  {{ displayCurrentMeasurements.feels_like }}
+                  <span class="text--text">
+                    {{ currentUnits.temp }}
+                  </span>
+                </span>
+              </div>
+            </VCol>
+
+            <VCol sm="6" md="6" xs="6" class="pa-0">
+              <!---------------------------- Loop in measurements ------------------------------->
+              <VRow
+                v-for="measurement in measurements"
+                :key="measurement.key"
+                class="ma-0 pa-0"
+              >
+                <DetailsCardMeasurement
+                  :measurement-metadata="measurement"
+                  :unit="currentUnits[measurement.unit]"
+                  :device-measurement-value="
+                    displayCurrentMeasurements[measurement.key]
+                  "
+                  :wind-dir-conditional-rendering="
+                    measurement.key === 'windSpeed' ||
+                    measurement.key === 'windGust'
+                      ? {
+                          value: displayCurrentMeasurements.windDir,
+                          unit: currentUnits.windDir,
+                        }
+                      : { value: '', currentUnits: '' }
+                  "
+                />
+              </VRow>
+            </VCol>
+          </VRow>
+        </VSheet>
+        <VSheet rounded="xl-b" class="pt-2" color="layer1">
+          <VRow class="pa-0 ma-0">
+            <VCol sm="6" md="6" xs="6" class="pa-0">
+              <VRow
+                v-for="measurement in measurements2"
+                :key="measurement.key"
+                class="ma-0 pa-0"
+              >
+                <DetailsCardMeasurement
+                  class="text-truncate"
+                  :measurement-metadata="measurement"
+                  :unit="currentUnits[measurement.unit]"
+                  :device-measurement-value="
+                    displayCurrentMeasurements[measurement.key]
+                  "
+                  :wind-dir-conditional-rendering="
+                    measurement.key === 'windSpeed' ||
+                    measurement.key === 'windGust'
+                      ? {
+                          value: displayCurrentMeasurements.windDir,
+                          unit: currentUnits.windDir,
+                        }
+                      : { value: '', currentUnits: '' }
+                  "
+                />
+              </VRow>
+            </VCol>
+            <VCol sm="6" md="6" xs="6" class="pa-0">
+              <VRow
+                v-for="measurement in measurements3"
+                :key="measurement.key"
+                class="ma-0 pa-0"
+              >
+                <DetailsCardMeasurement
+                  class="text-truncate"
+                  :measurement-metadata="measurement"
+                  :unit="currentUnits[measurement.unit]"
+                  :device-measurement-value="
+                    displayCurrentMeasurements[measurement.key]
+                  "
+                  :wind-dir-conditional-rendering="
+                    measurement.key === 'windSpeed' ||
+                    measurement.key === 'windGust'
+                      ? {
+                          value: displayCurrentMeasurements.windDir,
+                          unit: currentUnits.windDir,
+                        }
+                      : { value: '', currentUnits: '' }
+                  "
+                />
+              </VRow>
+            </VCol>
+          </VRow>
+          <div class="d-flex justify-end px-5 pt-5 text-darkGrey">
+            {{ calcedLastUpdated }}
+          </div>
+        </VSheet>
+      </VCardText>
+    </VCard>
+
+    <div :class="['bg-blueTint', 'pa-4 ma-4 mt-6 rounded-xl']">
+      <h5 :class="['text-h6']">Get the WeatherXM app to access:</h5>
+      <div :class="['d-flex justify-space-between align-center']">
+        <!-- selling points section -->
+        <div :class="['w-50']">
+          <div
+            :class="[
+              'd-flex justify-start align-center ga-2',
+              'text-subtitle-2',
+            ]"
+          >
+            <i class="fa-solid fa-check text-success" />
+            Historical data
           </div>
           <div
-            style="letter-spacing: normal"
-            class="text-text font-weight-regular"
+            :class="[
+              'd-flex justify-start align-center ga-2',
+              'text-subtitle-2',
+            ]"
           >
-            {{ footerTextSecondLine }}
+            <i class="fa-solid fa-check text-success" />
+            Daily & hourly forecast
           </div>
-        </VCol>
-        <VCol
-          class="ma-0 pa-0 pr-2 pt-2 pb-2"
-          :class="display.smAndDown ? 'pl-2' : 'pl-3'"
-          :cols="4"
-        >
-          <VBtn
-            color="primary"
-            class="text-top text-none px-5 pt-4 pb-4"
-            elevation="0"
-            style="
-              height: 100%;
-              width: 100%;
-              font-weight: 700;
-              border-radius: 8px;
-              letter-spacing: normal;
-            "
-            @click="
-              [
-                openWindow(),
-                trackGAevent('deviceObservationsClickOnDownloadButton'),
-              ]
-            "
-            >{{ downloadButtonText }}</VBtn
+          <div
+            :class="[
+              'd-flex justify-start align-center ga-2',
+              'text-subtitle-2',
+            ]"
           >
-        </VCol>
-      </VRow>
-    </VCardText>
-  </VCard>
+            <i class="fa-solid fa-check text-success" />
+            Real-time weather data
+          </div>
+          <div
+            :class="[
+              'd-flex justify-start align-center ga-2',
+              'text-subtitle-2',
+            ]"
+          >
+            <i class="fa-solid fa-check text-success" />
+            many more...
+          </div>
+          <button
+            :class="[
+              'px-5 py-2 rounded-lg mt-4',
+              'bg-primary font-weight-bold text-subtitle-2',
+              'cursor-pointer',
+            ]"
+            @click="openWindow"
+          >
+            Download App
+          </button>
+        </div>
+
+        <!-- image section -->
+        <div
+          :class="['w-50 h-100 position-relative']"
+          :style="{ minHeight: '140px' }"
+        >
+          <img
+            :src="appPromoImg"
+            :class="['position-absolute top-0 left-0 right']"
+            :style="{ transform: 'translateX(-10%)' }"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
