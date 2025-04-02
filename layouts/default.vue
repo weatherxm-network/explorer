@@ -31,7 +31,7 @@
         :border="false"
       >
         <div class="h-100 w-100">
-          <VLayout>
+          <VLayout full-height>
             <slot />
           </VLayout>
         </div>
@@ -52,7 +52,7 @@
         color="background"
       >
         <div class="pa-0 h-100 w-100">
-          <VLayout>
+          <VLayout full-height>
             <slot />
           </VLayout>
         </div>

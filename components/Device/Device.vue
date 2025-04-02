@@ -150,7 +150,7 @@
     <!--------------- Main Content -------------->
     <VCardText class="ma-0 pa-0 h-100 w-100">
       <VCard height="100%" class="w-100" color="background" elevation="0">
-        <VCardText class="ma-0 pa-0">
+        <VCardText class="ma-0 pa-0 h-100">
           <div v-if="loading" :style="animationContainerHeight">
             <LottieComponent
               :lottieName="'loaderLight'"
@@ -181,13 +181,17 @@
               >
             </VSheet>
           </div>
-          <v-card-text v-if="showDeviceDetails && !loading" class="pa-0 ma-0">
+          <v-card-text
+            v-if="showDeviceDetails && !loading"
+            class="pa-0 ma-0 h-100"
+          >
             <v-window
               v-model="windowValue"
+              class="h-100"
               :reverse="enableReverse"
               @update:model-value="updateTabs"
             >
-              <v-window-item :value="1">
+              <v-window-item :value="1" class="h-100">
                 <StationHealth
                   :loading="loading"
                   :device="resolvedDevice"
