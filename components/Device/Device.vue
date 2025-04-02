@@ -24,7 +24,6 @@
   const windowValue = ref(1)
   const enableReverse = ref(false)
   const changeTabTo = ref(0)
-  const bottomSheetContainer = ref<HTMLElement>()
   const cellAddress = ref('')
   const cellDeviceName = ref('')
   const cellDeviceBundle = ref<Device['bundle']>({
@@ -193,16 +192,18 @@
                   :loading="loading"
                   :device="resolvedDevice"
                   :address="cellAddress"
-                  :sheetElemRef="bottomSheetContainer"
                 />
+
                 <ObservationsSheet
                   :device="resolvedDevice"
                   @open-window="openWindow"
                 />
               </v-window-item>
+
               <v-window-item :value="2">
                 <Forecast />
               </v-window-item>
+
               <v-window-item :value="3">
                 <RewardsSheet
                   :device="resolvedDevice"
@@ -214,6 +215,5 @@
         </VCardText>
       </VCard>
     </VCardText>
-    <div ref="bottomSheetContainer"></div>
   </VCard>
 </template>
