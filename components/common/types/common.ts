@@ -1,4 +1,4 @@
-import { type RemoteConfig, type Value } from 'firebase/remote-config'
+import type { Value } from 'firebase/remote-config'
 
 export interface Units {
   humidity: string
