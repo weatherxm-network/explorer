@@ -57,6 +57,11 @@
       return 'Not verified'
     return 'Verified'
   })
+
+  const readMore = () => {
+    const url = 'https://docs.weatherxm.com/rewards/data-quality'
+    window.open(url, '_blank')
+  }
 </script>
 <template>
   <div v-if="!props.loading" class="w-100 pa-4">
@@ -91,12 +96,12 @@
               <h6 class="text-body-1 font-weight-bold">Data Quality</h6>
               <p class="text-body-2 mt-1">
                 The network’s effectiveness relies on meaningful, usable data,
-                measured by the Quality-of-Data (QoD) score, which
+                measured by the Data Quality score, which
                 <strong>updates daily</strong>. This score motivates weather
                 station owners to follow guidelines for optimal data quality. A
-                station’s daily reward is tied to its QoD, calculated using an
-                open-source algorithm that assesses data quality and provides a
-                confidence level in the data received.
+                station’s daily reward is tied to its Data Quality, calculated
+                using an open-source algorithm that assesses data quality and
+                provides a confidence level in the data received.
               </p>
             </div>
 
@@ -110,7 +115,10 @@
                 generating a confidence score for its position.
               </p>
             </div>
-            <button class="w-100 bg-top mt-4 py-3 rounded-md text-primary">
+            <button
+              class="w-100 bg-top mt-4 py-3 rounded-md text-primary"
+              @click="readMore"
+            >
               Read More
             </button>
           </div>
