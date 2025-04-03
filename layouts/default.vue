@@ -52,7 +52,7 @@
         color="background"
       >
         <div class="pa-0 h-100 w-100">
-          <VLayout full-height>
+          <VLayout>
             <slot />
           </VLayout>
         </div>
