@@ -191,7 +191,11 @@
               :reverse="enableReverse"
               @update:model-value="updateTabs"
             >
-              <v-window-item :value="1" class="h-100">
+              <v-window-item
+                :value="1"
+                class="h-100"
+                :style="{ paddingBottom: '100px' }"
+              >
                 <StationHealth
                   :loading="loading"
                   :device="resolvedDevice"

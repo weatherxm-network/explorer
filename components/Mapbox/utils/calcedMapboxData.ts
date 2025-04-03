@@ -1,4 +1,4 @@
-import type { Cell, FeatureCollection } from '../types/mapbox'
+import type { Cell, Collections, FeatureCollection } from '../types/mapbox'
 import createCollections from './createCollections'
 import { fixCellPoints } from './fixCell'
 import wxmApi from '~/api/wxmApi'
@@ -22,18 +22,20 @@ const getCollections = async () => {
 
   if (cells) {
     // create collection for the cell layer
-    const cellsCollection: FeatureCollection = createCollections.createCellsCollection(cells)
+    const cellsCollection: FeatureCollection =
+      createCollections.createCellsCollection(cells)
     // create collection for the heatmap layer
-    const heatmapCollection: FeatureCollection = createCollections.createHeatmapCollection(cells)
+    const heatmapCollection: FeatureCollection =
+      createCollections.createHeatmapCollection(cells)
     // store calced collections
     mapboxStore.fillCollections({ cellsCollection, heatmapCollection })
 
-    return { cellsCollection, heatmapCollection }
+    return { cellsCollection, heatmapCollection } as Collections
   } else {
-    return {}
+    return {} as Collections
   }
 }
 
 export default {
-  getCollections
+  getCollections,
 }

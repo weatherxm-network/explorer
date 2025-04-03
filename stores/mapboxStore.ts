@@ -1,33 +1,45 @@
 import { defineStore } from 'pinia'
+import type {
+  Collections,
+  SearchResultDevice,
+  SearchResultLocation,
+} from '~/components/Mapbox/types/mapbox'
 
 export const useMapboxStore = defineStore('MapboxStore', {
-  state: () => {
+  state: (): MapState => {
     return {
       collections: null,
       initMapPositionEvent: null,
       searchedDeviceToFly: null,
-      searchedAddressToFly: null
+      searchedAddressToFly: null,
     }
   },
   getters: {
     getCollections: (state) => state.collections,
     getInitMapPositionEvent: (state) => state.initMapPositionEvent,
     getSearchedDeviceToFly: (state) => state.searchedDeviceToFly,
-    getSearchedAddressToFly: (state) => state.searchedAddressToFly
+    getSearchedAddressToFly: (state) => state.searchedAddressToFly,
   },
 
   actions: {
-    fillCollections(calcedCollections) {
+    fillCollections(calcedCollections: Collections) {
       this.collections = calcedCollections
     },
     emitInitMapPositionEvent(event) {
       this.initMapPositionEvent = event
     },
-    setSearchedDeviceToFly(device) {
+    setSearchedDeviceToFly(device: SearchResultDevice) {
       this.searchedDeviceToFly = device
     },
-    setSearchedAddressToFly(address) {
+    setSearchedAddressToFly(address: SearchResultLocation) {
       this.searchedAddressToFly = address
-    }
-  }
+    },
+  },
 })
+
+interface MapState {
+  collections: null | Collections
+  searchedDeviceToFly: null | SearchResultDevice
+  searchedAddressToFly: null | SearchResultLocation
+  initMapPositionEvent: null
+}

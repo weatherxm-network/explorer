@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import mapboxgl from 'mapbox-gl'
-  import { useDisplay, useTheme } from 'vuetify/lib/framework.mjs'
+  import type { Map, IControl, MapboxGeoJSONFeature } from 'mapbox-gl'
+  import { useDisplay, useTheme } from 'vuetify'
   import _ from 'lodash'
   import calcedMapboxData from './utils/calcedMapboxData'
   import mapCreation from './utils/mapCreation'
@@ -8,12 +9,7 @@
   import RefreshSnackbar from './widgets/RefreshSnackbar.vue'
   import SearchBar from './widgets/SearchBar.vue'
   import TrackingConcentComponent from './widgets/TrackingConcentComponent.vue'
-  import type {
-    SearchResultLocation,
-    Point,
-    SearchResultDevice,
-    Collections,
-  } from './types/mapbox'
+  import type { Point, SearchResultDevice, Collections } from './types/mapbox'
   import { useMapboxStore } from '~/stores/mapboxStore'
   import { useMobileStore } from '~/stores/mobileStore'
   import wxmApi from '~/api/wxmApi'
@@ -25,9 +21,9 @@
   const display = useDisplay()
   const theme = useTheme()
   const route = useRoute()
-  let navControls = reactive({})
-  let geolocate = reactive({})
-  const map = ref({})
+  let navControls = reactive<IControl>({} as IControl)
+  let geolocate = reactive<IControl>({} as IControl)
+  const map = ref<Map>()
   const mapboxLoading = ref(false)
   const collections = ref<Collections>()
   const hoverCellId = ref('')
@@ -72,38 +68,48 @@
     value ? (snackbar.value = false) : (snackbar.value = true)
   })
 
-  watch(searchedAddressToFly, (newAddress: SearchResultLocation) => {
-    map.value.flyTo({
-      center: [newAddress.center.lon, newAddress.center.lat],
-      zoom: 13,
-    })
-  })
+  watch(
+    () => searchedAddressToFly.value,
+    (newAddress) => {
+      if (!newAddress) return
 
-  watch(searchedDeviceToFly, (newDevice: SearchResultDevice) => {
-    const coords: Point = {
-      lon: newDevice.cell_center.lon,
-      lat: newDevice.cell_center.lat,
-    }
-    // check if any polygon is already clicked
-    if (clickCellId.value) {
-      // if any remove its outline layer
-      removeOutLineLayer(clickCellId.value)
-    }
-    // else set the new polygon id
-    clickCellId.value = newDevice.cell_index
-    // add outline to new polygon
-    addOutLineLayer(clickCellId.value)
-    // zoom to cell
-    map.value.flyTo({
-      center: [coords.lon, coords.lat],
-      zoom: 13,
-    })
-    // navigato to cells page
-    navigateTo(
-      `/stations/${formatDeviceName.denormalizeDeviceName(newDevice.name)}`,
-    )
-    mobileStore.setPageState(true)
-  })
+      map.value?.flyTo({
+        center: [newAddress.center.lon, newAddress.center.lat],
+        zoom: 13,
+      })
+    },
+  )
+
+  watch(
+    () => searchedDeviceToFly.value,
+    (newDevice) => {
+      if (!newDevice) return
+
+      const coords: Point = {
+        lon: newDevice.cell_center.lon,
+        lat: newDevice.cell_center.lat,
+      }
+      // check if any polygon is already clicked
+      if (clickCellId.value) {
+        // if any remove its outline layer
+        removeOutLineLayer(clickCellId.value)
+      }
+      // else set the new polygon id
+      clickCellId.value = newDevice.cell_index
+      // add outline to new polygon
+      addOutLineLayer(clickCellId.value)
+      // zoom to cell
+      map.value?.flyTo({
+        center: [coords.lon, coords.lat],
+        zoom: 13,
+      })
+      // navigato to cells page
+      navigateTo(
+        `/stations/${formatDeviceName.denormalizeDeviceName(newDevice.name)}`,
+      )
+      mobileStore.setPageState(true)
+    },
+  )
 
   watch(initMapPositonEvent, (val, newVal) => {
     if (val !== newVal) {
@@ -129,14 +135,14 @@
     }
   }
 
-  const updateOnlineStatus = (e: any) => {
+  const updateOnlineStatus = (e: Event) => {
     const { type } = e
     onLine.value = type === 'online'
   }
 
   const mapsInitialPosition = () => {
     // zoom out to initial position
-    map.value.flyTo({
+    map.value?.flyTo({
       center: [24.162572, 38.667284],
       zoom: 3,
     })
@@ -159,46 +165,50 @@
   }
 
   const addNavControlOnMap = () => {
-    map.value.addControl(navControls, 'bottom-right')
+    map.value?.addControl(navControls, 'bottom-right')
   }
 
   const removeNavControlFromMap = () => {
-    map.value.removeControl(navControls)
+    map.value?.removeControl(navControls)
   }
 
   const addGeolocateControlOnMap = () => {
-    map.value.addControl(geolocate, 'bottom-right')
+    map.value?.addControl(geolocate, 'bottom-right')
   }
 
   const removeGeolocateControlFromMap = () => {
-    map.value.removeControl(geolocate)
+    map.value?.removeControl(geolocate)
   }
 
   const changeMapboxLogoPosition = () => {
     const mapboxLogo = document.getElementsByClassName(
       'mapboxgl-ctrl-bottom-left',
-    )[0]
-    smBreakpoint.value
-      ? (mapboxLogo.style.left = '0px')
-      : (mapboxLogo.style.left = '440px')
+    )[0] as HTMLElement
+
+    if (mapboxLogo) {
+      smBreakpoint.value
+        ? (mapboxLogo.style.left = '0px')
+        : (mapboxLogo.style.left = '440px')
+    }
   }
 
   const addCellsSource = () => {
-    map.value.addSource('cells', {
+    map.value?.addSource('cells', {
       type: 'geojson',
-      data: collections.value.cellsCollection,
+      data: collections.value?.cellsCollection as never as MapboxGeoJSONFeature,
     })
   }
 
   const addHeatSource = () => {
-    map.value.addSource('heatmap', {
+    map.value?.addSource('heatmap', {
       type: 'geojson',
-      data: collections.value.heatmapCollection,
+      data: collections.value
+        ?.heatmapCollection as never as MapboxGeoJSONFeature,
     })
   }
 
   const addCellsLayer = () => {
-    map.value.addLayer({
+    map.value?.addLayer({
       id: 'cells',
       type: 'fill',
       source: 'cells',
@@ -214,7 +224,7 @@
   }
 
   const addHeatLayer = () => {
-    map.value.addLayer(
+    map.value?.addLayer(
       {
         id: 'heat',
         type: 'heatmap',
@@ -284,19 +294,19 @@
 
   const mouseFunctionality = () => {
     // Change the cursor to a pointer when the mouse is over the places layer.
-    map.value.on('mouseenter', 'cells', () => {
-      map.value.getCanvas().style.cursor = 'pointer'
+    map.value?.on('mouseenter', 'cells', () => {
+      map.value!.getCanvas().style.cursor = 'pointer'
     })
     // Change it back to a pointer when it leaves.
-    map.value.on('mouseleave', 'cells', () => {
-      map.value.getCanvas().style.cursor = ''
+    map.value?.on('mouseleave', 'cells', () => {
+      map.value!.getCanvas().style.cursor = ''
     })
   }
 
   const mouseHoverFunctionality = () => {
     // on cell hover
-    map.value.on('mousemove', 'cells', (e) => {
-      const currentCell = e.features[0].properties.index
+    map.value?.on('mousemove', 'cells', (e) => {
+      const currentCell = e.features![0].properties?.index
       // check if current polygon is not the same
       if (hoverCellId.value !== currentCell) {
         if (clickCellId.value !== currentCell) {
@@ -315,7 +325,7 @@
       hoverCellId.value = currentCell
     })
     // on hex7 leave
-    map.value.on('mouseleave', 'cells', () => {
+    map.value?.on('mouseleave', 'cells', () => {
       if (hoverCellId.value !== clickCellId.value) {
         removeOutLineLayer(hoverCellId.value)
       }
@@ -326,27 +336,28 @@
   // add cell outline layer
   const addOutLineLayer = (cellIndex: string) => {
     // search in collection based on cell index
-    const cell = _.find(collections.value.cellsCollection.features, {
-      properties: { index: cellIndex },
-    })
+    const cell = collections.value?.cellsCollection.features.filter(
+      (cellsFeatures) => cellsFeatures.properties.index === cellIndex,
+    )[0]
+
     // check if source already exists
-    if (!map.value.getSource(`outline${cellIndex}`)) {
+    if (!map.value?.getSource(`outline${cellIndex}`)) {
       // create source
-      map.value.addSource(`outline${cellIndex}`, {
+      map.value?.addSource(`outline${cellIndex}`, {
         type: 'geojson',
         data: {
           type: 'Feature',
           geometry: {
             type: 'Polygon',
-            coordinates: [cell.geometry.coordinates[0]],
+            coordinates: [cell?.geometry.coordinates[0]],
           },
-        },
+        } as MapboxGeoJSONFeature,
       })
     }
     // check if layer already exists
-    if (!map.value.getLayer(`outline${cellIndex}`)) {
+    if (!map.value?.getLayer(`outline${cellIndex}`)) {
       // create layer
-      map.value.addLayer({
+      map.value?.addLayer({
         id: `outline${cellIndex}`,
         type: 'line',
         source: `outline${cellIndex}`,
@@ -360,11 +371,11 @@
   }
 
   // remove cell outline layer
-  const removeOutLineLayer = (cellIndex) => {
-    if (map.value.getLayer(`outline${cellIndex}`)) {
+  const removeOutLineLayer = (cellIndex: string) => {
+    if (map.value?.getLayer(`outline${cellIndex}`)) {
       map.value.removeLayer(`outline${cellIndex}`)
     }
-    if (map.value.getSource(`outline${cellIndex}`)) {
+    if (map.value?.getSource(`outline${cellIndex}`)) {
       map.value.removeSource(`outline${cellIndex}`)
     }
   }
@@ -381,13 +392,13 @@
   }
 
   const clickOnCell = () => {
-    map.value.on('click', 'cells', (e) => {
+    map.value?.on('click', 'cells', (e) => {
       // prevent event bubbling
       e.preventDefault()
       // get cell's center coords
-      const coords = JSON.parse(e.features[0].properties.center)
+      const coords = JSON.parse(e.features![0].properties?.center)
       // get cell's index
-      const cellIndex = e.features[0].properties.index
+      const cellIndex = e.features![0].properties?.index
 
       // check if any polygon is already clicked
       if (clickCellId.value) {
@@ -400,7 +411,7 @@
       addOutLineLayer(clickCellId.value)
 
       // zoom to cell
-      map.value.flyTo({
+      map.value?.flyTo({
         center: [coords.lon, coords.lat],
         zoom: 13,
       })
@@ -441,11 +452,12 @@
 
   const handleCellUrl = (urlCellIndex: string) => {
     try {
-      const cell = _.find(collections.value.cellsCollection.features, {
+      const cell = _.find(collections.value?.cellsCollection.features, {
         properties: {
           index: `${urlCellIndex}`,
         },
-      }).properties
+      })?.properties
+
       // check if any polygon is already clicked
       if (clickCellId.value) {
         // if any remove its outline layer
@@ -456,11 +468,13 @@
       // add outline to new polygon
       addOutLineLayer(clickCellId.value)
       // zoom to cell
-      map.value.flyTo({
-        center: [cell.center.lon, cell.center.lat],
+      map.value?.flyTo({
+        center: [cell!.center.lon, cell!.center.lat],
         zoom: 13,
       })
-    } catch (e) {}
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   const handleHashCellDevice = (device: SearchResultDevice) => {
@@ -475,11 +489,13 @@
       // add outline to new polygon
       addOutLineLayer(clickCellId.value)
       // zoom to cell
-      map.value.flyTo({
+      map.value?.flyTo({
         center: [device.cell_center.lon, device.cell_center.lat],
         zoom: 13,
       })
-    } catch (e) {}
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   onMounted(async () => {
@@ -487,10 +503,10 @@
     window.addEventListener('resize', () => {
       onResize()
     })
-    window.addEventListener('online', updateOnlineStatus.value)
-    window.addEventListener('offline', updateOnlineStatus.value)
+    window.addEventListener('online', updateOnlineStatus)
+    window.addEventListener('offline', updateOnlineStatus)
 
-    map.value = await mapCreation.createMap(
+    map.value = mapCreation.createMap(
       config.mapboxAccessToken,
       config.mapboxStyle,
     )
@@ -513,17 +529,17 @@
         ? (snackbar.value = true)
         : (snackbar.value = false)
       // add sources to map
-      await addCellsSource()
-      await addHeatSource()
+      addCellsSource()
+      addHeatSource()
       // add layers to map
-      await addCellsLayer()
-      await addHeatLayer()
+      addCellsLayer()
+      addHeatLayer()
       // add mouse functionality
-      await mouseFunctionality()
+      mouseFunctionality()
       // add mouse hover functionality
-      await mouseHoverFunctionality()
+      mouseHoverFunctionality()
       // close card if click on map
-      await map.value.on('click', (e) => {
+      map.value?.on('click', (e) => {
         if (e.defaultPrevented) return
         clickOnMap()
       })
@@ -532,7 +548,7 @@
       mapboxLoading.value = false
     })
     // add cell functionality
-    await clickOnCell()
+    clickOnCell()
   })
 
   onBeforeUnmount(() => {
