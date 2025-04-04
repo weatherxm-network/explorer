@@ -39,6 +39,7 @@ export default defineNuxtConfig({
       version: process.env.GIT_COMMIT_HASH
         ? `${pkg.version}-${process.env.GIT_COMMIT_HASH}`
         : pkg.version,
+      fontAwesomeProKitKey: process.env.NUXT_PUBLIC_FONT_AWESOME_PRO_KIT_KEY,
       googleAnalyticsId: process.env.NUXT_PUBLIC_GOOGLE_ANALYTICS_ID,
       firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY,
       firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -79,19 +80,9 @@ export default defineNuxtConfig({
           rel: 'stylesheet',
           href: 'https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/7.0.96/css/materialdesignicons.min.css',
         },
-        {
-          href: `https://kit.fontawesome.com/f9fbef1f98.css`,
-          rel: 'stylesheet',
-          crossorigin: 'anonymous',
-        },
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
       ],
-      script: [
-        {
-          src: `https://kit.fontawesome.com/f9fbef1f98.js`,
-          crossorigin: 'anonymous',
-        },
-      ],
+      script: [],
     },
   },
 })

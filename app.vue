@@ -4,14 +4,30 @@
   import { useSettingsStore } from '~/stores/settingsStore'
 
   const { theme } = storeToRefs(useSettingsStore())
-  const config = useRuntimeConfig().public
+  const config = useRuntimeConfig()
 
   const { getFirebaseId } = useFirebase()
   const { userAgent } = useUserAgent()
   const firebaseId = await getFirebaseId()
 
+  useHead({
+    script: [
+      {
+        src: `https://kit.fontawesome.com/${config.fontAwesomeProKitKey}.js`,
+        crossorigin: 'anonymous',
+      },
+    ],
+    link: [
+      {
+        href: `https://kit.fontawesome.com/${config.fontAwesomeProKitKey}.css`,
+        rel: 'stylesheet',
+        crossorigin: 'anonymous',
+      },
+    ],
+  })
+
   onBeforeMount(() => {
-    wxmApi.setupAxios(config.apiBaseUrl, userAgent, firebaseId)
+    wxmApi.setupAxios(config.public.apiBaseUrl, userAgent, firebaseId)
   })
 </script>
 
