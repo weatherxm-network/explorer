@@ -208,26 +208,6 @@
               }}
             </VSheet>
           </VCol>
-
-          <div
-            v-if="!loading"
-            style="min-width: 100px"
-            class="flex-shrink-1 flex-grow-0"
-          >
-            <VSheet
-              class="d-flex align-center pa-2 text-text text-caption"
-              color="blueTint"
-              style="border-radius: 10px"
-            >
-              <div class="text-body-1 d-flex align-center">
-                <i class="fa-regular fa-hexagon"></i>
-              </div>
-
-              <span class="pl-3 text-truncate">
-                {{ deviceAddress }}
-              </span>
-            </VSheet>
-          </div>
         </VRow>
       </VCardTitle>
       <v-tabs
