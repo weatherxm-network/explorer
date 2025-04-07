@@ -13,13 +13,13 @@
   useHead({
     script: [
       {
-        src: `https://kit.fontawesome.com/${config.fontAwesomeProKitKey}.js`,
+        src: `https://kit.fontawesome.com/${config.public.fontAwesomeProKitKey}.js`,
         crossorigin: 'anonymous',
       },
     ],
     link: [
       {
-        href: `https://kit.fontawesome.com/${config.fontAwesomeProKitKey}.css`,
+        href: `https://kit.fontawesome.com/${config.public.fontAwesomeProKitKey}.css`,
         rel: 'stylesheet',
         crossorigin: 'anonymous',
       },
