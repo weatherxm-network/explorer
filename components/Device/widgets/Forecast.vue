@@ -100,8 +100,9 @@
           Get hyperlocal weather data through our B2B API
         </h5>
         <p class="mb-3 text-body-2">
-          Ideal for agriculture, events, and meteorology, our API integrates
-          seamlessly, delivering insights for smart, data-driven decisions.
+          Ideal for insurance, agriculture, energy and event planning our API
+          integrates seamlessly, delivering insights for smart, data-driven
+          decisions.
         </p>
         <button
           :class="['bg-primary w-100 py-3 px-5 text-body-2 font-weight-bold']"
