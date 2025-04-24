@@ -30,13 +30,15 @@
   const showNoInternetComponent = ref(false)
   const boldText = ref('SERVICE UNAVAILABLE')
   const lightText = ref(
-    'Server busy, site may have moved or you lost your dial-up Internet connection'
+    'Server busy, site may have moved or you lost your dial-up Internet connection',
   )
 
   // mainnet banner vars
   const { fetchRemoteConfig } = useFirebase()
   const remoteConfig = await fetchRemoteConfig()
-  const mainnetShowFlag = ref<boolean>(remoteConfig.feat_mainnet._value === 'true')
+  const mainnetShowFlag = ref<boolean>(
+    remoteConfig.feat_mainnet._value === 'true',
+  )
   // data days vars
   let dataDaysChartData = reactive([])
   let dataDaysLastAndProgress = reactive({ lastValue: '0', progress: '0' })
@@ -46,6 +48,7 @@
   let rewardsChartData = reactive([])
   let rewardsLastAndProgress = reactive({ lastValue: '0', progress: '0' })
   let rewardsChartLabels = reactive([])
+  const rewardsTotalRewards = ref(0)
   const rewards30DaysTotal = ref(0)
   const rewardsLastRunUrl = ref('')
   const rewardsContractUrl = ref('')
@@ -107,11 +110,19 @@
         }
         rewardsChartData = calcLineChartData(response.tokens.allocated_per_day)
         // calc last and progress
-        rewardsLastAndProgress = calcLastAndProgress(response.tokens.allocated_per_day)
+        rewardsLastAndProgress = calcLastAndProgress(
+          response.tokens.allocated_per_day,
+        )
         // calc chart labels
         rewardsChartLabels = calcChartLabels(response.tokens.allocated_per_day)
+        // pass total rewards
+        rewardsTotalRewards.value = numberFormater.nFormatter(
+          response.tokens.total_allocated,
+        )
         // calc 30 days total
-        rewards30DaysTotal.value = calc30DaysTotal(response.tokens.allocated_per_day)
+        rewards30DaysTotal.value = calc30DaysTotal(
+          response.tokens.allocated_per_day,
+        )
         // pass rewards last tx url
         rewardsLastRunUrl.value = response.tokens.last_tx_hash_url
         // pass rewards contract url
@@ -164,12 +175,12 @@
       // format numbers
       return {
         lastValue: numberFormater.nFormatter(lastDay),
-        progress: numberFormater.nFormatter(lastDay - secondToLast)
+        progress: numberFormater.nFormatter(lastDay - secondToLast),
       }
     } catch (err) {
       return {
         lastValue: 0,
-        progress: 0
+        progress: 0,
       }
     }
   }
@@ -178,7 +189,7 @@
     try {
       return [
         dayjs(array[0].ts).format('MMM DD'),
-        dayjs(array[array.length - 1].ts).format('MMM DD')
+        dayjs(array[array.length - 1].ts).format('MMM DD'),
       ]
     } catch (err) {
       return 0
@@ -199,7 +210,10 @@
 </script>
 
 <template>
-  <VCard class="w-100 h-100" :color="display.smAndDown ? `background` : `blueTint`">
+  <VCard
+    class="w-100 h-100"
+    :color="display.smAndDown ? `background` : `blueTint`"
+  >
     <!--------------- Card header -------------->
     <CardHeader />
     <!--------------- Main Content -------------->
@@ -225,7 +239,11 @@
             class="h-100 w-100 d-flex align-center justify-center"
             :style="animationContainerHeight"
           >
-            <LottieComponent :lottie-name="'loaderLight'" :bold-text="''" :light-text="''" />
+            <LottieComponent
+              :lottie-name="'loaderLight'"
+              :bold-text="''"
+              :light-text="''"
+            />
           </div>
 
           <!------- No internet component ------>
@@ -257,6 +275,7 @@
             <Rewards
               :rewards-chart-data="rewardsChartData"
               :rewards-last-and-progress="rewardsLastAndProgress"
+              :rewards-total-rewards="rewardsTotalRewards"
               :rewards-chart-labels="rewardsChartLabels"
               :rewards30-days-total="rewards30DaysTotal"
               :rewards-last-run-url="rewardsLastRunUrl"
