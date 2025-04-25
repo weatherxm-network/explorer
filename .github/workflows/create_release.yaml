@@ -70,4 +70,4 @@ jobs:
         commit-message: update ${{ env.ARGOCD_APP_NAME }} to ${{ github.sha }}
         title: "[production] update ${{ env.ARGOCD_APP_NAME }} to ${{ github.sha }}"
         body: Production update ${{ env.ARGOCD_APP_NAME }} to ${{ github.sha }}
-        branch: ${{ env.ARGOCD_APP_NAME }}_staging
+        branch: ${{ env.ARGOCD_APP_NAME }}_production
