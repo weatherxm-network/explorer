@@ -1,6 +1,6 @@
 {
   "name": "wxm-explorer",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "private": true,
   "scripts": {
     "build": "nuxt build",
@@ -59,3 +59,4 @@
   },
   "packageManager": "yarn@4.3.0"
 }
+
