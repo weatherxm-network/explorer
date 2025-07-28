@@ -1,43 +1,51 @@
 <script setup lang="ts">
+  import dayjs from 'dayjs'
   import { useDisplay } from 'vuetify'
   import { ref, computed } from 'vue'
   import numberFormater from '../utils/numberFormater'
   import LineChartComponent from './LineChartComponent.vue'
   import TooltipComponent from '~/components/common/TooltipComponent.vue'
+  import type { v2NetworkStatsResponse } from '../types/stats'
 
   interface Props {
-    rewardsChartData?: number[]
-    rewardsLastAndProgress?: {
-      lastValue?: string
-      progress?: string
-    }
-    rewardsTotalRewards?: number
-    rewardsChartLabels?: string[]
-    rewards30DaysTotal?: number
-    rewardsLastRunUrl?: string
-    rewardsContractUrl?: string
+    contractUrl?: string
+    rewards?: v2NetworkStatsResponse['rewards']
   }
 
   const props = withDefaults(defineProps<Props>(), {
-    rewardsChartData: () => [],
-    rewardsLastAndProgress: () => ({
-      lastValue: '0',
-      progress: '0',
+    contractUrl: '',
+    rewards: () => ({
+      last_30days: 0,
+      last_30days_graph: [],
+      last_run: 0,
+      last_tx_hash_url: '',
+      total: 0,
+      token_metrics: {
+        token: {
+          circulating_supply: 0,
+          total_supply: 0,
+        },
+        total_allocated: {
+          base_rewards: 0,
+          boost_rewards: 0,
+          dune: {
+            claimed: 0,
+            dune_public_url: '',
+            total: 0,
+            unclaimed: 0,
+          },
+        },
+      },
     }),
-    rewardsChartLabels: () => [],
-    rewardsTotalRewards: 0,
-    rewards30DaysTotal: 0,
-    rewardsLastRunUrl: '',
-    rewardsContractUrl: '',
   })
 
   const { trackGAevent } = useGAevents()
   const display = ref(useDisplay())
   const rewardsCardTitle = ref('$WXM Rewards')
   const rewardsCardLast30DaysText = ref('Last 30 Days')
-  const rewardsCardTotalText = ref('TOTAL ALLOCATED')
+  const rewardsCardTotalText = ref('TOTAL')
   const rewardsCardLastRunText = ref('LAST RUN')
-  const rewardsSubtitleLinkText = ref('View rewards contract on Arbiscan')
+  const rewardsSubtitleLinkText = ref('Learn more about our reward mechanism')
   const tottalAllocatedRewardsMessage = ref(
     'Station owners are rewarded in $WXM for providing data to the WeatherXM Network.',
   )
@@ -47,6 +55,10 @@
     return display.value.smAndDown
       ? { 'font-size': '1.402rem', 'font-weight': 700 }
       : { 'font-size': '1.705rem', 'font-weight': 700 }
+  })
+
+  const lastRunGraphData = computed(() => {
+    return props.rewards.last_30days_graph.map((point) => point.value)
   })
 
   const nFormat = (number: number) => {
@@ -69,7 +81,14 @@
         class="text-text pl-2 pt-1"
       >
         {{ rewardsCardTitle }}
+
+        <i
+          class="fa fa-chevron-right text-primary ml-2 mr-4"
+          style="font-size: 1.2rem"
+          @click="() => navigateTo('/stats/token-metrics')"
+        ></i>
       </div>
+
       <div
         @mouseenter="
           trackGAevent('clickInfoIcon', { ITEM_ID: 'allocated_rewards' })
@@ -88,11 +107,7 @@
       @click="trackGAevent('click_on_reward_contract_link')"
       @mouseenter="trackGAevent('click_on_reward_contract_link')"
     >
-      <a
-        :href="props.rewardsContractUrl"
-        target="_blank"
-        class="text-decoration-none"
-      >
+      <a :href="props.contractUrl" target="_blank" class="text-decoration-none">
         <span class="pl-2 pr-1">{{ rewardsSubtitleLinkText }}</span>
         <i class="fa-solid fa-arrow-up-right-from-square"></i>
       </a>
@@ -102,21 +117,31 @@
       <VCol class="ma-0 pa-0" cols="9">
         <VRow class="ma-0 pa-0">
           <LineChartComponent
-            :data="props.rewardsChartData"
+            :data="lastRunGraphData"
             class="pr-11 pl-4"
           ></LineChartComponent>
           <VRow class="ma-0 pa-0 d-flex justify-space-between pr-6 pt-2">
             <div
+              v-if="props.rewards.last_30days_graph.length > 0"
               class="text-darkGrey text-uppercase"
               style="font-size: 0.778rem"
             >
-              {{ props.rewardsChartLabels[0] }}
+              {{
+                dayjs(props.rewards.last_30days_graph[0].ts).format('MMM DD')
+              }}
             </div>
             <div
+              v-if="props.rewards.last_30days_graph.length > 0"
               class="text-darkGrey text-uppercase"
               style="font-size: 0.778rem"
             >
-              {{ props.rewardsChartLabels[1] }}
+              {{
+                dayjs(
+                  props.rewards.last_30days_graph[
+                    props.rewards.last_30days_graph.length - 1
+                  ].ts,
+                ).format('MMM DD')
+              }}
             </div>
           </VRow>
         </VRow>
@@ -127,7 +152,7 @@
             class="text-text d-flex justify-center"
             style="line-height: 120%"
           >
-            {{ nFormat(props.rewards30DaysTotal) }}
+            {{ nFormat(props.rewards.last_30days) }}
           </div>
           <div
             class="text-darkGrey d-flex justify-center"
@@ -155,14 +180,14 @@
           </div>
           <div :style="responsiveTextStyles">
             <div class="text-text d-flex justify-start">
-              {{ props.rewardsTotalRewards }}
+              {{ nFormat(props.rewards.total) }}
             </div>
           </div>
         </VSheet>
       </VCol>
       <VCol class="pa-0 ma-0" cols="6">
         <a
-          :href="props.rewardsLastRunUrl"
+          :href="props.rewards.last_tx_hash_url"
           target="_blank"
           class="text-decoration-none"
         >
@@ -181,7 +206,7 @@
             </div>
             <div :style="responsiveTextStyles">
               <div class="text-rewardVeryHigh d-flex justify-start">
-                +{{ props.rewardsLastAndProgress.progress }}
+                +{{ nFormat(props.rewards.last_run) }}
               </div>
             </div>
           </VSheet>

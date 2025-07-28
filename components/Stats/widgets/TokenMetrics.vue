@@ -1,22 +1,15 @@
 <script setup lang="ts">
   import { useDisplay } from 'vuetify'
-  import { onMounted, computed, reactive } from 'vue'
-
-  import LottieComponent from '../common/LottieComponent.vue'
-  import NoInternetComponent from '../common/NoInternetComponent.vue'
-
-  import CardHeader from './widgets/CardHeader.vue'
-  import MobileHeader from './widgets/MobileHeader.vue'
-  import NetworkGrowth from './widgets/NetworkGrowth.vue'
-  import NetworkHealth from './widgets/NetworkHealth.vue'
-  import Rewards from './widgets/Rewards.vue'
-  import ShopCard from './widgets/ShopCard.vue'
-  import ContactCard from './widgets/ContactCard.vue'
-  import LastUpdatedFooter from './widgets/LastUpdatedFooter.vue'
-
+  import { onMounted, onUnmounted, computed, reactive } from 'vue'
+  import LottieComponent from '../../common/LottieComponent.vue'
+  import NoInternetComponent from '../../common/NoInternetComponent.vue'
+  import CardHeader from './CardHeader.vue'
+  import MobileHeader from './MobileHeader.vue'
+  import WXMToken from './WXMToken.vue'
+  import WXMTokenAllocation from './WXMTokenAllocation.vue'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
-  import type { NetworkStatsResponse } from './types/stats'
+  import type { TokenMetrics } from '../types/stats'
 
   const mobileStore = useMobileStore()
   const display = ref(useDisplay())
@@ -28,27 +21,14 @@
     'Server busy, site may have moved or you lost your dial-up Internet connection',
   )
 
-  let netHealth: NetworkStatsResponse['net_health'] = reactive(
-    {} as NetworkStatsResponse['net_health'],
-  )
-  let rewards: NetworkStatsResponse['rewards'] = reactive(
-    {} as NetworkStatsResponse['rewards'],
-  )
-  let netGrowth: NetworkStatsResponse['net_growth'] = reactive(
-    {} as NetworkStatsResponse['net_growth'],
-  )
-
-  const contractUrl = ref('')
-
-  // last update var
-  const lastUpdated = ref('')
+  const tokenContrractUrl = ref('')
+  let tokenMetrics: TokenMetrics = reactive({} as TokenMetrics)
 
   const animationContainerHeight = computed(() => {
     return display.value.smAndDown
       ? { marginTop: `calc(${display.value.height / 2}px - 120px)` }
       : { marginTop: `calc(${display.value.height / 2}px - 400px)` }
   })
-
   const errorContainerHeight = computed(() => {
     return display.value.smAndDown
       ? { marginTop: `calc(${display.value.height / 2}px - 157px)` }
@@ -56,7 +36,7 @@
   })
 
   onMounted(() => {
-    if (display.value.smAndDown && route.fullPath === '/stats') {
+    if (display.value.smAndDown && route.fullPath === '/stats/token-metrics') {
       mobileStore.setPageState(true)
     }
     fillData()
@@ -70,13 +50,9 @@
     await wxmApi
       .getNetStats()
       .then((response) => {
-        netHealth = response.net_health
-        rewards = response.rewards
-        netGrowth = response.net_growth
-        contractUrl.value = response.contracts.rewards_url
+        tokenContrractUrl.value = response.contracts.token_url
+        tokenMetrics = response.rewards.token_metrics
 
-        // pass last update
-        lastUpdated.value = response.last_updated
         loading.value = false
       })
       .catch(() => {
@@ -85,20 +61,25 @@
       })
   }
 
-  const handlePaging = () => {
-    window.addEventListener('popstate', () => {
-      if (display.value.smAndDown && route.fullPath === '/stats') {
-        mobileStore.setPageState(false)
-        navigateTo('/')
-      }
-    })
+  const handlePopstate = () => {
+    if (display.value.smAndDown && route.fullPath === '/stats/token-metrics') {
+      mobileStore.setPageState(false)
+      navigateTo('/stats')
+    }
   }
+
+  const handlePaging = () => {
+    window.addEventListener('popstate', handlePopstate)
+  }
+
+  onUnmounted(() => {
+    window.removeEventListener('popstate', handlePopstate)
+  })
 
   const reloadComponent = () => {
     fillData()
   }
 </script>
-
 <template>
   <VCard
     class="w-100 h-100"
@@ -121,6 +102,17 @@
         "
       >
         <MobileHeader />
+
+        <div v-if="!display.smAndDown" class="pa-8 pb-3 d-flex align-center">
+          <i
+            class="fa fa-arrow-left text-primary mr-4"
+            style="font-size: 1.2rem"
+            @click="() => navigateTo('/stats')"
+          ></i>
+          <span class="ma-0 pa-0 font-weight-bold" style="font-size: 1.577rem">
+            {{ 'Token metrics' }}
+          </span>
+        </div>
 
         <VCardText class="ma-0 pa-0">
           <!------- Loading lottie ------>
@@ -153,23 +145,17 @@
             v-if="!loading && !showNoInternetComponent"
             :class="display.smAndDown ? `pa-5` : `pa-4`"
           >
-            <!-------- NetworkHealth -------->
-            <NetworkHealth :health="netHealth" />
+            <!------ WXM Token Allocation ----->
+            <WXMTokenAllocation :token-metrics="tokenMetrics" />
 
-            <!------ Network Growth ----->
-            <NetworkGrowth :growth="netGrowth" />
-
-            <!------ Buy Station Card ---->
-            <ShopCard />
-
-            <!------ Tottal allocated rewards --->
-            <Rewards :rewards="rewards" :contract-url="contractUrl" />
-
-            <!------ Last updated footer ------>
-            <LastUpdatedFooter :last-updated="lastUpdated" />
-
-            <!------ Contact ------>
-            <ContactCard />
+            <!------ WXM Token ------>
+            <WXMToken
+              :wxm-token-total-supply="tokenMetrics.token.total_supply"
+              :wxm-token-circulating-supply="
+                tokenMetrics.token.circulating_supply
+              "
+              :wxm-token-contract-url="tokenContrractUrl"
+            />
           </div>
         </VCardText>
       </VCard>

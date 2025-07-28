@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { Device } from '~/components/common/types/common'
+import type { NetworkStatsResponse } from '~/components/Stats/types/stats'
 
 const client = axios.create({
   baseURL: '',
@@ -26,7 +27,7 @@ const getCells = () => {
     .catch(() => [])
 }
 
-const getNetStats = () => {
+const getNetStats = (): Promise<NetworkStatsResponse> => {
   return client
     .get('/api/v1/network/stats')
     .then((response) => response.data)
