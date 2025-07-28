@@ -3,85 +3,51 @@
   import { useDisplay, useTheme } from 'vuetify'
   import numberFormater from '../utils/numberFormater'
   import TooltipComponent from '~/components/common/TooltipComponent.vue'
-
-  interface WeatherStationsDetails {
-    amount?: number
-    connectivity?: string
-    model?: string
-    percentage?: number
-    url?: string
-  }
-
-  interface WeatherStationsInfo {
-    total?: number
-    details?: WeatherStationsDetails[]
-  }
+  import type { NetworkStatsResponse } from '../types/stats'
 
   interface Props {
-    weatherStationsActive?: WeatherStationsInfo
-    weatherStationsClaimed?: WeatherStationsInfo
-    weatherStationsOnboarded?: WeatherStationsInfo
+    weatherStations?: NetworkStatsResponse['weather_stations']
   }
 
   const props = withDefaults(defineProps<Props>(), {
-    weatherStationsActive: () => ({
-      total: 0,
-      details: [
-        {
-          amount: 0,
-          connectivity: '',
-          model: '',
-          percentage: 0,
-          url: ''
-        }
-      ]
+    weatherStations: () => ({
+      active: {
+        details: [],
+        total: 0,
+      },
+      claimed: {
+        details: [],
+        total: 0,
+      },
+      onboarded: {
+        details: [],
+        total: 0,
+      },
     }),
-    weatherStationsClaimed: () => ({
-      total: 0,
-      details: [
-        {
-          amount: 0,
-          connectivity: '',
-          model: '',
-          percentage: 0,
-          url: ''
-        }
-      ]
-    }),
-    weatherStationsOnboarded: () => ({
-      total: 0,
-      details: [
-        {
-          amount: 0,
-          connectivity: '',
-          model: '',
-          percentage: 0,
-          url: ''
-        }
-      ]
-    })
   })
 
   const { trackGAevent } = useGAevents()
   const display = ref(useDisplay())
   const theme = useTheme()
-  const weatherStationsCardTitle = ref('Weather Stations')
-  const weatherStationsCardTotalSectionHeader = ref('TOTAL')
-  const weatherStationsCardClaimedSectionHeader = ref('CLAIMED')
+  const weatherStationsCardTitle = ref('Weather Stations breakdown')
+  const weatherStationsCardTotalSectionHeader = ref(
+    'MANUFACTURED AND PROVISIONED',
+  )
+  const weatherStationsCardClaimedSectionHeader = ref('DEPLOYED')
   const weatherStationsCardActiveSectionHeader = ref('ACTIVE')
   // total tooltip info
   const totalWeatherStationsMessage = ref(
-    'The number of weather stations manufactured and registered on the network.'
+    'The number of weather stations manufactured and provisioned in the network.',
   )
-  const totalTooltipTitle = ref('Total Weather Stations')
+  const totalTooltipTitle = ref('Manufactured and Provisioned')
   // claimed tooltip info
   const claimedWeatherStationsMessage = ref(
-    'The number of weather stations already claimed by users.'
+    'The number of weather stations already deployed by users.',
   )
-  const claimedTooltipTitle = ref('Claimed Weather Stations')
+  const claimedTooltipTitle = ref('Deployed Weather Stations')
   // active tooltip info
   const activeWeatherStationsMessage = ref(
-    'The number of weather stations that were active during the last day.'
+    'The number of weather stations that were active during the last day.',
   )
   const activeTooltipTitle = ref('Active Weather Stations')
 
@@ -96,7 +62,7 @@
       '--anchor-color':
         theme.global.name.value === 'dark'
           ? theme.themes.value.dark.colors.darkestBlue
-          : theme.themes.value.light.colors.darkestBlue
+          : theme.themes.value.light.colors.darkestBlue,
     }
   })
 
@@ -124,9 +90,13 @@
     <!----------  Total -------->
     <VSheet class="mb-2" color="layer1" style="border-radius: 8px">
       <VRow class="pa-0 ma-0 pb-3 pt-3 justify-space-between align-center">
-        <div class="text-body-2 pl-3">{{ weatherStationsCardTotalSectionHeader }}</div>
+        <div class="text-body-2 pl-3">
+          {{ weatherStationsCardTotalSectionHeader }}
+        </div>
         <div
-          @mouseenter="trackGAevent('clickInfoIcon', { ITEM_ID: 'total_stations' })"
+          @mouseenter="
+            trackGAevent('clickInfoIcon', { ITEM_ID: 'total_stations' })
+          "
           @click="trackGAevent('clickInfoIcon', { ITEM_ID: 'total_stations' })"
         >
           <TooltipComponent
@@ -140,18 +110,26 @@
       <VRow class="ma-0 pa-0 align-center pb-4 pl-3 pr-4">
         <VCol cols="9" class="ma-0 pa-0 pr-2">
           <VRow
-            v-for="(device, index) in props.weatherStationsOnboarded.details"
+            v-for="(device, index) in props.weatherStations.onboarded.details"
             :key="index"
             class="pa-0 ma-0"
-            :class="index === props.weatherStationsOnboarded.details.length - 1 ? '' : 'pb-2'"
+            :class="
+              index === props.weatherStations.onboarded.details.length - 1
+                ? ''
+                : 'pb-2'
+            "
           >
-            <VCol class="ma-0 pa-0" :class="display.smAndDown ? '' : 'mr-n2'" cols="4">
+            <VCol
+              class="ma-0 pa-0"
+              :class="display.smAndDown ? '' : 'mr-n2'"
+              cols="4"
+            >
               <div
                 class="text-caption text-darkGrey"
                 @click="
                   trackGAevent('clickOnOpenStationShop', {
                     ITEM_ID: 'total',
-                    ITEM_LIST_ID: device.model
+                    ITEM_LIST_ID: device.model,
                   })
                 "
               >
@@ -162,7 +140,9 @@
                   :style="anchorColor"
                 >
                   {{ device.model }}
-                  <i class="text-text fa-solid fa-arrow-up-right-from-square"></i>
+                  <i
+                    class="text-text fa-solid fa-arrow-up-right-from-square"
+                  ></i>
                 </a>
               </div>
             </VCol>
@@ -173,7 +153,9 @@
                 rounded="pill"
                 color="netStatProgressBar"
               >
-                <strong>{{ calcProgressBarPercentage(device.percentage) }}%</strong>
+                <strong
+                  >{{ calcProgressBarPercentage(device.percentage) }}%</strong
+                >
               </VProgressLinear>
             </VCol>
             <VCol class="ma-0 pa-0" cols="3">
@@ -185,7 +167,7 @@
         </VCol>
         <VCol cols="3" class="ma-0 pa-0 text-text">
           <div :style="responsiveTextStyles" class="pr-0 d-flex justify-end">
-            {{ localizeNumber(props.weatherStationsOnboarded.total) }}
+            {{ localizeNumber(props.weatherStations.onboarded.total) }}
           </div>
         </VCol>
       </VRow>
@@ -193,10 +175,16 @@
     <!----------  Claimed -------->
     <VSheet class="mb-2" color="layer1" style="border-radius: 8px">
       <VRow class="pa-0 ma-0 pb-3 pt-3 justify-space-between align-center">
-        <div class="text-body-2 pl-3">{{ weatherStationsCardClaimedSectionHeader }}</div>
+        <div class="text-body-2 pl-3">
+          {{ weatherStationsCardClaimedSectionHeader }}
+        </div>
         <div
-          @mouseenter="trackGAevent('clickInfoIcon', { ITEM_ID: 'claimed_stations' })"
-          @click="trackGAevent('clickInfoIcon', { ITEM_ID: 'claimed_stations' })"
+          @mouseenter="
+            trackGAevent('clickInfoIcon', { ITEM_ID: 'claimed_stations' })
+          "
+          @click="
+            trackGAevent('clickInfoIcon', { ITEM_ID: 'claimed_stations' })
+          "
         >
           <TooltipComponent
             :message="claimedWeatherStationsMessage"
@@ -209,18 +197,26 @@
       <VRow class="ma-0 pa-0 align-center pb-4 pl-3 pr-4">
         <VCol cols="9" class="ma-0 pa-0 pr-2">
           <VRow
-            v-for="(device, index) in props.weatherStationsClaimed.details"
+            v-for="(device, index) in props.weatherStations.claimed.details"
             :key="index"
             class="pa-0 ma-0"
-            :class="index === props.weatherStationsClaimed.details.length - 1 ? '' : 'pb-2'"
+            :class="
+              index === props.weatherStations.claimed.details.length - 1
+                ? ''
+                : 'pb-2'
+            "
           >
-            <VCol class="ma-0 pa-0" :class="display.smAndDown ? '' : 'mr-n2'" cols="4">
+            <VCol
+              class="ma-0 pa-0"
+              :class="display.smAndDown ? '' : 'mr-n2'"
+              cols="4"
+            >
               <div
                 class="text-caption text-darkGrey"
                 @click="
                   trackGAevent('clickOnOpenStationShop', {
                     ITEM_ID: 'claimed',
-                    ITEM_LIST_ID: device.model
+                    ITEM_LIST_ID: device.model,
                   })
                 "
               >
@@ -231,7 +227,9 @@
                   :style="anchorColor"
                 >
                   {{ device.model }}
-                  <i class="text-text fa-solid fa-arrow-up-right-from-square"></i>
+                  <i
+                    class="text-text fa-solid fa-arrow-up-right-from-square"
+                  ></i>
                 </a>
               </div>
             </VCol>
@@ -242,7 +240,9 @@
                 style="border-radius: 14px"
                 color="netStatProgressBar"
               >
-                <strong>{{ calcProgressBarPercentage(device.percentage) }}%</strong>
+                <strong
+                  >{{ calcProgressBarPercentage(device.percentage) }}%</strong
+                >
               </v-progress-linear>
             </VCol>
             <VCol class="ma-0 pa-0" cols="3">
@@ -254,7 +254,7 @@
         </VCol>
         <VCol cols="3" class="ma-0 pa-0 text-text">
           <div :style="responsiveTextStyles" class="pr-0 d-flex justify-end">
-            {{ localizeNumber(props.weatherStationsClaimed.total) }}
+            {{ localizeNumber(props.weatherStations.claimed.total) }}
           </div>
         </VCol>
       </VRow>
@@ -262,9 +262,13 @@
     <!----------  Active -------->
     <VSheet color="layer1" style="border-radius: 8px">
       <VRow class="pa-0 ma-0 pb-3 pt-3 justify-space-between align-center">
-        <div class="text-body-2 pl-3">{{ weatherStationsCardActiveSectionHeader }}</div>
+        <div class="text-body-2 pl-3">
+          {{ weatherStationsCardActiveSectionHeader }}
+        </div>
         <div
-          @mouseenter="trackGAevent('clickInfoIcon', { ITEM_ID: 'active_stations' })"
+          @mouseenter="
+            trackGAevent('clickInfoIcon', { ITEM_ID: 'active_stations' })
+          "
           @click="trackGAevent('clickInfoIcon', { ITEM_ID: 'active_stations' })"
         >
           <TooltipComponent
@@ -279,18 +283,26 @@
       <VRow class="ma-0 pa-0 align-center pb-4 pl-3 pr-4">
         <VCol cols="9" class="ma-0 pa-0 pr-2">
           <VRow
-            v-for="(device, index) in props.weatherStationsActive.details"
+            v-for="(device, index) in props.weatherStations.active.details"
             :key="index"
             class="pa-0 ma-0"
-            :class="index === props.weatherStationsActive.details.length - 1 ? '' : 'pb-2'"
+            :class="
+              index === props.weatherStations.active.details.length - 1
+                ? ''
+                : 'pb-2'
+            "
           >
-            <VCol class="ma-0 pa-0" :class="display.smAndDown ? '' : 'mr-n2'" cols="4">
+            <VCol
+              class="ma-0 pa-0"
+              :class="display.smAndDown ? '' : 'mr-n2'"
+              cols="4"
+            >
               <div
                 class="text-caption text-darkGrey"
                 @click="
                   trackGAevent('clickOnOpenStationShop', {
                     ITEM_ID: 'active',
-                    ITEM_LIST_ID: device.model
+                    ITEM_LIST_ID: device.model,
                   })
                 "
               >
@@ -301,7 +313,9 @@
                   :style="anchorColor"
                 >
                   {{ device.model }}
-                  <i class="text-text fa-solid fa-arrow-up-right-from-square"></i>
+                  <i
+                    class="text-text fa-solid fa-arrow-up-right-from-square"
+                  ></i>
                 </a>
               </div>
             </VCol>
@@ -312,7 +326,9 @@
                 style="border-radius: 14px"
                 color="netStatProgressBar"
               >
-                <strong>{{ calcProgressBarPercentage(device.percentage) }}%</strong>
+                <strong
+                  >{{ calcProgressBarPercentage(device.percentage) }}%</strong
+                >
               </v-progress-linear>
             </VCol>
             <VCol class="ma-0 pa-0" cols="3">
@@ -324,7 +340,7 @@
         </VCol>
         <VCol cols="3" class="ma-0 pa-0 text-text">
           <div :style="responsiveTextStyles" class="pr-0 d-flex justify-end">
-            {{ localizeNumber(props.weatherStationsActive.total) }}
+            {{ localizeNumber(props.weatherStations.active.total) }}
           </div>
         </VCol>
       </VRow>

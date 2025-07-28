@@ -6,7 +6,7 @@
     lastUpdated?: string
   }
   const props = withDefaults(defineProps<Props>(), {
-    lastUpdated: ''
+    lastUpdated: '',
   })
 
   const nav = window.navigator.language
@@ -28,7 +28,7 @@
 
 <template>
   <div
-    class="text-subtitle-2 text-right text-text"
+    class="text-subtitle-2 text-right text-text mx-2 my-4"
     style="font-weight: 100; font-style: normal; line-height: 21px"
   >
     {{ calcedLastUpdated }}
