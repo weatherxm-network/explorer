@@ -22,7 +22,7 @@
           class="text-decoration-none d-inline-flex align-center"
           style="color : ${anchorColor.value}"
           >WeatherXM<i class="fa-solid fa-arrow-up-right-from-square pl-1" style="font-size: 12px"></i
-        ></a>`
+        ></a>`,
         )
       : `<a
           target="_blank"
@@ -31,8 +31,7 @@
           style="color : ${anchorColor.value}"
           >WeatherXM<i class="fa-solid fa-arrow-up-right-from-square pl-1" style="font-size: 12px"></i
         ></a>
-        is a community powered web3 weather station network. Search or navigate with the map to
-        discover stations deployed all over the world and view real-time weather conditions.`
+        is a community-driven web3 weather station network. Explore global weather data and view network stats using the map.`
   })
 
   const anchorColor = computed(() => {
@@ -69,7 +68,10 @@
     </div>
 
     <!--------------- Welcome -------------->
-    <div class="px-4 text--text" style="font-size: 1.875rem; font-weight: 300; line-height: 36px">
+    <div
+      class="px-4 text--text"
+      style="font-size: 1.875rem; font-weight: 300; line-height: 36px"
+    >
       {{ welcomeText }}
     </div>
     <div
@@ -78,7 +80,10 @@
     >
       {{ projectsNameText }}
     </div>
-    <div class="text-body-1 mb-5 mt-6 px-4 anchor-color" style="font-weight: 400">
+    <div
+      class="text-body-1 mb-5 mt-6 px-4 anchor-color"
+      style="font-weight: 400"
+    >
       <div v-html="statsHeaderText" />
     </div>
   </div>

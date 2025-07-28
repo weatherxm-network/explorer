@@ -38,10 +38,6 @@
   const nFormat = (number: number) => {
     return numberFormater.nFormatter(number)
   }
-
-  onMounted(() => {
-    console.log('PROPS: \n', props.growth)
-  })
 </script>
 
 <template>

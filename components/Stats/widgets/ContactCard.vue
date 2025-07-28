@@ -36,7 +36,7 @@
     }"
   >
     <VCardText class="pa-0 ma-0">
-      <VRow class="ma-0 pa-2 pl-3" align="center" justify="justify-start">
+      <VRow class="ma-0 pa-2 pl-3" align="center" justify="start">
         <div
           class="text-text mr-1"
           :style="{ 'font-size': '0.8rem', 'font-weight': 400 }"
