@@ -57,7 +57,7 @@
         {{ cardTitle }}
 
         <i
-          class="fa fa-chevron-right text-primary ml-2 mr-4"
+          class="fa fa-chevron-right text-primary ml-2 mr-4 cursor-pointer"
           style="font-size: 1.2rem"
           @click="() => navigateTo('/stats/stations-growth')"
         ></i>
@@ -69,7 +69,7 @@
         <VRow class="ma-0 pa-0">
           <LineChartComponent
             :data="lastRunGraphData"
-            class="pr-11 pl-4"
+            class="pr-8 pl-2"
           ></LineChartComponent>
           <VRow class="ma-0 pa-0 d-flex justify-space-between pr-6 pt-2">
             <div

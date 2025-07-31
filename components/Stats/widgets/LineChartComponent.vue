@@ -9,16 +9,24 @@
     LineElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
   } from 'chart.js'
-  ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
+  ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+  )
 
   interface Props {
     data?: number[]
   }
 
   const props = withDefaults(defineProps<Props>(), {
-    data: () => []
+    data: () => [],
   })
 
   const theme = useTheme()
@@ -30,43 +38,53 @@
         data: [],
         borderColor: '',
         borderWidth: 4,
-        tension: 0.3
-      }
-    ]
+        tension: 0.3,
+        borderCapStyle: 'round',
+      },
+    ],
   })
 
   const chartOptions = ref({
     maintainAspectRatio: false,
     type: 'line',
     responsive: true,
+    layout: {
+      padding: {
+        left: 15,
+        right: 15,
+        top: 10,
+        bottom: 10,
+      },
+    },
     plugins: {
       legend: {
-        display: false
+        display: false,
       },
       tooltip: {
-        enabled: false
-      }
+        enabled: false,
+      },
     },
 
     elements: {
       point: {
-        radius: 0
-      }
+        radius: 0,
+      },
     },
     scales: {
       x: {
         display: false,
         grid: {
-          display: false
-        }
+          display: false,
+        },
       },
       y: {
         display: false,
         grid: {
-          display: false
-        }
-      }
-    }
+          display: false,
+        },
+        grace: '1%',
+      },
+    },
   })
 
   const chartLineColor = computed(() => {

@@ -5,11 +5,11 @@
   import numberFormater from '../utils/numberFormater'
   import LineChartComponent from './LineChartComponent.vue'
   import TooltipComponent from '~/components/common/TooltipComponent.vue'
-  import type { v2NetworkStatsResponse } from '../types/stats'
+  import type { NetworkStatsResponse } from '../types/stats'
 
   interface Props {
     contractUrl?: string
-    rewards?: v2NetworkStatsResponse['rewards']
+    rewards?: NetworkStatsResponse['rewards']
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -83,7 +83,7 @@
         {{ rewardsCardTitle }}
 
         <i
-          class="fa fa-chevron-right text-primary ml-2 mr-4"
+          class="fa fa-chevron-right text-primary ml-2 mr-4 cursor-pointer"
           style="font-size: 1.2rem"
           @click="() => navigateTo('/stats/token-metrics')"
         ></i>
@@ -107,7 +107,11 @@
       @click="trackGAevent('click_on_reward_contract_link')"
       @mouseenter="trackGAevent('click_on_reward_contract_link')"
     >
-      <a :href="props.contractUrl" target="_blank" class="text-decoration-none">
+      <a
+        :href="props.contractUrl"
+        target="_blank"
+        class="text-decoration-none text-primary"
+      >
         <span class="pl-2 pr-1">{{ rewardsSubtitleLinkText }}</span>
         <i class="fa-solid fa-arrow-up-right-from-square"></i>
       </a>
@@ -118,7 +122,7 @@
         <VRow class="ma-0 pa-0">
           <LineChartComponent
             :data="lastRunGraphData"
-            class="pr-11 pl-4"
+            class="pr-8 pl-2"
           ></LineChartComponent>
           <VRow class="ma-0 pa-0 d-flex justify-space-between pr-6 pt-2">
             <div
