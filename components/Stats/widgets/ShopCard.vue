@@ -79,7 +79,10 @@
           :class="display.smAndDown ? 'pl-2' : 'pl-3'"
           :cols="6"
         >
-          <img :src="promoStationImg" />
+          <img
+            :src="promoStationImg"
+            :style="{ objectFit: 'contain', width: '100%' }"
+          />
         </VCol>
       </VRow>
     </VCardText>

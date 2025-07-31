@@ -31,6 +31,16 @@
     'Reflects the overall performance and reliability of the network. It consists of data quality, network uptime and number of healthy stations to indicate how well the network is functioning and how trustworthy the collected data is.',
   )
 
+  const dataQualityScoreTooltipTitle = ref('Data Quality Score')
+  const dataQualityScoreTooltipText = ref(
+    'The Data Quality Score indicates the confidence level in the quality of the weather data received from a station.',
+  )
+
+  const activeStationsTooltipTitle = ref('Active Stations')
+  const activeStationsTooltipText = ref(
+    'The number of weather stations that were active during the last day.',
+  )
+
   const chartData = computed(() => {
     return props.health.health_30days_graph.map((point) => point.value)
   })
@@ -88,7 +98,7 @@
         <VRow class="ma-0 pa-0">
           <LineChartComponent
             :data="chartData"
-            class="pr-11 pl-4"
+            class="pr-8 pl-2"
           ></LineChartComponent>
           <VRow class="ma-0 pa-0 d-flex justify-space-between pr-6 pt-2">
             <div
@@ -148,6 +158,20 @@
             <div class="text-text text-caption">
               {{ netHealthQoDScoreLabel }}
             </div>
+            <div
+              @mouseenter="
+                trackGAevent('clickInfoIcon', { ITEM_ID: 'data_quality_score' })
+              "
+              @click="
+                trackGAevent('clickInfoIcon', { ITEM_ID: 'data_quality_score' })
+              "
+            >
+              <TooltipComponent
+                :message="dataQualityScoreTooltipText"
+                :container="'any'"
+                :tooltip-title="dataQualityScoreTooltipTitle"
+              />
+            </div>
           </div>
           <div :style="responsiveTextStyles">
             <div
@@ -168,6 +192,20 @@
           <div class="d-flex justify-space-between align-center mb-4">
             <div class="text-text text-caption">
               {{ netHealthActiveStationsLabel }}
+            </div>
+            <div
+              @mouseenter="
+                trackGAevent('clickInfoIcon', { ITEM_ID: 'active_stations' })
+              "
+              @click="
+                trackGAevent('clickInfoIcon', { ITEM_ID: 'active_stations' })
+              "
+            >
+              <TooltipComponent
+                :message="activeStationsTooltipText"
+                :container="'any'"
+                :tooltip-title="activeStationsTooltipTitle"
+              />
             </div>
           </div>
           <div :style="responsiveTextStyles">
