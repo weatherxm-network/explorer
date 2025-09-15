@@ -5,6 +5,7 @@
   import lightLogo from '~/assets/logo.svg'
   import darkLogo from '~/assets/Dark_Logo.svg'
 
+  const route = useRoute()
   const display = ref(useDisplay())
   const theme = useTheme()
   const mapboxStore = useMapboxStore()
@@ -32,6 +33,11 @@
           >WeatherXM<i class="fa-solid fa-arrow-up-right-from-square pl-1" style="font-size: 12px"></i
         ></a>
         is a community-driven web3 weather station network. Explore global weather data and view network stats using the map.`
+  })
+
+  const isInNestedStats = computed(() => {
+    const statSubRoutes = ['/stats/stations-growth', '/stats/token-metrics']
+    return statSubRoutes.indexOf(route.path) > -1
   })
 
   const anchorColor = computed(() => {
@@ -75,13 +81,14 @@
       {{ welcomeText }}
     </div>
     <div
-      class="px-4 pb-text--text"
+      class="px-4 pb-text--text mb-6"
       style="font-size: 1.875rem; font-weight: 600; line-height: 36px"
     >
       {{ projectsNameText }}
     </div>
     <div
-      class="text-body-1 mb-5 mt-6 px-4 anchor-color"
+      v-if="!isInNestedStats"
+      class="text-body-1 mb-5 px-4 anchor-color"
       style="font-weight: 400"
     >
       <div v-html="statsHeaderText" />
