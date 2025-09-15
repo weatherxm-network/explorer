@@ -18,6 +18,8 @@
   import { useMobileStore } from '~/stores/mobileStore'
   import type { NetworkStatsResponse } from './types/stats'
 
+  const infoBannerStore = useInfoBannerStore()
+  const { isInfoBannerShown, elementHeight } = storeToRefs(infoBannerStore)
   const mobileStore = useMobileStore()
   const display = ref(useDisplay())
   const route = useRoute()
@@ -122,11 +124,11 @@
       >
         <MobileHeader />
 
-        <VCardText class="ma-0 pa-0">
+        <VCardText class="ma-0 pa-0 h-100">
           <!------- Loading lottie ------>
           <div
             v-if="loading"
-            class="h-100 w-100 d-flex align-center justify-center"
+            class="h-30 w-100 d-flex align-center justify-center"
             :style="animationContainerHeight"
           >
             <LottieComponent
@@ -139,7 +141,7 @@
           <!------- No internet component ------>
           <div
             v-if="!loading && showNoInternetComponent"
-            class="h-100 w-100 d-flex align-center justify-center"
+            class="h-30 w-100 d-flex align-center justify-center"
             :style="errorContainerHeight"
           >
             <NoInternetComponent
@@ -151,7 +153,10 @@
 
           <div
             v-if="!loading && !showNoInternetComponent"
-            :class="display.smAndDown ? `pa-5` : `pa-4`"
+            :class="[
+              display.smAndDown ? `pa-5` : `pa-4`,
+              'h-100 d-flex flex-column justify-start align-stretch',
+            ]"
           >
             <!-------- NetworkHealth -------->
             <NetworkHealth :health="netHealth" />
@@ -169,7 +174,11 @@
             <LastUpdatedFooter :last-updated="lastUpdated" />
 
             <!------ Contact ------>
-            <ContactCard />
+            <ContactCard
+              :style="{
+                marginTop: `calc(100% ${isInfoBannerShown ? `- ${elementHeight}px` : '+ 20px'}`,
+              }"
+            />
           </div>
         </VCardText>
       </VCard>

@@ -52,14 +52,14 @@
     >
       <div
         style="font-size: 1.094rem; font-weight: 700"
-        class="text-text pl-2 pt-1"
+        class="text-text pl-2 pt-1 cursor-pointer"
+        @click="() => navigateTo('/stats/stations-growth')"
       >
         {{ cardTitle }}
 
         <i
-          class="fa fa-chevron-right text-primary ml-2 mr-4 cursor-pointer"
+          class="fa fa-chevron-right text-primary ml-2 mr-4"
           style="font-size: 1.2rem"
-          @click="() => navigateTo('/stats/stations-growth')"
         ></i>
       </div>
     </div>

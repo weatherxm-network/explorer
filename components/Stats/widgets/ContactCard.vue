@@ -25,7 +25,6 @@
     :style="{
       marginLeft: '-20px',
       marginRight: '-20px',
-      marginBottom: '-20px',
     }"
   >
     <VCardText class="pa-0 ma-0">

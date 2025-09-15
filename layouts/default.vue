@@ -31,7 +31,7 @@
         :border="false"
       >
         <div class="h-100 w-100">
-          <VLayout>
+          <VLayout class="h-100">
             <slot />
           </VLayout>
         </div>
