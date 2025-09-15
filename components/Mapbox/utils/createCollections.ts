@@ -8,7 +8,8 @@ const createCellsCollection = (cells: Cell[]): FeatureCollection => {
       properties: {
         index: cell.index,
         device_count: cell.device_count,
-        center: cell.center
+        center: cell.center,
+        avg_data_quality: cell.avg_data_quality
       },
       geometry: {
         type: 'Polygon',

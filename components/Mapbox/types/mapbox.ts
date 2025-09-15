@@ -19,6 +19,7 @@ interface Properties {
   index: string
   device_count: number
   center: Point
+  avg_data_quality?: number
 }
 
 interface Geometry {

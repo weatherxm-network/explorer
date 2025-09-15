@@ -9,6 +9,7 @@
   import RefreshSnackbar from './widgets/RefreshSnackbar.vue'
   import SearchBar from './widgets/SearchBar.vue'
   import TrackingConcentComponent from './widgets/TrackingConcentComponent.vue'
+  import LayerSwitcher from './widgets/LayerSwitcher.vue'
   import type { Point, SearchResultDevice, Collections } from './types/mapbox'
   import { useMapboxStore } from '~/stores/mapboxStore'
   import { useMobileStore } from '~/stores/mobileStore'
@@ -30,6 +31,7 @@
   const clickCellId = ref('')
   const snackbar = ref(false)
   const onLine = ref(navigator.onLine)
+  const hexagonLayerType = ref<'simple' | 'data-quality'>('simple')
 
   const smBreakpoint = computed(() => {
     return display.smAndDown.value
@@ -292,44 +294,132 @@
     )
   }
 
-  const mouseFunctionality = () => {
-    // Change the cursor to a pointer when the mouse is over the places layer.
-    map.value?.on('mouseenter', 'cells', () => {
-      map.value!.getCanvas().style.cursor = 'pointer'
+  const addDeviceCountLabels = () => {
+    map.value?.addLayer({
+      id: 'device-count-labels',
+      type: 'symbol',
+      source: 'cells',
+      layout: {
+        'text-field': ['get', 'device_count'],
+        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+        'text-size': 12,
+        'text-anchor': 'center',
+      },
+      paint: {
+        'text-color': '#ffffff',
+        'text-halo-color': '#000000',
+        'text-halo-width': 1,
+        // Opposite visibility pattern of heatmap - visible when heatmap fades out
+        'text-opacity': [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          9.5, 0.0,
+          10, 1.0,
+          15, 1.0
+        ]
+      },
+      filter: ['>', ['get', 'device_count'], 0], // Only show cells with devices
     })
-    // Change it back to a pointer when it leaves.
-    map.value?.on('mouseleave', 'cells', () => {
-      map.value!.getCanvas().style.cursor = ''
+  }
+
+  const addDataQualityLayer = () => {
+    map.value?.addLayer({
+      id: 'data-quality-hexagons',
+      type: 'fill',
+      source: 'cells',
+      layout: {
+        visibility: 'none', // Initially hidden, will be toggled by layer switcher
+      },
+      paint: {
+        'fill-color': [
+          'case',
+          // Handle null/undefined avg_data_quality values
+          ['==', ['typeof', ['get', 'avg_data_quality']], 'undefined'], '#C6C6D0', // Grey for no data
+          ['==', ['get', 'avg_data_quality'], null], '#C6C6D0', // Grey for null data
+          [
+            'step',
+            ['*', ['get', 'avg_data_quality'], 100], // Convert to percentage (0-100)
+            '#FF1744',    // Red for 0-15%
+            15.01, '#FFAB49',  // Orange for 16-76%
+            76.01, '#00E676'   // Green for 77-100%
+          ]
+        ],
+        'fill-opacity': [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          9.5, 0.0,
+          10, 0.6,  // Same visibility pattern as device count labels
+          15, 0.6
+        ],
+      },
+      filter: ['==', '$type', 'Polygon'],
+    })
+  }
+
+  const toggleHexagonLayerType = (type: 'simple' | 'data-quality') => {
+    if (type === 'simple') {
+      map.value?.setLayoutProperty('cells', 'visibility', 'visible')
+      map.value?.setLayoutProperty('data-quality-hexagons', 'visibility', 'none')
+    } else {
+      map.value?.setLayoutProperty('cells', 'visibility', 'none')
+      map.value?.setLayoutProperty('data-quality-hexagons', 'visibility', 'visible')
+    }
+    hexagonLayerType.value = type
+  }
+
+  const handleLayerChange = (type: 'simple' | 'data-quality') => {
+    toggleHexagonLayerType(type)
+  }
+
+  const mouseFunctionality = () => {
+    // Add mouse functionality for both hexagon layers
+    const hexagonLayers = ['cells', 'data-quality-hexagons']
+
+    hexagonLayers.forEach(layerId => {
+      // Change the cursor to a pointer when the mouse is over the hexagon layers
+      map.value?.on('mouseenter', layerId, () => {
+        map.value!.getCanvas().style.cursor = 'pointer'
+      })
+      // Change it back when it leaves
+      map.value?.on('mouseleave', layerId, () => {
+        map.value!.getCanvas().style.cursor = ''
+      })
     })
   }
 
   const mouseHoverFunctionality = () => {
-    // on cell hover
-    map.value?.on('mousemove', 'cells', (e) => {
-      const currentCell = e.features![0].properties?.index
-      // check if current polygon is not the same
-      if (hoverCellId.value !== currentCell) {
-        if (clickCellId.value !== currentCell) {
-          addOutLineLayer(currentCell)
+    const hexagonLayers = ['cells', 'data-quality-hexagons']
+
+    hexagonLayers.forEach(layerId => {
+      // on cell hover
+      map.value?.on('mousemove', layerId, (e) => {
+        const currentCell = e.features![0].properties?.index
+        // check if current polygon is not the same
+        if (hoverCellId.value !== currentCell) {
+          if (clickCellId.value !== currentCell) {
+            addOutLineLayer(currentCell)
+          }
         }
-      }
-      // check if hovered polygon exist
-      if (hoverCellId.value !== currentCell) {
-        // check if clicked polygon exist
-        if (clickCellId.value !== hoverCellId.value) {
-          // check if cursor moved over map before enter the new polygon
-          if (hoverCellId.value) removeOutLineLayer(hoverCellId.value)
+        // check if hovered polygon exist
+        if (hoverCellId.value !== currentCell) {
+          // check if clicked polygon exist
+          if (clickCellId.value !== hoverCellId.value) {
+            // check if cursor moved over map before enter the new polygon
+            if (hoverCellId.value) removeOutLineLayer(hoverCellId.value)
+          }
         }
-      }
-      // set current polygon to hoverPoly
-      hoverCellId.value = currentCell
-    })
-    // on hex7 leave
-    map.value?.on('mouseleave', 'cells', () => {
-      if (hoverCellId.value !== clickCellId.value) {
-        removeOutLineLayer(hoverCellId.value)
-      }
-      hoverCellId.value = ''
+        // set current polygon to hoverPoly
+        hoverCellId.value = currentCell
+      })
+      // on layer leave
+      map.value?.on('mouseleave', layerId, () => {
+        if (hoverCellId.value !== clickCellId.value) {
+          removeOutLineLayer(hoverCellId.value)
+        }
+        hoverCellId.value = ''
+      })
     })
   }
 
@@ -392,36 +482,40 @@
   }
 
   const clickOnCell = () => {
-    map.value?.on('click', 'cells', (e) => {
-      // prevent event bubbling
-      e.preventDefault()
-      // get cell's center coords
-      const coords = JSON.parse(e.features![0].properties?.center)
-      // get cell's index
-      const cellIndex = e.features![0].properties?.index
+    const hexagonLayers = ['cells', 'data-quality-hexagons']
 
-      // check if any polygon is already clicked
-      if (clickCellId.value) {
-        // if any remove its outline layer
-        removeOutLineLayer(clickCellId.value)
-      }
-      // else set the new polygon id
-      clickCellId.value = cellIndex
-      // add outline to new polygon
-      addOutLineLayer(clickCellId.value)
+    hexagonLayers.forEach(layerId => {
+      map.value?.on('click', layerId, (e) => {
+        // prevent event bubbling
+        e.preventDefault()
+        // get cell's center coords
+        const coords = JSON.parse(e.features![0].properties?.center)
+        // get cell's index
+        const cellIndex = e.features![0].properties?.index
 
-      // zoom to cell
-      map.value?.flyTo({
-        center: [coords.lon, coords.lat],
-        zoom: 13,
+        // check if any polygon is already clicked
+        if (clickCellId.value) {
+          // if any remove its outline layer
+          removeOutLineLayer(clickCellId.value)
+        }
+        // else set the new polygon id
+        clickCellId.value = cellIndex
+        // add outline to new polygon
+        addOutLineLayer(clickCellId.value)
+
+        // zoom to cell
+        map.value?.flyTo({
+          center: [coords.lon, coords.lat],
+          zoom: 13,
+        })
+
+        // navigato to cells page
+        navigateTo(`/cells/${cellIndex}`)
+        mobileStore.setPageState(true)
+
+        // track GA event
+        trackGAevent('explorer_cell', { ITEM_ID: clickCellId.value })
       })
-
-      // navigato to cells page
-      navigateTo(`/cells/${cellIndex}`)
-      mobileStore.setPageState(true)
-
-      // track GA event
-      trackGAevent('explorer_cell', { ITEM_ID: clickCellId.value })
     })
   }
 
@@ -534,6 +628,8 @@
       // add layers to map
       addCellsLayer()
       addHeatLayer()
+      addDeviceCountLabels()
+      addDataQualityLayer()
       // add mouse functionality
       mouseFunctionality()
       // add mouse hover functionality
@@ -567,6 +663,7 @@
       absolute
     ></VProgressLinear>
     <SearchBar />
+    <LayerSwitcher @layer-change="handleLayerChange" />
     <div id="map" :style="navButtonsStyles"></div>
 
     <StatsButton />
