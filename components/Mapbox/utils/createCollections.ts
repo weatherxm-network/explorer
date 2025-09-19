@@ -9,13 +9,17 @@ const createCellsCollection = (cells: Cell[]): FeatureCollection => {
         index: cell.index,
         device_count: cell.device_count,
         center: cell.center,
-        avg_data_quality: cell.avg_data_quality
+        avg_data_quality: cell.avg_data_quality,
+        capacity: cell.capacity,
+        active_device_count: cell.active_device_count,
       },
       geometry: {
         type: 'Polygon',
-        coordinates: [cell.polygon.map((coordinates) => [coordinates.lon, coordinates.lat])]
-      }
-    }))
+        coordinates: [
+          cell.polygon.map((coordinates) => [coordinates.lon, coordinates.lat]),
+        ],
+      },
+    })),
   }
 }
 
@@ -27,17 +31,17 @@ const createHeatmapCollection = (cells: Cell[]): FeatureCollection => {
       properties: {
         index: cell.index,
         device_count: cell.device_count,
-        center: cell.center
+        center: cell.center,
       },
       geometry: {
         type: 'Point',
-        coordinates: [cell.center.lon, cell.center.lat]
-      }
-    }))
+        coordinates: [cell.center.lon, cell.center.lat],
+      },
+    })),
   }
 }
 
 export default {
   createCellsCollection,
-  createHeatmapCollection
+  createHeatmapCollection,
 }

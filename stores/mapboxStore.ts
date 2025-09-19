@@ -12,6 +12,7 @@ export const useMapboxStore = defineStore('MapboxStore', {
       initMapPositionEvent: null,
       searchedDeviceToFly: null,
       searchedAddressToFly: null,
+      qualityRange: [0, 100],
     }
   },
   getters: {
@@ -19,6 +20,7 @@ export const useMapboxStore = defineStore('MapboxStore', {
     getInitMapPositionEvent: (state) => state.initMapPositionEvent,
     getSearchedDeviceToFly: (state) => state.searchedDeviceToFly,
     getSearchedAddressToFly: (state) => state.searchedAddressToFly,
+    getQualityRange: (state) => state.qualityRange,
   },
 
   actions: {
@@ -34,6 +36,9 @@ export const useMapboxStore = defineStore('MapboxStore', {
     setSearchedAddressToFly(address: SearchResultLocation) {
       this.searchedAddressToFly = address
     },
+    setQualityRange(range: [number, number]) {
+      this.qualityRange = range
+    },
   },
 })
 
@@ -42,4 +47,5 @@ interface MapState {
   searchedDeviceToFly: null | SearchResultDevice
   searchedAddressToFly: null | SearchResultLocation
   initMapPositionEvent: null
+  qualityRange: [number, number]
 }

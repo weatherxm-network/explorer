@@ -5,6 +5,7 @@ export interface Point {
 
 export interface Cell {
   active_device_count: number
+  capacity: number
   avg_data_quality?: number
   devices: {
     [key: string]: number
