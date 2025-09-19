@@ -1,55 +1,288 @@
 <script setup lang="ts">
-const selectedType = ref<'simple' | 'data-quality'>('simple')
+  import cellsDefaultLayerImg from '@/assets/layer-cells-default.png'
+  import dataQualityLayerImg from '@/assets/layer-data-quality.png'
 
-const emit = defineEmits<{
-  layerChange: [type: 'simple' | 'data-quality']
-}>()
+  type LayerKeys = 'simple' | 'data-quality'
+  interface Layers {
+    key: LayerKeys
+    src: string
+    label: string
+  }
 
-const onTypeChange = (type: 'simple' | 'data-quality') => {
-  emit('layerChange', type)
-}
+  const selectedType = ref<LayerKeys>('simple')
+  const isLayerSelectionShown = ref<boolean>(false)
 
-watch(selectedType, (newType) => {
-  onTypeChange(newType)
-})
+  const mapboxStore = useMapboxStore()
+
+  // Local reactive state for immediate UI updates
+  const localQualityRange = ref([...mapboxStore.getQualityRange])
+
+  // Debounced function to update store (and trigger map filter)
+  const debouncedUpdateStore = useDebounceFn((value: [number, number]) => {
+    mapboxStore.setQualityRange(value)
+  }, 300)
+
+  const qualityRange = computed({
+    get: () => localQualityRange.value,
+    set: (value) => {
+      // Update local state immediately for smooth UI
+      localQualityRange.value = value
+      // Update store (and map) with debounce
+      debouncedUpdateStore(value as [number, number])
+    },
+  })
+
+  const emit = defineEmits<{
+    layerChange: [type: LayerKeys]
+  }>()
+
+  const onTypeChange = (type: LayerKeys) => {
+    emit('layerChange', type)
+  }
+
+  const layers: Layers[] = [
+    { key: 'simple', src: cellsDefaultLayerImg, label: 'Cells' },
+    { key: 'data-quality', src: dataQualityLayerImg, label: 'Data Quality' },
+  ]
+
+  const layerImages = computed(() => {
+    return layers.filter((li) => li.key !== selectedType.value)
+  })
+
+  const currentLayerImg = computed(() => {
+    return layers.filter((li) => li.key === selectedType.value)[0]
+  })
+
+  watch(selectedType, (newType) => {
+    onTypeChange(newType)
+  })
+
+  watch(
+    () => mapboxStore.getQualityRange,
+    (newRange) => {
+      localQualityRange.value = [...newRange]
+    },
+    { immediate: true },
+  )
+
+  function showLayerSelection() {
+    isLayerSelectionShown.value = true
+  }
+
+  function hideLayerSelection() {
+    isLayerSelectionShown.value = false
+  }
 </script>
 
 <template>
-  <VCard class="layer-switcher" elevation="2">
-    <VCardTitle class="text-h6 pb-2">
-      Map Layers
-    </VCardTitle>
-    <VCardText>
-      <VRadioGroup v-model="selectedType" density="compact">
-        <VRadio
-          value="simple"
-          label="Simple Hexagons"
-          color="primary"
-        />
-        <VRadio
-          value="data-quality"
-          label="Data Quality"
-          color="primary"
-        />
-      </VRadioGroup>
-    </VCardText>
+  <div class="LayerSwitcher" elevation="2">
+    <div
+      v-if="selectedType === 'data-quality'"
+      class="LayerSwitcher__qod__slider"
+    >
+      <VRangeSlider
+        v-model="qualityRange"
+        :min="0"
+        :max="100"
+        :step="1"
+        color="transparent"
+        track-color="transparent"
+        thumb-color="white"
+        :thumb-size="18"
+        class="quality-gradient-slider"
+        hide-details
+      >
+        <template #prepend>
+          <span class="range-label">Data Quality Score: </span>
+          <span class="range-label">{{ qualityRange[0] }}%</span>
+        </template>
+        <template #append>
+          <span class="range-label">{{ qualityRange[1] }}%</span>
+        </template>
+      </VRangeSlider>
+    </div>
+    <div
+      class="LayerSwitcher__container"
+      @mouseenter="showLayerSelection"
+      @mouseleave="hideLayerSelection"
+    >
+      <div class="LayerImage__container">
+        <img class="w-100 h-100" :src="currentLayerImg.src" />
+        <p>{{ currentLayerImg.label }}</p>
+      </div>
+
+      <div
+        :class="[
+          'LayerImage__options',
+          isLayerSelectionShown
+            ? 'LayerImage__options--show'
+            : 'LayerImage__options--hide',
+        ]"
+      >
+        <div
+          v-for="img in layerImages"
+          :key="img.key"
+          class="LayerImage__options__item cursor-pointer"
+          @click="() => (selectedType = img.key)"
+        >
+          <img :src="img.src" />
+          <p>{{ img.label }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <VCard elevation="2">
+    <VSheet></VSheet>
   </VCard>
 </template>
 
 <style scoped>
-.layer-switcher {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  min-width: 200px;
-}
+  .LayerSwitcher {
+    position: absolute;
+    bottom: 10px;
+    right: 60px;
+    z-index: 100;
+    min-width: 200px;
 
-@media (max-width: 960px) {
-  .layer-switcher {
-    bottom: 140px;
-    right: 10px;
-    min-width: 180px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 16px;
   }
-}
+
+  .LayerSwitcher__qod__slider {
+    /* 100vw - layerImag - content - paddings */
+    width: calc(100vw - 220px - 440px - 50px);
+    max-width: 500px;
+    padding: 12px;
+    background-color: #31364acc;
+    border-radius: 12px;
+    border: 2px solid #b8c6ff;
+  }
+
+  .quality-gradient-slider :deep(.v-slider-track__background) {
+    background: linear-gradient(
+      to right,
+      #ff1744 0%,
+      /* Deep red at start */ #ff1744 15%,
+      /* Hold red until 15% */ #ff4500 18%,
+      /* Transition to red-orange */ #ff6b00 22%,
+      /* More orange-red */ #ffab49 30%,
+      /* Orange */ #ffab49 70%,
+      /* Hold orange through middle */ #7dd55f 78%,
+      /* Transition to yellow-green */ #00e676 85%,
+      /* Bright green */ #00c864 100% /* Slightly deeper green at end */
+    ) !important;
+    height: 6px !important;
+    border-radius: 3px !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  .quality-gradient-slider :deep(.v-slider-track__fill) {
+    background: transparent !important;
+    height: 6px !important;
+    border-radius: 3px !important;
+    box-sizing: border-box;
+    opacity: 1 !important;
+  }
+
+  .quality-gradient-slider {
+    opacity: 1 !important;
+  }
+
+  .quality-gradient-slider :deep(.v-slider-track) {
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  .quality-gradient-slider :deep(.v-slider-thumb) {
+    border: 2px solid #333;
+  }
+
+  .range-label {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 35px;
+    text-align: center;
+  }
+
+  @media (max-width: 959px) {
+    .LayerSwitcher {
+      display: none;
+    }
+  }
+
+  .LayerSwitcher__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    position: relative;
+  }
+
+  .LayerImage__container {
+    border: 2px solid #b8c6ffaa;
+    border-radius: 16px;
+    overflow: hidden;
+    width: 180px;
+    aspect-ratio: 1/1;
+
+    z-index: 5;
+
+    > p {
+      position: absolute;
+      bottom: 6px;
+      left: 4px;
+      right: 4px;
+      text-align: center;
+    }
+  }
+
+  .LayerImage__options {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    z-index: 4;
+
+    transition: all 0.15s ease-in;
+    transition-delay: 75ms;
+
+    width: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+
+    border-radius: 16px;
+    padding: 8px;
+
+    background-color: #31364acc;
+  }
+
+  .LayerImage__options--show {
+    transform: translateY(-200px);
+  }
+
+  .LayerImage__options--hide {
+    height: 180px;
+  }
+
+  .LayerImage__options__item {
+    position: relative;
+    border: 2px solid #b8c6ff;
+    border-radius: 16px;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 1/1;
+
+    > p {
+      position: absolute;
+      bottom: 6px;
+      left: 4px;
+      right: 4px;
+      text-align: center;
+    }
+  }
 </style>

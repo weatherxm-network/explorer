@@ -66,6 +66,10 @@
     return mapboxStore.getSearchedDeviceToFly
   })
 
+  const qualityRange = computed(() => {
+    return mapboxStore.getQualityRange
+  })
+
   watch(onLine, (value) => {
     value ? (snackbar.value = false) : (snackbar.value = true)
   })
@@ -116,6 +120,12 @@
   watch(initMapPositonEvent, (val, newVal) => {
     if (val !== newVal) {
       mapsInitialPosition()
+    }
+  })
+
+  watch(qualityRange, (newRange) => {
+    if (map.value && map.value.getLayer('data-quality-hexagons')) {
+      updateDataQualityFilter(newRange)
     }
   })
 
@@ -300,7 +310,7 @@
       type: 'symbol',
       source: 'cells',
       layout: {
-        'text-field': ['get', 'device_count'],
+        'text-field': ['get', 'capacity'],
         'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
         'text-size': 12,
         'text-anchor': 'center',
@@ -308,18 +318,21 @@
       paint: {
         'text-color': '#ffffff',
         'text-halo-color': '#000000',
-        'text-halo-width': 1,
+        'text-halo-width': 2,
         // Opposite visibility pattern of heatmap - visible when heatmap fades out
         'text-opacity': [
           'interpolate',
           ['exponential', 0.5],
           ['zoom'],
-          9.5, 0.0,
-          10, 1.0,
-          15, 1.0
-        ]
+          9.5,
+          0.0,
+          10,
+          1.0,
+          15,
+          1.0,
+        ],
       },
-      filter: ['>', ['get', 'device_count'], 0], // Only show cells with devices
+      filter: ['>', ['get', 'capacity'], 0], // Only show cells with devices
     })
   }
 
@@ -335,23 +348,30 @@
         'fill-color': [
           'case',
           // Handle null/undefined avg_data_quality values
-          ['==', ['typeof', ['get', 'avg_data_quality']], 'undefined'], '#C6C6D0', // Grey for no data
-          ['==', ['get', 'avg_data_quality'], null], '#C6C6D0', // Grey for null data
+          ['==', ['typeof', ['get', 'avg_data_quality']], 'undefined'],
+          '#C6C6D0', // Grey for no data
+          ['==', ['get', 'avg_data_quality'], null],
+          '#C6C6D0', // Grey for null data
           [
             'step',
-            ['*', ['get', 'avg_data_quality'], 100], // Convert to percentage (0-100)
-            '#FF1744',    // Red for 0-15%
-            15.01, '#FFAB49',  // Orange for 16-76%
-            76.01, '#00E676'   // Green for 77-100%
-          ]
+            ['get', 'avg_data_quality'], // Use raw value (assuming already 0-100)
+            '#FF1744', // Red for 0-19.99% (default)
+            19.99,
+            '#FFAB49', // Orange for 20-79.99%
+            79.99,
+            '#00E676', // Green for 80-100%
+          ],
         ],
         'fill-opacity': [
           'interpolate',
           ['exponential', 0.5],
           ['zoom'],
-          9.5, 0.0,
-          10, 0.6,  // Same visibility pattern as device count labels
-          15, 0.6
+          9.5,
+          0.0,
+          10,
+          0.6, // Same visibility pattern as device count labels
+          15,
+          0.6,
         ],
       },
       filter: ['==', '$type', 'Polygon'],
@@ -361,10 +381,18 @@
   const toggleHexagonLayerType = (type: 'simple' | 'data-quality') => {
     if (type === 'simple') {
       map.value?.setLayoutProperty('cells', 'visibility', 'visible')
-      map.value?.setLayoutProperty('data-quality-hexagons', 'visibility', 'none')
+      map.value?.setLayoutProperty(
+        'data-quality-hexagons',
+        'visibility',
+        'none',
+      )
     } else {
       map.value?.setLayoutProperty('cells', 'visibility', 'none')
-      map.value?.setLayoutProperty('data-quality-hexagons', 'visibility', 'visible')
+      map.value?.setLayoutProperty(
+        'data-quality-hexagons',
+        'visibility',
+        'visible',
+      )
     }
     hexagonLayerType.value = type
   }
@@ -373,11 +401,34 @@
     toggleHexagonLayerType(type)
   }
 
+  const updateDataQualityFilter = (range: [number, number]) => {
+    const [min, max] = range
+
+    const filter = [
+      'all',
+      ['==', '$type', 'Polygon'],
+      [
+        'any',
+        // Show cells with no avg_data_quality property (grey cells)
+        ['!has', 'avg_data_quality'],
+        // Show cells within the selected quality range
+        [
+          'all',
+          ['has', 'avg_data_quality'],
+          ['>=', 'avg_data_quality', min],
+          ['<=', 'avg_data_quality', max],
+        ],
+      ],
+    ]
+
+    map.value?.setFilter('data-quality-hexagons', filter)
+  }
+
   const mouseFunctionality = () => {
     // Add mouse functionality for both hexagon layers
     const hexagonLayers = ['cells', 'data-quality-hexagons']
 
-    hexagonLayers.forEach(layerId => {
+    hexagonLayers.forEach((layerId) => {
       // Change the cursor to a pointer when the mouse is over the hexagon layers
       map.value?.on('mouseenter', layerId, () => {
         map.value!.getCanvas().style.cursor = 'pointer'
@@ -392,7 +443,7 @@
   const mouseHoverFunctionality = () => {
     const hexagonLayers = ['cells', 'data-quality-hexagons']
 
-    hexagonLayers.forEach(layerId => {
+    hexagonLayers.forEach((layerId) => {
       // on cell hover
       map.value?.on('mousemove', layerId, (e) => {
         const currentCell = e.features![0].properties?.index
@@ -484,7 +535,7 @@
   const clickOnCell = () => {
     const hexagonLayers = ['cells', 'data-quality-hexagons']
 
-    hexagonLayers.forEach(layerId => {
+    hexagonLayers.forEach((layerId) => {
       map.value?.on('click', layerId, (e) => {
         // prevent event bubbling
         e.preventDefault()
