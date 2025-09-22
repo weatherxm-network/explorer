@@ -82,3 +82,5 @@ export interface UnitsUserPrefs {
   wind_direction: UnitPrefStruct
   pressure: UnitPrefStruct
 }
+
+export type LayerKeys = 'density' | 'data-quality'

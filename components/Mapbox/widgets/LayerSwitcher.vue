@@ -1,15 +1,15 @@
 <script setup lang="ts">
   import cellsDefaultLayerImg from '@/assets/layer-cells-default.png'
   import dataQualityLayerImg from '@/assets/layer-data-quality.png'
+  import type { LayerKeys } from '@/components/Mapbox/types/mapbox'
 
-  type LayerKeys = 'simple' | 'data-quality'
   interface Layers {
     key: LayerKeys
     src: string
     label: string
   }
 
-  const selectedType = ref<LayerKeys>('simple')
+  const selectedType = ref<LayerKeys>('density')
   const isLayerSelectionShown = ref<boolean>(false)
 
   const mapboxStore = useMapboxStore()
@@ -41,7 +41,7 @@
   }
 
   const layers: Layers[] = [
-    { key: 'simple', src: cellsDefaultLayerImg, label: 'Cells' },
+    { key: 'density', src: cellsDefaultLayerImg, label: 'Cells' },
     { key: 'data-quality', src: dataQualityLayerImg, label: 'Data Quality' },
   ]
 
@@ -80,6 +80,7 @@
       v-if="selectedType === 'data-quality'"
       class="LayerSwitcher__qod__slider"
     >
+      <span class="range-label">Data Quality Score: </span>
       <VRangeSlider
         v-model="qualityRange"
         :min="0"
@@ -93,7 +94,6 @@
         hide-details
       >
         <template #prepend>
-          <span class="range-label">Data Quality Score: </span>
           <span class="range-label">{{ qualityRange[0] }}%</span>
         </template>
         <template #append>
@@ -131,9 +131,44 @@
       </div>
     </div>
   </div>
-  <VCard elevation="2">
-    <VSheet></VSheet>
-  </VCard>
+
+  <div class="LayerSwitcher__mobile">
+    <v-bottom-sheet>
+      <template #activator="{ props: activatorProps }">
+        <button
+          v-bind="activatorProps"
+          class="LayerSwitcher__mobile__toggle fa fa-layer-group"
+        ></button>
+      </template>
+
+      <v-card title="Map Layers" class="LayerOptions__sheet">
+        <v-radio-group v-model="selectedType">
+          <v-radio value="data-quality">
+            <template #label>
+              <div class="LayerOptions__option__label">
+                <span>Data Quality Score</span>
+                <p>
+                  Display a color-coded map indicating station data quality
+                  levels.
+                </p>
+                <div>TEST</div>
+              </div>
+            </template>
+          </v-radio>
+          <v-radio value="density">
+            <template #label>
+              <div class="LayerOptions__option__label">
+                <span>Density</span>
+                <p>
+                  Concise view showing all stations that exist in each cell.
+                </p>
+              </div>
+            </template>
+          </v-radio>
+        </v-radio-group>
+      </v-card>
+    </v-bottom-sheet>
+  </div>
 </template>
 
 <style scoped>
@@ -145,6 +180,7 @@
     min-width: 200px;
 
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
     align-items: flex-end;
     gap: 16px;
@@ -158,6 +194,11 @@
     background-color: #31364acc;
     border-radius: 12px;
     border: 2px solid #b8c6ff;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
   }
 
   .quality-gradient-slider :deep(.v-slider-track__background) {
@@ -188,6 +229,7 @@
   }
 
   .quality-gradient-slider {
+    min-width: 250px;
     opacity: 1 !important;
   }
 
@@ -206,12 +248,6 @@
     font-weight: 600;
     min-width: 35px;
     text-align: center;
-  }
-
-  @media (max-width: 959px) {
-    .LayerSwitcher {
-      display: none;
-    }
   }
 
   .LayerSwitcher__container {
@@ -283,6 +319,40 @@
       left: 4px;
       right: 4px;
       text-align: center;
+    }
+  }
+
+  /* MOBILE */
+
+  .LayerSwitcher__mobile {
+    position: absolute;
+    bottom: 200px;
+    right: 20px;
+    z-index: 100;
+
+    width: 60px;
+    border-radius: 50%;
+
+    background-color: #31364a;
+    aspect-ratio: 1/1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 1.6rem;
+    line-height: 1.6rem;
+  }
+
+  @media (max-width: 959px) {
+    .LayerSwitcher {
+      display: none;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .LayerSwitcher__mobile {
+      display: none;
     }
   }
 </style>

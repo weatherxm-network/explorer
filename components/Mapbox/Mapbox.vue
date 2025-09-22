@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import mapboxgl from 'mapbox-gl'
+  import type { LayerKeys } from '@/components/Mapbox/types/mapbox'
   import type { Map, IControl, MapboxGeoJSONFeature } from 'mapbox-gl'
   import { useDisplay, useTheme } from 'vuetify'
   import _ from 'lodash'
@@ -31,7 +32,7 @@
   const clickCellId = ref('')
   const snackbar = ref(false)
   const onLine = ref(navigator.onLine)
-  const hexagonLayerType = ref<'simple' | 'data-quality'>('simple')
+  const hexagonLayerType = ref<LayerKeys>('density')
 
   const smBreakpoint = computed(() => {
     return display.smAndDown.value
@@ -310,7 +311,7 @@
       type: 'symbol',
       source: 'cells',
       layout: {
-        'text-field': ['get', 'capacity'],
+        'text-field': ['get', 'device_count'],
         'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
         'text-size': 12,
         'text-anchor': 'center',
@@ -332,7 +333,7 @@
           1.0,
         ],
       },
-      filter: ['>', ['get', 'capacity'], 0], // Only show cells with devices
+      filter: ['>', ['get', 'device_count'], 0], // Only show cells with devices
     })
   }
 
@@ -378,8 +379,8 @@
     })
   }
 
-  const toggleHexagonLayerType = (type: 'simple' | 'data-quality') => {
-    if (type === 'simple') {
+  const toggleHexagonLayerType = (type: LayerKeys) => {
+    if (type === 'density') {
       map.value?.setLayoutProperty('cells', 'visibility', 'visible')
       map.value?.setLayoutProperty(
         'data-quality-hexagons',
@@ -397,31 +398,37 @@
     hexagonLayerType.value = type
   }
 
-  const handleLayerChange = (type: 'simple' | 'data-quality') => {
+  const handleLayerChange = (type: LayerKeys) => {
     toggleHexagonLayerType(type)
   }
 
   const updateDataQualityFilter = (range: [number, number]) => {
     const [min, max] = range
 
-    const filter = [
-      'all',
-      ['==', '$type', 'Polygon'],
-      [
-        'any',
-        // Show cells with no avg_data_quality property (grey cells)
-        ['!has', 'avg_data_quality'],
-        // Show cells within the selected quality range
-        [
-          'all',
-          ['has', 'avg_data_quality'],
-          ['>=', 'avg_data_quality', min],
-          ['<=', 'avg_data_quality', max],
-        ],
-      ],
-    ]
+    if (min === 0 && max === 100) {
+      const filter = ['all', ['==', '$type', 'Polygon']]
 
-    map.value?.setFilter('data-quality-hexagons', filter)
+      map.value?.setFilter('data-quality-hexagons', filter)
+    } else {
+      const filter = [
+        'all',
+        ['==', '$type', 'Polygon'],
+        [
+          'any',
+          // Always show cells with no avg_data_quality property (grey cells)
+          ['!has', 'avg_data_quality'],
+          // Show cells within the selected quality range
+          [
+            'all',
+            ['has', 'avg_data_quality'],
+            ['>=', 'avg_data_quality', min],
+            ['<=', 'avg_data_quality', max],
+          ],
+        ],
+      ]
+
+      map.value?.setFilter('data-quality-hexagons', filter)
+    }
   }
 
   const mouseFunctionality = () => {
