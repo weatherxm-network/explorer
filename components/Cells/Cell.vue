@@ -14,6 +14,7 @@
   const lightText = ref('Failed to get the public devices.')
   const orderedCellDevices = ref<Device[]>([])
   const cellAddress = ref(' ')
+  const cellDataQuality = ref(0)
   const countActiveStations = ref(0)
   const countTotalStations = ref(0)
   const animationContainerHeight = computed(() => {
@@ -43,6 +44,8 @@
             (obj) => obj.isActive === true,
           ).length
 
+          cellDataQuality.value = orderedDevices[0].cellAvgDataQuality ?? 0
+
           // show cell devices
           loading.value = false
           showCellsDevices.value = true
@@ -65,6 +68,7 @@
       :total-stations="countTotalStations"
       :cell-address="cellAddress"
       :loading="loading"
+      :cell-data-quality="cellDataQuality"
     />
     <!--------------- Main Content -------------->
     <VCardText class="ma-0 pa-0 h-100 w-100">
