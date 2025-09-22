@@ -56,6 +56,8 @@ export interface Device {
   name: string
   profile: string
   timezone: string
+  cellActiveDeviceCount?: number
+  cellAvgDataQuality?: number
 }
 
 export interface InfoBannerConfig {

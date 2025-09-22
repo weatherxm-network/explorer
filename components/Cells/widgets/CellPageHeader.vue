@@ -4,11 +4,17 @@
   import TooltipComponent from '~/components/common/TooltipComponent.vue'
   import { useMobileStore } from '~/stores/mobileStore'
 
+  import qodGrey from '~/assets/metrics/qod-grey.svg'
+  import qodGreen from '~/assets/metrics/qod-green.svg'
+  import qodOrange from '~/assets/metrics/qod-orange.svg'
+  import qodRed from '~/assets/metrics/qod-red.svg'
+
   interface Props {
     activeStations: number
     totalStations: number
     loading: boolean
     cellAddress?: string
+    cellDataQuality: number
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -16,10 +22,15 @@
     totalStations: 0,
     loading: true,
     cellAddress: '-',
+    cellDataQuality: 0,
   })
   const { trackGAevent } = useGAevents()
   const mobileStore = useMobileStore()
   const display = ref(useDisplay())
+  const qodTooltipTitle = ref('Cell Data Quality')
+  const qodTooltipMessage = ref(
+    'Displays the average Quality of Data  score for all non-zero score stations within this cell.',
+  )
   const showTooltip = ref(false)
   const tooltipText = ref('Cell shareable link copied to clipboard')
   let timer: any = null
@@ -144,7 +155,7 @@
     </VCardTitle>
 
     <VCardText class="pa-0 pl-7">
-      <div class="d-flex">
+      <div class="d-flex flex-wrap ga-1">
         <div v-if="props.loading" style="min-width: 100px">
           <v-skeleton-loader type="chip"></v-skeleton-loader>
         </div>
@@ -188,6 +199,30 @@
                 :tooltip-title="infoTooltipTitle"
               />
             </div>
+          </VSheet>
+        </div>
+        <div v-if="props.loading" style="min-width: 100px">
+          <v-skeleton-loader type="chip"></v-skeleton-loader>
+        </div>
+        <div v-else style="min-width: 100px">
+          <VSheet
+            class="pl-3 pr-1 py-1 text-subtitle-2 flex-grow-0 d-flex ga-1 justify-space-between align-center"
+            style="border-radius: 10px"
+            color="blueTint"
+          >
+            <img v-if="!props.cellDataQuality" :src="qodGrey" />
+            <img v-if="props.cellDataQuality < 20" :src="qodRed" />
+            <img
+              v-if="props.cellDataQuality >= 20 && props.cellDataQuality < 80"
+              :src="qodOrange"
+            />
+            <img v-if="props.cellDataQuality >= 80" :src="qodGreen" />
+            <span>Cell Data Quality </span>
+            <span>{{ props.cellDataQuality }}%</span>
+            <TooltipComponent
+              :message="qodTooltipMessage"
+              :tooltip-title="qodTooltipTitle"
+            />
           </VSheet>
         </div>
       </div>
