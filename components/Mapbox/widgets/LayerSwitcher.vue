@@ -75,7 +75,7 @@
 </script>
 
 <template>
-  <div class="LayerSwitcher" elevation="2">
+  <div class="LayerSwitcher">
     <div
       v-if="selectedType === 'data-quality'"
       class="LayerSwitcher__qod__slider"
@@ -101,6 +101,7 @@
         </template>
       </VRangeSlider>
     </div>
+
     <div
       class="LayerSwitcher__container"
       @mouseenter="showLayerSelection"
@@ -141,25 +142,81 @@
         ></button>
       </template>
 
-      <v-card title="Map Layers" class="LayerOptions__sheet">
-        <v-radio-group v-model="selectedType">
-          <v-radio value="data-quality">
+      <v-card class="LayerOptions__sheet">
+        <template #title>
+          <h4>Map Layers</h4>
+        </template>
+        <v-radio-group v-model="selectedType" class="LayerOptions__radioGroup">
+          <v-radio
+            value="data-quality"
+            class="LayerOptions__option"
+            :style="{
+              border:
+                selectedType === 'data-quality' ? '1px solid #B8C6FF' : '',
+            }"
+          >
             <template #label>
               <div class="LayerOptions__option__label">
-                <span>Data Quality Score</span>
-                <p>
+                <span class="LayerOptions__option__label--title"
+                  >Data Quality Score</span
+                >
+                <p class="LayerOptions__option__label--description">
                   Display a color-coded map indicating station data quality
                   levels.
                 </p>
-                <div>TEST</div>
+                <div
+                  class="HexagonRanges__container d-flex justify-space-between px-2"
+                >
+                  <div
+                    class="d-flex flex-column justify-center align-center ga-1"
+                  >
+                    <div class="fa-solid fa-hexagon gray"></div>
+                    <span class="LayerOptions__option__label--description"
+                      >No data</span
+                    >
+                  </div>
+
+                  <div
+                    class="d-flex flex-column justify-center align-center ga-1"
+                  >
+                    <div class="fa-solid fa-hexagon red"></div>
+                    <span class="LayerOptions__option__label--description"
+                      >0-19%</span
+                    >
+                  </div>
+
+                  <div
+                    class="d-flex flex-column justify-center align-center ga-1"
+                  >
+                    <div class="fa-solid fa-hexagon orange"></div>
+                    <span class="LayerOptions__option__label--description"
+                      >20-79%</span
+                    >
+                  </div>
+
+                  <div
+                    class="d-flex flex-column justify-center align-center ga-1"
+                  >
+                    <div class="fa-solid fa-hexagon green"></div>
+                    <span class="LayerOptions__option__label--description"
+                      >80-100%</span
+                    >
+                  </div>
+                </div>
               </div>
             </template>
           </v-radio>
-          <v-radio value="density">
+          <v-radio
+            value="density"
+            class="LayerOptions__option"
+            :style="{
+              border: selectedType === 'density' ? '1px solid #B8C6FF' : '',
+            }"
+          >
             <template #label>
               <div class="LayerOptions__option__label">
-                <span>Density</span>
-                <p>
+                <span class="LayerOptions__option__label--title">Density</span>
+                <p class="LayerOptions__option__label--description">
                   Concise view showing all stations that exist in each cell.
                 </p>
               </div>
@@ -342,6 +399,63 @@
 
     font-size: 1.6rem;
     line-height: 1.6rem;
+  }
+
+  .LayerOptions__sheet {
+    border-top-right-radius: 20px;
+  }
+
+  .LayerOptions__radioGroup {
+    padding: 8px;
+  }
+
+  .LayerOptions__option {
+    background-color: #1e2438;
+    border-radius: 8px;
+  }
+  .LayerOptions__option:nth-child(1) {
+    margin-bottom: 16px;
+  }
+
+  .LayerOptions__option__label {
+    padding: 4px;
+  }
+
+  .LayerOptions__option__label--title {
+    font-size: 1em;
+    line-height: 1em;
+    color: #fff !important;
+  }
+
+  .LayerOptions__option__label--description {
+    color: #ddd;
+    font-size: 0.8em;
+    line-height: 1em;
+  }
+
+  .HexagonRanges__container {
+    background-color: #3a3f6a;
+    border-radius: 4px;
+    padding: 6px;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    margin-right: 6px;
+  }
+
+  .gray {
+    color: #c6c6d0;
+  }
+
+  .red {
+    color: #ff1744;
+  }
+
+  .orange {
+    color: #ffab49;
+  }
+
+  .green {
+    color: #00e676;
   }
 
   @media (max-width: 959px) {
