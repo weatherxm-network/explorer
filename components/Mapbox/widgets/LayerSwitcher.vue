@@ -13,6 +13,7 @@
   const isLayerSelectionShown = ref<boolean>(false)
 
   const mapboxStore = useMapboxStore()
+  const mobileStore = useMobileStore()
 
   // Local reactive state for immediate UI updates
   const localQualityRange = ref([...mapboxStore.getQualityRange])
@@ -133,7 +134,7 @@
     </div>
   </div>
 
-  <div class="LayerSwitcher__mobile">
+  <div v-if="!mobileStore.pageState" class="LayerSwitcher__mobile">
     <v-bottom-sheet>
       <template #activator="{ props: activatorProps }">
         <button

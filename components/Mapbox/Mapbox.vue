@@ -11,6 +11,7 @@
   import SearchBar from './widgets/SearchBar.vue'
   import TrackingConcentComponent from './widgets/TrackingConcentComponent.vue'
   import LayerSwitcher from './widgets/LayerSwitcher.vue'
+  import NearbyStationsWidget from '@/components/Mapbox/widgets/NearbyStationsWidget.vue'
   import type { Point, SearchResultDevice, Collections } from './types/mapbox'
   import { useMapboxStore } from '~/stores/mapboxStore'
   import { useMobileStore } from '~/stores/mobileStore'
@@ -33,6 +34,7 @@
   const snackbar = ref(false)
   const onLine = ref(navigator.onLine)
   const hexagonLayerType = ref<LayerKeys>('density')
+  const activeStationsCount = ref(0)
 
   const smBreakpoint = computed(() => {
     return display.smAndDown.value
@@ -539,6 +541,23 @@
     }
   }
 
+  const calculateVisibleActiveStations = () => {
+    console.log('ACTIVE CALLED:')
+    if (!map.value) return
+
+    const features = map.value.queryRenderedFeatures(undefined, {
+      layers: ['cells', 'data-quality-hexagons', 'heat'],
+    })
+
+    console.log('ACTIVE::: \n', features)
+
+    const totalActiveDevices = features.reduce((sum, feature) => {
+      return sum + (feature.properties?.active_device_count || 0)
+    }, 0)
+
+    activeStationsCount.value = totalActiveDevices
+  }
+
   const clickOnCell = () => {
     const hexagonLayers = ['cells', 'data-quality-hexagons']
 
@@ -699,6 +718,14 @@
       })
       parseUrl()
 
+      setTimeout(() => {
+        calculateVisibleActiveStations()
+      }, 300)
+
+      const debouncedCalculate = _.debounce(calculateVisibleActiveStations, 300)
+      map.value?.on('dragend', debouncedCalculate)
+      map.value?.on('zoomend', debouncedCalculate)
+
       mapboxLoading.value = false
     })
     // add cell functionality
@@ -721,6 +748,7 @@
       absolute
     ></VProgressLinear>
     <SearchBar />
+    <NearbyStationsWidget :count="activeStationsCount" />
     <LayerSwitcher @layer-change="handleLayerChange" />
     <div id="map" :style="navButtonsStyles"></div>
 
