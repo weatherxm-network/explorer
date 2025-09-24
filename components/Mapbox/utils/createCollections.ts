@@ -32,6 +32,9 @@ const createHeatmapCollection = (cells: Cell[]): FeatureCollection => {
         index: cell.index,
         device_count: cell.device_count,
         center: cell.center,
+        avg_data_quality: cell.avg_data_quality,
+        capacity: cell.capacity,
+        active_device_count: cell.active_device_count,
       },
       geometry: {
         type: 'Point',

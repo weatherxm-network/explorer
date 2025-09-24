@@ -211,7 +211,10 @@
             color="blueTint"
           >
             <img v-if="!props.cellDataQuality" :src="qodGrey" />
-            <img v-if="props.cellDataQuality < 20" :src="qodRed" />
+            <img
+              v-if="props.cellDataQuality && props.cellDataQuality < 20"
+              :src="qodRed"
+            />
             <img
               v-if="props.cellDataQuality >= 20 && props.cellDataQuality < 80"
               :src="qodOrange"
