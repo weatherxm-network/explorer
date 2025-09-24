@@ -29,4 +29,11 @@
 
     box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.1);
   }
+
+  @media (max-width: 960px) {
+    .NearbyStations {
+      top: calc(5% + 50px);
+      right: calc((100vw / 2) - 100px);
+    }
+  }
 </style>

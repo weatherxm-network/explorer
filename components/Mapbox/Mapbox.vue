@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import mapboxgl from 'mapbox-gl'
   import type { LayerKeys } from '@/components/Mapbox/types/mapbox'
-  import type { Map, IControl, MapboxGeoJSONFeature } from 'mapbox-gl'
+  import type { Map as MapboxMap, IControl, MapboxGeoJSONFeature } from 'mapbox-gl'
   import { useDisplay, useTheme } from 'vuetify'
   import _ from 'lodash'
   import calcedMapboxData from './utils/calcedMapboxData'
@@ -26,7 +26,7 @@
   const route = useRoute()
   let navControls = reactive<IControl>({} as IControl)
   let geolocate = reactive<IControl>({} as IControl)
-  const map = ref<Map>()
+  const map = ref<MapboxMap>()
   const mapboxLoading = ref(false)
   const collections = ref<Collections>()
   const hoverCellId = ref('')
@@ -542,18 +542,27 @@
   }
 
   const calculateVisibleActiveStations = () => {
-    console.log('ACTIVE CALLED:')
     if (!map.value) return
 
     const features = map.value.queryRenderedFeatures(undefined, {
       layers: ['cells', 'data-quality-hexagons', 'heat'],
     })
 
-    console.log('ACTIVE::: \n', features)
+    const uniqueCells = new Map<string, number>()
 
-    const totalActiveDevices = features.reduce((sum, feature) => {
-      return sum + (feature.properties?.active_device_count || 0)
-    }, 0)
+    features.forEach((feature) => {
+      const index = feature.properties?.index
+      const activeDeviceCount = feature.properties?.active_device_count || 0
+
+      if (index && !uniqueCells.has(index)) {
+        uniqueCells.set(index, activeDeviceCount)
+      }
+    })
+
+    const totalActiveDevices = Array.from(uniqueCells.values()).reduce(
+      (sum, count) => sum + count,
+      0,
+    )
 
     activeStationsCount.value = totalActiveDevices
   }
