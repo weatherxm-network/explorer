@@ -42,7 +42,7 @@
   }
 
   const layers: Layers[] = [
-    { key: 'cell-capacity', src: cellsDefaultLayerImg, label: 'Cells' },
+    { key: 'cell-capacity', src: cellsDefaultLayerImg, label: 'Cell Capacity' },
     { key: 'data-quality', src: dataQualityLayerImg, label: 'Data Quality' },
   ]
 
@@ -82,19 +82,19 @@
       class="LayerSwitcher__cell-capacity__legend"
     >
       <div class="legend-item">
-        <div class="legend-color" style="background-color: #1497B7"></div>
+        <div class="legend-color" style="background-color: #1497b7"></div>
         <span class="legend-text">Available for Deployment</span>
       </div>
       <div class="legend-item">
-        <div class="legend-color" style="background-color: #346CDA"></div>
+        <div class="legend-color" style="background-color: #346cda"></div>
         <span class="legend-text">Near Capacity</span>
       </div>
       <div class="legend-item">
-        <div class="legend-color" style="background-color: #3F39FF"></div>
+        <div class="legend-color" style="background-color: #3f39ff"></div>
         <span class="legend-text">At Capacity</span>
       </div>
       <div class="legend-item">
-        <div class="legend-color" style="background-color: #7B39FF"></div>
+        <div class="legend-color" style="background-color: #7b39ff"></div>
         <span class="legend-text">Over Capacity</span>
       </div>
     </div>
@@ -233,14 +233,18 @@
             value="cell-capacity"
             class="LayerOptions__option"
             :style="{
-              border: selectedType === 'cell-capacity' ? '1px solid #B8C6FF' : '',
+              border:
+                selectedType === 'cell-capacity' ? '1px solid #B8C6FF' : '',
             }"
           >
             <template #label>
               <div class="LayerOptions__option__label">
-                <span class="LayerOptions__option__label--title">Cell Capacity</span>
+                <span class="LayerOptions__option__label--title"
+                  >Cell Capacity</span
+                >
                 <p class="LayerOptions__option__label--description">
-                  Concise view of all stations within each cell and its capacity.
+                  Concise view of all stations within each cell and its
+                  capacity.
                 </p>
               </div>
             </template>
