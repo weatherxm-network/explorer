@@ -83,4 +83,4 @@ export interface UnitsUserPrefs {
   pressure: UnitPrefStruct
 }
 
-export type LayerKeys = 'density' | 'data-quality'
+export type LayerKeys = 'cell-capacity' | 'data-quality'

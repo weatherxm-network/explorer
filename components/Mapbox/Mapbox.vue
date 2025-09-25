@@ -33,7 +33,7 @@
   const clickCellId = ref('')
   const snackbar = ref(false)
   const onLine = ref(navigator.onLine)
-  const hexagonLayerType = ref<LayerKeys>('density')
+  const hexagonLayerType = ref<LayerKeys>('cell-capacity')
   const activeStationsCount = ref(0)
 
   const smBreakpoint = computed(() => {
@@ -231,7 +231,29 @@
         visibility: 'visible',
       },
       paint: {
-        'fill-color': '#3a86ff',
+      'fill-color': [
+        'case',
+        ['==', ['get', 'capacity'], 0], '#C6C6D0',
+        ['==', ['get', 'capacity'], 2], [
+          'step',
+          ['/', ['get', 'device_count'], ['get', 'capacity']],
+          '#1497B7',
+          0.5, '#346CDA',
+          0.9, '#346CDA',
+          1.0, '#3F39FF',
+          1.00001, '#7B39FF'
+        ],
+
+        [
+          'step',
+          ['/', ['get', 'device_count'], ['get', 'capacity']],
+          '#1497B7',
+          0.66, '#346CDA',
+          0.9, '#346CDA',
+          1.0, '#3F39FF',
+          1.00001, '#7B39FF'
+        ]
+      ],
         'fill-opacity': 0.5,
       },
       filter: ['==', '$type', 'Polygon'],
@@ -313,10 +335,16 @@
       type: 'symbol',
       source: 'cells',
       layout: {
-        'text-field': ['get', 'device_count'],
+        'text-field': [
+          'concat',
+          ['to-string', ['get', 'device_count']],
+          '/',
+          ['to-string', ['get', 'capacity']]
+        ],
         'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
         'text-size': 12,
         'text-anchor': 'center',
+        'visibility': 'visible'
       },
       paint: {
         'text-color': '#ffffff',
@@ -329,13 +357,17 @@
           ['zoom'],
           9.5,
           0.0,
-          10,
+          11,
           1.0,
           15,
           1.0,
         ],
       },
-      filter: ['>', ['get', 'device_count'], 0], // Only show cells with devices
+      filter: [
+        'all',
+        ['>', ['get', 'device_count'], 0], // Only show cells with devices
+        ['>', ['get', 'capacity'], 0] // Only show cells with capacity
+      ],
     })
   }
 
@@ -382,8 +414,9 @@
   }
 
   const toggleHexagonLayerType = (type: LayerKeys) => {
-    if (type === 'density') {
+    if (type === 'cell-capacity') {
       map.value?.setLayoutProperty('cells', 'visibility', 'visible')
+      map.value?.setLayoutProperty('device-count-labels', 'visibility', 'visible')
       map.value?.setLayoutProperty(
         'data-quality-hexagons',
         'visibility',
@@ -391,6 +424,7 @@
       )
     } else {
       map.value?.setLayoutProperty('cells', 'visibility', 'none')
+      map.value?.setLayoutProperty('device-count-labels', 'visibility', 'none')
       map.value?.setLayoutProperty(
         'data-quality-hexagons',
         'visibility',
@@ -408,9 +442,7 @@
     const [min, max] = range
 
     if (min === 0 && max === 100) {
-      const filter = ['all', ['==', '$type', 'Polygon']]
-
-      map.value?.setFilter('data-quality-hexagons', filter)
+      map.value?.setFilter('data-quality-hexagons', ['all', ['==', '$type', 'Polygon']] as any)
     } else {
       const filter = [
         'all',
@@ -427,7 +459,7 @@
             ['<=', 'avg_data_quality', max],
           ],
         ],
-      ]
+      ] as any
 
       map.value?.setFilter('data-quality-hexagons', filter)
     }
@@ -544,7 +576,15 @@
   const calculateVisibleActiveStations = () => {
     if (!map.value) return
 
-    const features = map.value.queryRenderedFeatures(undefined, {
+    const bounds = map.value.getBounds()
+    if (!bounds) return
+    
+    const sw = bounds.getSouthWest()
+    const ne = bounds.getNorthEast()
+    const features = map.value.queryRenderedFeatures([
+      [sw.lng, sw.lat],
+      [ne.lng, ne.lat]
+    ], {
       layers: ['cells', 'data-quality-hexagons', 'heat'],
     })
 
