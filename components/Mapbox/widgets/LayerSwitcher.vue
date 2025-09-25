@@ -9,7 +9,7 @@
     label: string
   }
 
-  const selectedType = ref<LayerKeys>('density')
+  const selectedType = ref<LayerKeys>('cell-capacity')
   const isLayerSelectionShown = ref<boolean>(false)
 
   const mapboxStore = useMapboxStore()
@@ -42,7 +42,7 @@
   }
 
   const layers: Layers[] = [
-    { key: 'density', src: cellsDefaultLayerImg, label: 'Cells' },
+    { key: 'cell-capacity', src: cellsDefaultLayerImg, label: 'Cells' },
     { key: 'data-quality', src: dataQualityLayerImg, label: 'Data Quality' },
   ]
 
@@ -77,6 +77,28 @@
 
 <template>
   <div class="LayerSwitcher">
+    <div
+      v-if="selectedType === 'cell-capacity'"
+      class="LayerSwitcher__cell-capacity__legend"
+    >
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #1497B7"></div>
+        <span class="legend-text">Available for Deployment</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #346CDA"></div>
+        <span class="legend-text">Near Capacity</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #3F39FF"></div>
+        <span class="legend-text">At Capacity</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #7B39FF"></div>
+        <span class="legend-text">Over Capacity</span>
+      </div>
+    </div>
+
     <div
       v-if="selectedType === 'data-quality'"
       class="LayerSwitcher__qod__slider"
@@ -208,17 +230,17 @@
             </template>
           </v-radio>
           <v-radio
-            value="density"
+            value="cell-capacity"
             class="LayerOptions__option"
             :style="{
-              border: selectedType === 'density' ? '1px solid #B8C6FF' : '',
+              border: selectedType === 'cell-capacity' ? '1px solid #B8C6FF' : '',
             }"
           >
             <template #label>
               <div class="LayerOptions__option__label">
-                <span class="LayerOptions__option__label--title">Density</span>
+                <span class="LayerOptions__option__label--title">Cell Capacity</span>
                 <p class="LayerOptions__option__label--description">
-                  Concise view showing all stations that exist in each cell.
+                  Concise view of all stations within each cell and its capacity.
                 </p>
               </div>
             </template>
@@ -242,6 +264,35 @@
     justify-content: flex-end;
     align-items: flex-end;
     gap: 16px;
+  }
+
+  .LayerSwitcher__cell-capacity__legend {
+    padding: 12px;
+    background-color: #31364acc;
+    border-radius: 12px;
+    border: 1px solid #b8c6ff;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-right: 16px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .legend-color {
+    width: 18px;
+    height: 16px;
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  }
+
+  .legend-text {
+    color: white;
+    font-size: 12px;
+    white-space: nowrap;
   }
 
   .LayerSwitcher__qod__slider {
