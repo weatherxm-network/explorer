@@ -1,7 +1,11 @@
 <script setup lang="ts">
   import mapboxgl from 'mapbox-gl'
   import type { LayerKeys } from '@/components/Mapbox/types/mapbox'
-  import type { Map as MapboxMap, IControl, MapboxGeoJSONFeature } from 'mapbox-gl'
+  import type {
+    Map as MapboxMap,
+    IControl,
+    MapboxGeoJSONFeature,
+  } from 'mapbox-gl'
   import { useDisplay, useTheme } from 'vuetify'
   import _ from 'lodash'
   import calcedMapboxData from './utils/calcedMapboxData'
@@ -231,29 +235,39 @@
         visibility: 'visible',
       },
       paint: {
-      'fill-color': [
-        'case',
-        ['==', ['get', 'capacity'], 0], '#C6C6D0',
-        ['==', ['get', 'capacity'], 2], [
-          'step',
-          ['/', ['get', 'device_count'], ['get', 'capacity']],
-          '#1497B7',
-          0.5, '#346CDA',
-          0.9, '#346CDA',
-          1.0, '#3F39FF',
-          1.00001, '#7B39FF'
-        ],
+        'fill-color': [
+          'case',
+          ['==', ['get', 'capacity'], 0],
+          '#C6C6D0',
+          ['==', ['get', 'capacity'], 2],
+          [
+            'step',
+            ['/', ['get', 'device_count'], ['get', 'capacity']],
+            '#1497B7',
+            0.5,
+            '#346CDA',
+            0.9,
+            '#346CDA',
+            1.0,
+            '#3F39FF',
+            1.00001,
+            '#7B39FF',
+          ],
 
-        [
-          'step',
-          ['/', ['get', 'device_count'], ['get', 'capacity']],
-          '#1497B7',
-          0.66, '#346CDA',
-          0.9, '#346CDA',
-          1.0, '#3F39FF',
-          1.00001, '#7B39FF'
-        ]
-      ],
+          [
+            'step',
+            ['/', ['get', 'device_count'], ['get', 'capacity']],
+            '#1497B7',
+            0.66,
+            '#346CDA',
+            0.9,
+            '#346CDA',
+            1.0,
+            '#3F39FF',
+            1.00001,
+            '#7B39FF',
+          ],
+        ],
         'fill-opacity': 0.5,
       },
       filter: ['==', '$type', 'Polygon'],
@@ -339,12 +353,12 @@
           'concat',
           ['to-string', ['get', 'device_count']],
           '/',
-          ['to-string', ['get', 'capacity']]
+          ['to-string', ['get', 'capacity']],
         ],
         'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
         'text-size': 12,
         'text-anchor': 'center',
-        'visibility': 'visible'
+        'visibility': 'visible',
       },
       paint: {
         'text-color': '#ffffff',
@@ -366,8 +380,48 @@
       filter: [
         'all',
         ['>', ['get', 'device_count'], 0], // Only show cells with devices
-        ['>', ['get', 'capacity'], 0] // Only show cells with capacity
+        ['>', ['get', 'capacity'], 0], // Only show cells with capacity
       ],
+    })
+  }
+
+  const addDataQualityLabels = () => {
+    map.value?.addLayer({
+      id: 'data-quality-labels',
+      type: 'symbol',
+      source: 'cells',
+      layout: {
+        'text-field': [
+          'case',
+          ['==', ['typeof', ['get', 'avg_data_quality']], 'undefined'],
+          'N/A',
+          ['==', ['get', 'avg_data_quality'], null],
+          'N/A',
+          ['concat', ['to-string', ['get', 'avg_data_quality']], '%'],
+        ],
+        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+        'text-size': 12,
+        'text-anchor': 'center',
+        'visibility': 'none',
+      },
+      paint: {
+        'text-color': '#ffffff',
+        'text-halo-color': '#333',
+        'text-halo-width': 2,
+        // Opposite visibility pattern of heatmap - visible when heatmap fades out
+        'text-opacity': [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          9.5,
+          0.0,
+          11,
+          1.0,
+          15,
+          1.0,
+        ],
+      },
+      filter: ['==', '$type', 'Polygon'],
     })
   }
 
@@ -416,7 +470,12 @@
   const toggleHexagonLayerType = (type: LayerKeys) => {
     if (type === 'cell-capacity') {
       map.value?.setLayoutProperty('cells', 'visibility', 'visible')
-      map.value?.setLayoutProperty('device-count-labels', 'visibility', 'visible')
+      map.value?.setLayoutProperty(
+        'device-count-labels',
+        'visibility',
+        'visible',
+      )
+      map.value?.setLayoutProperty('data-quality-labels', 'visibility', 'none')
       map.value?.setLayoutProperty(
         'data-quality-hexagons',
         'visibility',
@@ -425,6 +484,11 @@
     } else {
       map.value?.setLayoutProperty('cells', 'visibility', 'none')
       map.value?.setLayoutProperty('device-count-labels', 'visibility', 'none')
+      map.value?.setLayoutProperty(
+        'data-quality-labels',
+        'visibility',
+        'visible',
+      )
       map.value?.setLayoutProperty(
         'data-quality-hexagons',
         'visibility',
@@ -442,7 +506,10 @@
     const [min, max] = range
 
     if (min === 0 && max === 100) {
-      map.value?.setFilter('data-quality-hexagons', ['all', ['==', '$type', 'Polygon']] as any)
+      map.value?.setFilter('data-quality-hexagons', [
+        'all',
+        ['==', '$type', 'Polygon'],
+      ] as any)
     } else {
       const filter = [
         'all',
@@ -576,15 +643,7 @@
   const calculateVisibleActiveStations = () => {
     if (!map.value) return
 
-    const bounds = map.value.getBounds()
-    if (!bounds) return
-    
-    const sw = bounds.getSouthWest()
-    const ne = bounds.getNorthEast()
-    const features = map.value.queryRenderedFeatures([
-      [sw.lng, sw.lat],
-      [ne.lng, ne.lat]
-    ], {
+    const features = map.value.queryRenderedFeatures(undefined, {
       layers: ['cells', 'data-quality-hexagons', 'heat'],
     })
 
@@ -754,8 +813,9 @@
       // add layers to map
       addCellsLayer()
       addHeatLayer()
-      addDeviceCountLabels()
       addDataQualityLayer()
+      addDeviceCountLabels()
+      addDataQualityLabels()
       // add mouse functionality
       mouseFunctionality()
       // add mouse hover functionality
