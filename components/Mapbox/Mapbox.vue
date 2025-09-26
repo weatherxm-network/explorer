@@ -235,43 +235,57 @@
         visibility: 'visible',
       },
       paint: {
-        'fill-color': [
-          'case',
-          ['==', ['get', 'capacity'], 0],
-          '#C6C6D0',
-          ['==', ['get', 'capacity'], 2],
-          [
-            'step',
-            ['/', ['get', 'device_count'], ['get', 'capacity']],
-            '#1497B7',
-            0.5,
-            '#346CDA',
-            0.9,
-            '#346CDA',
-            1.0,
-            '#3F39FF',
-            1.00001,
-            '#7B39FF',
-          ],
-
-          [
-            'step',
-            ['/', ['get', 'device_count'], ['get', 'capacity']],
-            '#1497B7',
-            0.66,
-            '#346CDA',
-            0.9,
-            '#346CDA',
-            1.0,
-            '#3F39FF',
-            1.00001,
-            '#7B39FF',
-          ],
-        ],
+        'fill-color': '#3a86ff',
         'fill-opacity': 0.5,
       },
       filter: ['==', '$type', 'Polygon'],
     })
+
+    // map.value?.addLayer({
+    //   id: 'cells',
+    //   type: 'fill',
+    //   source: 'cells',
+    //   layout: {
+    //     visibility: 'visible',
+    //   },
+    //   paint: {
+    //     'fill-color': [
+    //       'case',
+    //       ['==', ['get', 'capacity'], 0],
+    //       '#C6C6D0',
+    //       ['==', ['get', 'capacity'], 2],
+    //       [
+    //         'step',
+    //         ['/', ['get', 'device_count'], ['get', 'capacity']],
+    //         '#1497B7',
+    //         0.5,
+    //         '#346CDA',
+    //         0.9,
+    //         '#346CDA',
+    //         1.0,
+    //         '#3F39FF',
+    //         1.00001,
+    //         '#7B39FF',
+    //       ],
+    //
+    //       [
+    //         'step',
+    //         ['/', ['get', 'device_count'], ['get', 'capacity']],
+    //         '#1497B7',
+    //         0.66,
+    //         '#346CDA',
+    //         0.9,
+    //         '#346CDA',
+    //         1.0,
+    //         '#3F39FF',
+    //         1.00001,
+    //         '#7B39FF',
+    //       ],
+    //     ],
+    //     'fill-opacity': 0.5,
+    //   },
+    //   filter: ['==', '$type', 'Polygon'],
+    // })
   }
 
   const addHeatLayer = () => {
@@ -349,22 +363,16 @@
       type: 'symbol',
       source: 'heatmap',
       layout: {
-        'text-field': [
-          'concat',
-          ['to-string', ['get', 'device_count']],
-          '/',
-          ['to-string', ['get', 'capacity']],
-        ],
-        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-        'text-size': 12,
-        'text-anchor': 'center',
         'visibility': 'visible',
+        'text-field': ['get', 'device_count'],
+        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+        'text-size': 16,
+        'text-anchor': 'center',
       },
       paint: {
         'text-color': '#ffffff',
-        'text-halo-color': '#000000',
+        'text-halo-color': '#333',
         'text-halo-width': 2,
-        // Opposite visibility pattern of heatmap - visible when heatmap fades out
         'text-opacity': [
           'interpolate',
           ['exponential', 0.5],
@@ -377,12 +385,47 @@
           1.0,
         ],
       },
-      filter: [
-        'all',
-        ['>', ['get', 'device_count'], 0], // Only show cells with devices
-        ['>', ['get', 'capacity'], 0], // Only show cells with capacity
-      ],
     })
+
+    // map.value?.addLayer({
+    //   id: 'device-count-labels',
+    //   type: 'symbol',
+    //   source: 'heatmap',
+    //   layout: {
+    //     'text-field': [
+    //       'concat',
+    //       ['to-string', ['get', 'device_count']],
+    //       '/',
+    //       ['to-string', ['get', 'capacity']],
+    //     ],
+    //     'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+    //     'text-size': 12,
+    //     'text-anchor': 'center',
+    //     'visibility': 'visible',
+    //   },
+    //   paint: {
+    //     'text-color': '#ffffff',
+    //     'text-halo-color': '#000000',
+    //     'text-halo-width': 2,
+    //     // Opposite visibility pattern of heatmap - visible when heatmap fades out
+    //     'text-opacity': [
+    //       'interpolate',
+    //       ['exponential', 0.5],
+    //       ['zoom'],
+    //       9.5,
+    //       0.0,
+    //       11,
+    //       1.0,
+    //       15,
+    //       1.0,
+    //     ],
+    //   },
+    //   filter: [
+    //     'all',
+    //     ['>', ['get', 'device_count'], 0], // Only show cells with devices
+    //     ['>', ['get', 'capacity'], 0], // Only show cells with capacity
+    //   ],
+    // })
   }
 
   const addDataQualityLayer = () => {
@@ -430,12 +473,12 @@
   const toggleHexagonLayerType = (type: LayerKeys) => {
     if (type === 'cell-capacity') {
       map.value?.setLayoutProperty('cells', 'visibility', 'visible')
-      map.value?.setLayoutProperty(
-        'device-count-labels',
-        'visibility',
-        'visible',
-      )
-      map.value?.setLayoutProperty('data-quality-labels', 'visibility', 'none')
+      // map.value?.setLayoutProperty(
+      //   'device-count-labels',
+      //   'visibility',
+      //   'visible',
+      // )
+      // map.value?.setLayoutProperty('data-quality-labels', 'visibility', 'none')
       map.value?.setLayoutProperty(
         'data-quality-hexagons',
         'visibility',
@@ -443,12 +486,12 @@
       )
     } else {
       map.value?.setLayoutProperty('cells', 'visibility', 'none')
-      map.value?.setLayoutProperty('device-count-labels', 'visibility', 'none')
-      map.value?.setLayoutProperty(
-        'data-quality-labels',
-        'visibility',
-        'visible',
-      )
+      // map.value?.setLayoutProperty('device-count-labels', 'visibility', 'none')
+      // map.value?.setLayoutProperty(
+      //   'data-quality-labels',
+      //   'visibility',
+      //   'visible',
+      // )
       map.value?.setLayoutProperty(
         'data-quality-hexagons',
         'visibility',
