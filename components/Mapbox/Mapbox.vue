@@ -347,7 +347,7 @@
     map.value?.addLayer({
       id: 'device-count-labels',
       type: 'symbol',
-      source: 'cells',
+      source: 'heatmap',
       layout: {
         'text-field': [
           'concat',
@@ -382,46 +382,6 @@
         ['>', ['get', 'device_count'], 0], // Only show cells with devices
         ['>', ['get', 'capacity'], 0], // Only show cells with capacity
       ],
-    })
-  }
-
-  const addDataQualityLabels = () => {
-    map.value?.addLayer({
-      id: 'data-quality-labels',
-      type: 'symbol',
-      source: 'cells',
-      layout: {
-        'text-field': [
-          'case',
-          ['==', ['typeof', ['get', 'avg_data_quality']], 'undefined'],
-          'N/A',
-          ['==', ['get', 'avg_data_quality'], null],
-          'N/A',
-          ['concat', ['to-string', ['get', 'avg_data_quality']], '%'],
-        ],
-        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-        'text-size': 12,
-        'text-anchor': 'center',
-        'visibility': 'none',
-      },
-      paint: {
-        'text-color': '#ffffff',
-        'text-halo-color': '#333',
-        'text-halo-width': 2,
-        // Opposite visibility pattern of heatmap - visible when heatmap fades out
-        'text-opacity': [
-          'interpolate',
-          ['exponential', 0.5],
-          ['zoom'],
-          9.5,
-          0.0,
-          11,
-          1.0,
-          15,
-          1.0,
-        ],
-      },
-      filter: ['==', '$type', 'Polygon'],
     })
   }
 
@@ -815,7 +775,7 @@
       addHeatLayer()
       addDataQualityLayer()
       addDeviceCountLabels()
-      addDataQualityLabels()
+
       // add mouse functionality
       mouseFunctionality()
       // add mouse hover functionality
