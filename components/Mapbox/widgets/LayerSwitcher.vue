@@ -9,7 +9,7 @@
     label: string
   }
 
-  const selectedType = ref<LayerKeys>('cell-capacity')
+  const selectedType = ref<LayerKeys>('data-quality')
   const isLayerSelectionShown = ref<boolean>(false)
 
   const mapboxStore = useMapboxStore()
