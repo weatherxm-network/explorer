@@ -232,7 +232,7 @@
       type: 'fill',
       source: 'cells',
       layout: {
-        visibility: 'visible',
+        visibility: 'none',
       },
       paint: {
         'fill-color': '#3a86ff',
@@ -818,6 +818,10 @@
       addHeatLayer()
       addDataQualityLayer()
       addDeviceCountLabels()
+
+      // enable data quality as default
+      // if changed here, should update LayerSwitcher
+      toggleHexagonLayerType('data-quality')
 
       // add mouse functionality
       mouseFunctionality()
