@@ -42,7 +42,7 @@
   }
 
   const layers: Layers[] = [
-    { key: 'cell-capacity', src: cellsDefaultLayerImg, label: 'Density' },
+    { key: 'cell-capacity', src: cellsDefaultLayerImg, label: 'Cell Capacity' },
     { key: 'data-quality', src: dataQualityLayerImg, label: 'Data Quality' },
   ]
 
@@ -77,27 +77,27 @@
 
 <template>
   <div class="LayerSwitcher">
-    <!-- <div -->
-    <!--   v-if="selectedType === 'cell-capacity'" -->
-    <!--   class="LayerSwitcher__cell-capacity__legend" -->
-    <!-- > -->
-    <!--   <div class="legend-item"> -->
-    <!--     <div class="legend-color" style="background-color: #1497b7"></div> -->
-    <!--     <span class="legend-text">Available for Deployment</span> -->
-    <!--   </div> -->
-    <!--   <div class="legend-item"> -->
-    <!--     <div class="legend-color" style="background-color: #346cda"></div> -->
-    <!--     <span class="legend-text">Near Capacity</span> -->
-    <!--   </div> -->
-    <!--   <div class="legend-item"> -->
-    <!--     <div class="legend-color" style="background-color: #3f39ff"></div> -->
-    <!--     <span class="legend-text">At Capacity</span> -->
-    <!--   </div> -->
-    <!--   <div class="legend-item"> -->
-    <!--     <div class="legend-color" style="background-color: #7b39ff"></div> -->
-    <!--     <span class="legend-text">Over Capacity</span> -->
-    <!--   </div> -->
-    <!-- </div> -->
+    <div
+      v-if="selectedType === 'cell-capacity'"
+      class="LayerSwitcher__cell-capacity__legend"
+    >
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #1497b7"></div>
+        <span class="legend-text">Available for Deployment</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #346cda"></div>
+        <span class="legend-text">Near Capacity</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #3f39ff"></div>
+        <span class="legend-text">At Capacity</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #7b39ff"></div>
+        <span class="legend-text">Over Capacity</span>
+      </div>
+    </div>
 
     <div
       v-if="selectedType === 'data-quality'"
