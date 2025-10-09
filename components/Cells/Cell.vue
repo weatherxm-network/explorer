@@ -5,6 +5,7 @@
   import { getCellDevices } from './utils/cells'
   import type { Device } from '~/components/common/types/common'
   import LottieComponent from '~/components/common/LottieComponent.vue'
+  import { useMapboxStore } from '~/stores/mapboxStore'
 
   const display = ref(useDisplay())
   const route = useRoute()
@@ -24,6 +25,9 @@
     return { marginTop: `calc(${display.value.height / 2}px - 159px)` }
   })
 
+  const mapboxStore = useMapboxStore()
+  const currentLayerType = computed(() => mapboxStore.getCurrentLayerType);
+
   const clickOnDevice = (deviceName: string) => {
     navigateTo(
       `/stations/${formatDeviceName.denormalizeDeviceName(deviceName)}`,
@@ -36,9 +40,14 @@
     getCellDevices(route.params.cellIndex)
       .then(async (orderedDevices) => {
         if (orderedDevices.length !== 0) {
+          // Filter devices based on the current layer type
+          const filteredDevices = currentLayerType.value === 'targeted-rollouts'
+            ? orderedDevices.filter(device => device.programName !== 'community')
+            : orderedDevices
+
           // compute icon for cell devices
           cellAddress.value = orderedDevices[0].address
-          orderedCellDevices.value = orderedDevices
+          orderedCellDevices.value = filteredDevices
           countTotalStations.value = orderedCellDevices.value.length
           countActiveStations.value = orderedCellDevices.value.filter(
             (obj) => obj.isActive === true,
