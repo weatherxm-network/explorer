@@ -27,10 +27,14 @@ const getCollections = async () => {
     // create collection for the heatmap layer
     const heatmapCollection: FeatureCollection =
       createCollections.createHeatmapCollection(cells)
+    // create collection for targeted rollouts heatmap
+    const targetedRolloutsHeatmapCollection: FeatureCollection =
+      createCollections.createTargetedRolloutsHeatmapCollection(cells)
+    
     // store calced collections
-    mapboxStore.fillCollections({ cellsCollection, heatmapCollection })
+    mapboxStore.fillCollections({ cellsCollection, heatmapCollection, targetedRolloutsHeatmapCollection })
 
-    return { cellsCollection, heatmapCollection } as Collections
+    return { cellsCollection, heatmapCollection, targetedRolloutsHeatmapCollection } as Collections
   } else {
     return {} as Collections
   }

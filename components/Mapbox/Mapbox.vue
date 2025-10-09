@@ -77,6 +77,11 @@
     return mapboxStore.getQualityRange
   })
 
+  const hasCommunityDevicesOnly = (devices: { [key: string]: number }): boolean => {
+    const deviceKeys = Object.keys(devices)
+    return deviceKeys.length === 1 && deviceKeys[0] === 'community'
+  }
+
   watch(onLine, (value) => {
     value ? (snackbar.value = false) : (snackbar.value = true)
   })
@@ -212,9 +217,24 @@
   }
 
   const addCellsSource = () => {
+    if (!collections.value?.cellsCollection) {
+      return
+    }
+    
+    const enrichedCollection = {
+      ...collections.value.cellsCollection,
+      features: collections.value.cellsCollection.features.map(feature => ({
+        ...feature,
+        properties: {
+          ...feature.properties,
+          community_only: hasCommunityDevicesOnly(feature.properties.devices)
+        }
+      }))
+    }
+
     map.value?.addSource('cells', {
       type: 'geojson',
-      data: collections.value?.cellsCollection as never as MapboxGeoJSONFeature,
+      data: enrichedCollection as never as MapboxGeoJSONFeature,
     })
   }
 
@@ -223,6 +243,14 @@
       type: 'geojson',
       data: collections.value
         ?.heatmapCollection as never as MapboxGeoJSONFeature,
+    })
+  }
+
+  const addTargetedRolloutsHeatSource = () => {
+    map.value?.addSource('targeted-rollouts-heatmap', {
+      type: 'geojson',
+      data: collections.value
+        ?.targetedRolloutsHeatmapCollection as never as MapboxGeoJSONFeature,
     })
   }
 
@@ -325,6 +353,71 @@
             'interpolate',
             ['exponential', 0.5],
             // ["linear"],
+            ['zoom'],
+            0,
+            1.0,
+            8,
+            0.9,
+            9,
+            0.5,
+            9.5,
+            0.1,
+            10,
+            0.0,
+          ],
+        },
+      },
+      'waterway-label',
+    )
+  }
+
+  const addTargetedRolloutsHeatLayer = () => {
+    map.value?.addLayer(
+      {
+        id: 'targeted-rollouts-heat',
+        type: 'heatmap',
+        source: 'targeted-rollouts-heatmap',
+        maxzoom: 10,
+        minzoom: 0,
+        layout: {
+          visibility: 'none',
+        },
+        paint: {
+          'heatmap-weight': [
+            'interpolate',
+            ['linear'],
+            ['get', 'device_count'],
+            0,
+            0,
+            1000,
+            1000,
+          ],
+          'heatmap-color': [
+            'interpolate',
+            ['linear'],
+            ['heatmap-density'],
+            0,
+            'rgba(33.0, 102.0, 172.0, 0.0)',
+            0.2,
+            'rgb(103.0, 169.0, 207.0)',
+            0.4,
+            'rgba(162.0, 187.0, 201.0, 0.85)',
+            0.6,
+            'rgba(149.0, 153.0, 189.0, 0.85)',
+            0.8,
+            'rgb(103.0, 118.0, 247.0)',
+            1,
+            'rgb(0.0, 255.0, 206.0)',
+          ],
+          'heatmap-radius': {
+            stops: [
+              [0, 2],
+              [9, 20],
+            ],
+          },
+          'heatmap-opacity': [
+            'interpolate',
+            ['exponential', 0.5],
             ['zoom'],
             0,
             1.0,
@@ -458,35 +551,164 @@
     })
   }
 
+  const addTargetedRolloutsLayer = () => {
+    map.value?.addLayer({
+      id: 'targeted-rollouts-hexagons',
+      type: 'fill',
+      source: 'cells',
+      layout: {
+        visibility: 'none',
+      },
+      paint: {
+        'fill-color': '#28bea0',
+        'fill-opacity': [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          9.5,
+          0.0,
+          10,
+          0.6,
+          15,
+          0.6,
+        ],
+      },
+      filter: ['==', '$type', 'Polygon'],
+    })
+  }
+
+  const applyTargetedRolloutsFilter = () => {
+    if (!map.value || !map.value.getLayer('targeted-rollouts-hexagons')) {
+      return
+    }
+    
+    const filter = [
+      'all',
+      ['==', '$type', 'Polygon'],
+      ['!=', 'community_only', true]
+    ]
+
+    map.value.setFilter('targeted-rollouts-hexagons', filter)
+    
+    if (map.value.getLayer('device-count-labels')) {
+      map.value.setFilter('device-count-labels', [
+        'all',
+        ['!=', 'community_only', true],
+        ['>', 'non_community_device_count', 0] 
+      ])
+      
+      
+      map.value.setLayoutProperty('device-count-labels', 'text-field', [
+        'to-string',
+        ['get', 'non_community_device_count']
+      ])
+    }
+    
+    if (map.value.getLayer('cell-capacity-labels')) {
+      map.value.setFilter('cell-capacity-labels', [
+        'all',
+        ['!=', 'community_only', true],
+        ['>', 'non_community_device_count', 0] 
+      ])
+    }
+  }
+
+
+  const removeTargetedRolloutsFilter = () => {
+    if (!map.value || !map.value.getLayer('targeted-rollouts-hexagons')) {
+      return
+    }
+    
+    const defaultFilter = ['==', '$type', 'Polygon']
+    map.value.setFilter('targeted-rollouts-hexagons', defaultFilter)
+    
+    // Reset label filters
+    if (map.value.getLayer('device-count-labels')) {
+      map.value.setFilter('device-count-labels', null)
+      
+      // Reset label to show total device count
+      map.value.setLayoutProperty('device-count-labels', 'text-field', [
+        'to-string',
+        ['get', 'device_count']
+      ])
+    }
+    
+    if (map.value.getLayer('cell-capacity-labels')) {
+      map.value.setFilter('cell-capacity-labels', null)
+    }
+  }
+
+
   const toggleHexagonLayerType = (type: LayerKeys) => {
+    if (!map.value || !map.value.getLayer('cells')) {
+      return
+    }
+
     if (type === 'cell-capacity') {
       map.value?.setLayoutProperty('cells', 'visibility', 'visible')
-      map.value?.setLayoutProperty(
-        'cell-capacity-labels',
-        'visibility',
-        'visible',
-      )
-      map.value?.setLayoutProperty('device-count-labels', 'visibility', 'none')
-      map.value?.setLayoutProperty(
-        'data-quality-hexagons',
-        'visibility',
-        'none',
-      )
     } else {
       map.value?.setLayoutProperty('cells', 'visibility', 'none')
-      map.value?.setLayoutProperty(
-        'device-count-labels',
+    }
+    map.value?.setLayoutProperty(
+      'cell-capacity-labels',
+      'visibility',
+      type === 'cell-capacity' ? 'visible' : 'none',
+    )
+    map.value?.setLayoutProperty('device-count-labels', 'visibility', 'visible')
+    map.value?.setLayoutProperty(
+      'data-quality-hexagons',
+      'visibility',
+      type === 'data-quality' ? 'visible' : 'none',
+    )
+
+    map.value?.setLayoutProperty(
+      'targeted-rollouts-hexagons',
+      'visibility',
+      type === 'targeted-rollouts' ? 'visible' : 'none',
+    )
+
+    // Control heatmap visibility based on layer type
+    if (map.value.getLayer('heat')) {
+      map.value.setLayoutProperty(
+        'heat',
         'visibility',
-        'visible',
-      )
-      map.value?.setLayoutProperty('cell-capacity-labels', 'visibility', 'none')
-      map.value?.setLayoutProperty(
-        'data-quality-hexagons',
-        'visibility',
-        'visible',
+        type === 'targeted-rollouts' ? 'none' : 'visible'
       )
     }
+    
+    if (map.value.getLayer('targeted-rollouts-heat')) {
+      map.value.setLayoutProperty(
+        'targeted-rollouts-heat',
+        'visibility',
+        type === 'targeted-rollouts' ? 'visible' : 'none'
+      )
+    }
+
+    // Apply filter to hide community-only devices in targeted rollouts layer
+    if (type === 'targeted-rollouts') {
+      applyTargetedRolloutsFilter()
+      
+      // Clear any selected cell outline when switching to targeted rollouts if it's a community-only cell
+      if (clickCellId.value && collections.value?.cellsCollection) {
+        const cell = collections.value.cellsCollection.features.find(
+          f => f.properties.index === clickCellId.value
+        )
+        if (cell && hasCommunityDevicesOnly(cell.properties.devices)) {
+          removeOutLineLayer(clickCellId.value)
+          clickCellId.value = ''
+          // Also navigate away from the cell page
+          if (!smBreakpoint.value) {
+            navigateTo('/stats')
+          }
+        }
+      }
+    } else {
+      removeTargetedRolloutsFilter()
+    }
+
     hexagonLayerType.value = type
+    // Update the currentLayerType in the store
+    mapboxStore.setCurrentLayerType(type)
   }
 
   const handleLayerChange = (type: LayerKeys) => {
@@ -524,12 +746,16 @@
   }
 
   const mouseFunctionality = () => {
-    // Add mouse functionality for both hexagon layers
-    const hexagonLayers = ['cells', 'data-quality-hexagons']
+    const hexagonLayers = ['cells', 'data-quality-hexagons', 'targeted-rollouts-hexagons']
 
     hexagonLayers.forEach((layerId) => {
       // Change the cursor to a pointer when the mouse is over the hexagon layers
-      map.value?.on('mouseenter', layerId, () => {
+      map.value?.on('mouseenter', layerId, (e) => {
+        // Don't change cursor for community-only cells in targeted rollouts
+        if (layerId === 'targeted-rollouts-hexagons' && 
+            e.features && e.features[0]?.properties?.community_only === true) {
+          return
+        }
         map.value!.getCanvas().style.cursor = 'pointer'
       })
       // Change it back when it leaves
@@ -540,12 +766,19 @@
   }
 
   const mouseHoverFunctionality = () => {
-    const hexagonLayers = ['cells', 'data-quality-hexagons']
+    const hexagonLayers = ['cells', 'data-quality-hexagons', 'targeted-rollouts-hexagons']
 
     hexagonLayers.forEach((layerId) => {
       // on cell hover
       map.value?.on('mousemove', layerId, (e) => {
         const currentCell = e.features![0].properties?.index
+        
+        // Skip if in targeted rollouts layer and cell is community-only
+        if (layerId === 'targeted-rollouts-hexagons' && 
+            e.features![0].properties?.community_only === true) {
+          return
+        }
+        
         // check if current polygon is not the same
         if (hoverCellId.value !== currentCell) {
           if (clickCellId.value !== currentCell) {
@@ -635,7 +868,7 @@
     if (!map.value) return
 
     const features = map.value.queryRenderedFeatures(undefined, {
-      layers: ['cells', 'data-quality-hexagons', 'heat'],
+      layers: ['cells', 'data-quality-hexagons', 'heat', 'targeted-rollouts-hexagons', 'targeted-rollouts-heat'],
     })
 
     const uniqueCells = new Map<string, number>()
@@ -658,10 +891,16 @@
   }
 
   const clickOnCell = () => {
-    const hexagonLayers = ['cells', 'data-quality-hexagons']
+    const hexagonLayers = ['cells', 'data-quality-hexagons', 'targeted-rollouts-hexagons']
 
     hexagonLayers.forEach((layerId) => {
       map.value?.on('click', layerId, (e) => {
+        // Prevent clicking on community-only cells in targeted rollouts layer
+        if (layerId === 'targeted-rollouts-hexagons' && 
+            e.features![0].properties?.community_only === true) {
+          return
+        }
+
         // prevent event bubbling
         e.preventDefault()
         // get cell's center coords
@@ -669,9 +908,8 @@
         // get cell's index
         const cellIndex = e.features![0].properties?.index
 
-        // check if any polygon is already clicked
-        if (clickCellId.value) {
-          // if any remove its outline layer
+        // Remove outline from previously clicked cell if it's different
+        if (clickCellId.value && clickCellId.value !== cellIndex) {
           removeOutLineLayer(clickCellId.value)
         }
         // else set the new polygon id
@@ -794,6 +1032,12 @@
       addGeolocateControlOnMap()
       // create map collections
       collections.value = await calcedMapboxData.getCollections()
+
+      console.log('Raw collections sample:', collections.value?.cellsCollection.features.slice(0, 3).map(f => ({
+        index: f.properties.index,
+        devices: f.properties.devices,
+        device_count: f.properties.device_count
+      })))
       // error handling on empty collection
       _.isEmpty(collections.value)
         ? (snackbar.value = true)
@@ -801,11 +1045,14 @@
       // add sources to map
       addCellsSource()
       addHeatSource()
+      addTargetedRolloutsHeatSource()
       // add layers to map
       addCellsLayer()
       addHeatLayer()
+      addTargetedRolloutsHeatLayer()
       addCellCapacityLabelsLayer()
       addDataQualityLayer()
+      addTargetedRolloutsLayer()
       addDeviceCountLabels()
 
       // enable data quality as default

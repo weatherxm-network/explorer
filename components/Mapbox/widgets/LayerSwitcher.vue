@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import cellsDefaultLayerImg from '@/assets/layer-cells-default.png'
   import dataQualityLayerImg from '@/assets/layer-data-quality.png'
+  import targetedRolloutsLayerImg from '@/assets/layer-targeted-rollouts.png'
   import type { LayerKeys } from '@/components/Mapbox/types/mapbox'
 
   interface Layers {
@@ -44,6 +45,7 @@
   const layers: Layers[] = [
     { key: 'cell-capacity', src: cellsDefaultLayerImg, label: 'Cell Capacity' },
     { key: 'data-quality', src: dataQualityLayerImg, label: 'Data Quality' },
+    { key: 'targeted-rollouts', src: targetedRolloutsLayerImg, label: 'Targeted Rollouts' },
   ]
 
   const layerImages = computed(() => {
@@ -65,6 +67,8 @@
     },
     { immediate: true },
   )
+
+  selectedType.value = mapboxStore.getCurrentLayerType;
 
   function showLayerSelection() {
     isLayerSelectionShown.value = true
@@ -249,6 +253,25 @@
               </div>
             </template>
           </v-radio>
+          <v-radio
+            value="targeted-rollouts"
+            class="LayerOptions__option"
+            :style="{
+              border:
+                selectedType === 'targeted-rollouts' ? '1px solid #B8C6FF' : '',
+            }"
+          >
+            <template #label>
+              <div class="LayerOptions__option__label">
+                <span class="LayerOptions__option__label--title"
+                  >Targeted Rollouts</span
+                >
+                <p class="LayerOptions__option__label--description">
+                  View of cells for targeted rollouts.
+                </p>
+              </div>
+            </template>
+          </v-radio>
         </v-radio-group>
       </v-card>
     </v-bottom-sheet>
@@ -339,6 +362,7 @@
     border-radius: 3px !important;
     box-sizing: border-box;
     opacity: 1 !important;
+    filter: none !important;
   }
 
   .quality-gradient-slider {
