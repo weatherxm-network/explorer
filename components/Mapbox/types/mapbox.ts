@@ -21,6 +21,9 @@ interface Properties {
   device_count: number
   center: Point
   avg_data_quality?: number
+  devices: { 
+    [key: string]: number
+  }
 }
 
 interface Geometry {
@@ -42,6 +45,7 @@ export interface FeatureCollection {
 export interface Collections {
   cellsCollection: FeatureCollection
   heatmapCollection: FeatureCollection
+  targetedRolloutsHeatmapCollection?: FeatureCollection
 }
 
 export interface SearchResultDevice {
@@ -83,4 +87,4 @@ export interface UnitsUserPrefs {
   pressure: UnitPrefStruct
 }
 
-export type LayerKeys = 'cell-capacity' | 'data-quality'
+export type LayerKeys = 'cell-capacity' | 'data-quality' | 'targeted-rollouts'

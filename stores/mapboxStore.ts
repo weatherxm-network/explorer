@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type {
   Collections,
+  LayerKeys,
   SearchResultDevice,
   SearchResultLocation,
 } from '~/components/Mapbox/types/mapbox'
@@ -13,6 +14,7 @@ export const useMapboxStore = defineStore('MapboxStore', {
       searchedDeviceToFly: null,
       searchedAddressToFly: null,
       qualityRange: [0, 100],
+      currentLayerType: 'cell-capacity',
     }
   },
   getters: {
@@ -21,6 +23,7 @@ export const useMapboxStore = defineStore('MapboxStore', {
     getSearchedDeviceToFly: (state) => state.searchedDeviceToFly,
     getSearchedAddressToFly: (state) => state.searchedAddressToFly,
     getQualityRange: (state) => state.qualityRange,
+    getCurrentLayerType: (state) => state.currentLayerType,
   },
 
   actions: {
@@ -39,6 +42,9 @@ export const useMapboxStore = defineStore('MapboxStore', {
     setQualityRange(range: [number, number]) {
       this.qualityRange = range
     },
+    setCurrentLayerType(layerType: LayerKeys) {
+      this.currentLayerType = layerType;
+    },
   },
 })
 
@@ -48,4 +54,5 @@ interface MapState {
   searchedAddressToFly: null | SearchResultLocation
   initMapPositionEvent: null
   qualityRange: [number, number]
+  currentLayerType: LayerKeys
 }
