@@ -45,7 +45,11 @@
   const layers: Layers[] = [
     { key: 'cell-capacity', src: cellsDefaultLayerImg, label: 'Cell Capacity' },
     { key: 'data-quality', src: dataQualityLayerImg, label: 'Data Quality' },
-    { key: 'targeted-rollouts', src: targetedRolloutsLayerImg, label: 'Targeted Rollouts' },
+    {
+      key: 'targeted-rollouts',
+      src: targetedRolloutsLayerImg,
+      label: 'Targeted Rollouts',
+    },
   ]
 
   const layerImages = computed(() => {
@@ -68,7 +72,7 @@
     { immediate: true },
   )
 
-  selectedType.value = mapboxStore.getCurrentLayerType;
+  selectedType.value = mapboxStore.getCurrentLayerType
 
   function showLayerSelection() {
     isLayerSelectionShown.value = true
@@ -402,6 +406,10 @@
     aspect-ratio: 1/1;
 
     z-index: 5;
+
+    > img {
+      object-fit: cover;
+    }
 
     > p {
       position: absolute;
