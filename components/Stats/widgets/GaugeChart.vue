@@ -9,6 +9,7 @@
     type Plugin,
   } from 'chart.js'
   import numberFormater from '../utils/numberFormater'
+  import { useTheme } from 'vuetify'
 
   Chart.register(ArcElement, Tooltip)
 
@@ -16,7 +17,14 @@
     display: boolean
     text: string
     subText: string
+    textColor: string
   }
+
+  const theme = useTheme()
+  
+  const  themeTextColor = computed(() => {
+    return theme.global.name.value === 'dark' ? 'white' : 'black'
+  })
 
   const centerTextPlugin: Plugin<'doughnut'> = {
     id: 'centerText',
@@ -35,11 +43,11 @@
         ctx.textBaseline = 'middle'
 
         // --- Draw "TOTAL" Label ---
-        ctx.fillStyle = '#FFFFFF'
+        ctx.fillStyle = centerTextOptions.textColor 
         ctx.fillText(centerTextOptions.subText, centerX, centerY - 20)
 
         // --- Draw Total Value ---
-        ctx.fillStyle = '#FFFFFF'
+        ctx.fillStyle = centerTextOptions.textColor
         ctx.fillText(centerTextOptions.text, centerX, centerY + 15)
 
         ctx.restore()
@@ -72,19 +80,26 @@
     return (st / props.total) * 100
   })
 
-  const chartData = computed(() => ({
-    datasets: [
-      {
-        data: [
-          Math.max(100 - gaugeFillPercentage.value, 1),
-          gaugeFillPercentage.value,
-        ],
-        backgroundColor: ['#2c5282', '#3b82f6'],
-        borderColor: 'transparent',
-        borderWidth: 0,
-      },
-    ],
-  }))
+  const chartData = computed(() => {
+      const claimedPercentage = (props.claimed / props.total) * 100;
+      const reservedPercentage = (props.reserved / props.total) * 100;
+      const remainingPercentage = 100 - (claimedPercentage + reservedPercentage);
+
+      return {
+          datasets: [
+              {
+                  data: [
+                      claimedPercentage,
+                      reservedPercentage,
+                      Math.max(0, remainingPercentage),
+                  ],
+                  backgroundColor: ['#234170', '#2780ff', '#555'], 
+                  borderColor: 'transparent',
+                  borderWidth: 0,
+              },
+          ],
+      };
+  });
 
   const chartOptions = computed<ChartOptions<'doughnut'>>(() => ({
     responsive: true,
@@ -100,13 +115,14 @@
         display: true,
         text: formattedTotal.value,
         subText: 'TOTAL',
+        textColor:  themeTextColor.value,
       } as CenterTextOptions,
     },
   }))
 </script>
 
 <template>
-  <div class="position-relative max-w-lg mx-auto font-sans text-white">
+  <div class="position-relative max-w-lg mx-auto font-sans">
     <div
       class="position-relative px-4 mx-auto"
       :style="{ width: '180px', height: '100px' }"
@@ -117,16 +133,23 @@
         aria-label="Gauge chart showing claimed and reserved values"
       />
     </div>
-    <div
+    
+        <div
       class="position-absolute left-0 text-center px-4"
       :style="{ transform: 'translateY(-50%)', top: '25%', left: '0%' }"
     >
       <p
-        class="text-base md:text-lg font-semibold tracking-wider text-gray-300"
+        class="text-base md:text-lg font-semibold tracking-wider"
+        :style="{ color:  themeTextColor }"
       >
         CLAIMED
       </p>
-      <p class="text-3xl md:text-4xl font-bold">{{ formattedClaimed }}</p>
+      <p 
+        class="text-3xl md:text-4xl font-bold"
+        :style="{ color:  themeTextColor }"
+      >
+        {{ formattedClaimed }}
+      </p>
     </div>
 
     <div
@@ -134,11 +157,17 @@
       :style="{ transform: 'translateY(-50%)', top: '25%', right: '0%' }"
     >
       <p
-        class="text-base md:text-lg font-semibold tracking-wider text-gray-300"
+        class="text-base md:text-lg font-semibold tracking-wider"
+        :style="{ color:  themeTextColor }"
       >
         RESERVED
       </p>
-      <p class="text-3xl md:text-4xl font-bold">{{ formattedReserved }}</p>
+      <p 
+        class="text-3xl md:text-4xl font-bold"
+        :style="{ color:  themeTextColor }"
+      >
+        {{ formattedReserved }}
+      </p>
     </div>
   </div>
 </template>
