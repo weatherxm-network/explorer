@@ -417,6 +417,7 @@
       left: 4px;
       right: 4px;
       text-align: center;
+      color: white;
     }
   }
 
@@ -464,6 +465,7 @@
       left: 4px;
       right: 4px;
       text-align: center;
+      color: white;
     }
   }
 
