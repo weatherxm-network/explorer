@@ -2,6 +2,7 @@
   import cellsDefaultLayerImg from '@/assets/layer-cells-default.png'
   import dataQualityLayerImg from '@/assets/layer-data-quality.png'
   import targetedRolloutsLayerImg from '@/assets/layer-targeted-rollouts.png'
+  import cellBountyLayerImg from 'assets/layer-cells-bounty.png'
   import type { LayerKeys } from '@/components/Mapbox/types/mapbox'
 
   interface Layers {
@@ -50,6 +51,11 @@
       src: targetedRolloutsLayerImg,
       label: 'Targeted Rollouts',
     },
+    {
+      key: 'cell-bounty',
+      src: cellBountyLayerImg,
+      label: 'Cell Bounty',
+    },
   ]
 
   const layerImages = computed(() => {
@@ -68,6 +74,16 @@
     () => mapboxStore.getQualityRange,
     (newRange) => {
       localQualityRange.value = [...newRange]
+    },
+    { immediate: true },
+  )
+
+  watch(
+    () => mapboxStore.getCurrentLayerType,
+    (newType) => {
+      if (selectedType.value !== newType) {
+        selectedType.value = newType
+      }
     },
     { immediate: true },
   )
@@ -272,6 +288,24 @@
                 >
                 <p class="LayerOptions__option__label--description">
                   View of cells for targeted rollouts.
+                </p>
+              </div>
+            </template>
+          </v-radio>
+          <v-radio
+            value="cell-bounty"
+            class="LayerOptions__option"
+            :style="{
+              border: selectedType === 'cell-bounty' ? '1px solid #B8C6FF' : '',
+            }"
+          >
+            <template #label>
+              <div class="LayerOptions__option__label">
+                <span class="LayerOptions__option__label--title"
+                  >Cell Bounty</span
+                >
+                <p class="LayerOptions__option__label--description">
+                  View of cells with active cell bounty programs.
                 </p>
               </div>
             </template>

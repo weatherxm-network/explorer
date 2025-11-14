@@ -2,7 +2,10 @@
   import _ from 'lodash'
   import { useDisplay, useTheme } from 'vuetify'
   import { reactive, computed, ref } from 'vue'
-  import type { SearchResultDevice, SearchResultLocation } from '../types/mapbox'
+  import type {
+    SearchResultDevice,
+    SearchResultLocation,
+  } from '../types/mapbox'
   import Settings from './Settings.vue'
   import ResultsComponent from './SearchBarWidgets/ResultsComponent.vue'
   import SettingsButton from './SettingsWidgets/SettingsButton.vue'
@@ -29,8 +32,8 @@
   const recentResults = reactive(
     localStorage.get('recentResults') ?? {
       devices: [],
-      addresses: []
-    }
+      addresses: [],
+    },
   )
   // arrow functionality
   const downArrowEvent = ref({})
@@ -45,14 +48,14 @@
           width: 'calc(100% - 40px)',
           right: 'calc(50% - calc(50% - 20px))',
           top: '20px',
-          zIndex: 9
+          zIndex: 9,
         }
       : {
           position: 'absolute',
           right: '20px',
           top: '20px',
           zIndex: 9,
-          width: '460px'
+          width: '460px',
         }
   })
 
@@ -64,7 +67,10 @@
       showRecentResults.value = false
       showErrorMessage.value = false
       showEmptyRecent.value = false
-      if (!_.isEmpty(searchResults.value.devices) || !_.isEmpty(searchResults.value.addresses)) {
+      if (
+        !_.isEmpty(searchResults.value.devices) ||
+        !_.isEmpty(searchResults.value.addresses)
+      ) {
         showResults.value = true
       }
     }
@@ -73,7 +79,7 @@
       showErrorMessage.value = false
       searchResults.value = {
         addresses: [],
-        devices: []
+        devices: [],
       }
       handleEmptyRecent()
     }
@@ -95,7 +101,10 @@
               // check if the user has already cleared the input field
               if (!_.isEmpty(textFieldModel.value)) {
                 // if not check the response for empty lists
-                if (_.isEmpty(response.devices) && _.isEmpty(response.addresses)) {
+                if (
+                  _.isEmpty(response.devices) &&
+                  _.isEmpty(response.addresses)
+                ) {
                   throw new Error('empty lists')
                 } else {
                   // if not empty show result
@@ -115,7 +124,7 @@
               if (userInput.length !== 0) {
                 searchResults.value = {
                   addresses: [],
-                  devices: []
+                  devices: [],
                 }
                 showResults.value = false
                 showEmptyRecent.value = false
@@ -136,7 +145,8 @@
 
   const handleResultsState = () => {
     const resultsIsEmpty =
-      !_.isEmpty(searchResults.value.devices) || !_.isEmpty(searchResults.value.addresses)
+      !_.isEmpty(searchResults.value.devices) ||
+      !_.isEmpty(searchResults.value.addresses)
     if (resultsIsEmpty && !_.isEmpty(textFieldModel.value)) {
       showResults.value = true
     }
@@ -161,7 +171,7 @@
     showResults.value = false
     searchResults.value = {
       addresses: [],
-      devices: []
+      devices: [],
     }
     handleEmptyRecent()
   }
@@ -194,7 +204,9 @@
 
   // handle settings component
   const handleSettings = () => {
-    showSettings.value === false ? (showSettings.value = true) : (showSettings.value = false)
+    showSettings.value === false
+      ? (showSettings.value = true)
+      : (showSettings.value = false)
   }
 
   // add address to recent addresses list flow
@@ -217,7 +229,7 @@
     // track GA event
     trackGAevent('clickOnResultOnNetworkSearch', {
       ITEM_ID: 'search',
-      ITEM_LIST_ID: 'location'
+      ITEM_LIST_ID: 'location',
     })
 
     // propagate address
@@ -247,7 +259,7 @@
     // track ga event
     trackGAevent('clickOnResultOnNetworkSearch', {
       ITEM_ID: 'search',
-      ITEM_LIST_ID: 'station'
+      ITEM_LIST_ID: 'station',
     })
 
     // propagate device to parent component
@@ -257,11 +269,13 @@
   }
 
   // pass data to parent component
-  const passSelectedAddressToExplorer = (selectedAddress: SearchResultLocation) => {
+  const passSelectedAddressToExplorer = (
+    selectedAddress: SearchResultLocation,
+  ) => {
     // track ga event
     trackGAevent('clickOnResultOnNetworkSearch', {
       ITEM_ID: 'recent',
-      ITEM_LIST_ID: 'location'
+      ITEM_LIST_ID: 'location',
     })
     showRecentResults.value = false
     mapboxStore.setSearchedAddressToFly(selectedAddress)
@@ -271,7 +285,7 @@
     // track ga event
     trackGAevent('clickOnResultOnNetworkSearch', {
       ITEM_ID: 'recent',
-      ITEM_LIST_ID: 'station'
+      ITEM_LIST_ID: 'station',
     })
     showRecentResults.value = false
     mapboxStore.setSearchedDeviceToFly(selectedDevice)
@@ -287,7 +301,11 @@
     >
       <VRow class="ma-0 pa-0">
         <VCol class="ma-0 pa-0" cols="12">
-          <VSheet class="d-flex align-center pr-0" color="transparent" rounded="xl">
+          <VSheet
+            class="d-flex align-center pr-0"
+            color="transparent"
+            rounded="xl"
+          >
             <v-text-field
               v-model="textFieldModel"
               v-click-outside="closeResults"
@@ -343,7 +361,11 @@
                     style="font-size: 19px; cursor: pointer"
                     class="d-flex align-center"
                   >
-                    <i class="fa-solid fa-xmark" :class="'text-darkGrey '" @click="clearInput"></i>
+                    <i
+                      class="fa-solid fa-xmark"
+                      :class="'text-darkGrey '"
+                      @click="clearInput"
+                    ></i>
                   </div>
                 </div>
               </template>
@@ -366,7 +388,10 @@
             @pass-selected-address-to-explorer="passSelectedAddressToExplorer"
             @pass-selected-device-to-explorer="passSelectedDeviceToExplorer"
           />
-          <Settings :show-settings="showSettings" @close-settings="showSettings = false" />
+          <Settings
+            :show-settings="showSettings"
+            @close-settings="showSettings = false"
+          />
         </VCol>
       </VRow>
     </VForm>

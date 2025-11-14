@@ -15,6 +15,8 @@
     loading: boolean
     cellAddress?: string
     cellDataQuality: number
+    isBountyCell?: boolean
+    bountyCellMaxStations?: number
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -23,6 +25,8 @@
     loading: true,
     cellAddress: '-',
     cellDataQuality: 0,
+    isBountyCell: false,
+    bountyCellMaxStations: 10,
   })
   const { trackGAevent } = useGAevents()
   const mobileStore = useMobileStore()
@@ -159,7 +163,23 @@
         <div v-if="props.loading" style="min-width: 100px">
           <v-skeleton-loader type="chip"></v-skeleton-loader>
         </div>
-
+        <VSheet
+          v-if="!props.loading && props.isBountyCell"
+          class="pl-3 pr-1 py-1 text-subtitle-2 flex-grow-0 d-inline-flex align-center rounded-lg"
+          style="
+            background: linear-gradient(
+              35deg,
+              #3b2d78 0%,
+              #d41da7 100%
+            ) !important;
+          "
+        >
+          <i
+            class="fa-solid fa-star text-text me-2"
+            style="font-size: 14px"
+          ></i>
+          <span class="text-text text-subtitle-2 me-2">Bounty Cell</span>
+        </VSheet>
         <VSheet
           v-if="!props.loading && !!props.activeStations"
           class="px-3 py-1 text-subtitle-2 flex-grow-0 me-1"
@@ -180,7 +200,10 @@
             color="blueTint"
           >
             <span class="me-2"
-              >{{ props.totalStations }}/10 stations present</span
+              >{{ props.totalStations }}/{{
+                props.isBountyCell ? props.bountyCellMaxStations : 10
+              }}
+              stations present</span
             >
             <div
               @mouseenter="
@@ -206,6 +229,7 @@
         </div>
         <div v-else style="min-width: 100px">
           <VSheet
+            v-if="!props.isBountyCell"
             class="pl-3 pr-1 py-1 text-subtitle-2 flex-grow-0 d-flex ga-1 justify-space-between align-center"
             style="border-radius: 10px"
             color="blueTint"

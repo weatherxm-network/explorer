@@ -1,10 +1,12 @@
-import type { Cell, FeatureCollection } from '../types/mapbox'
+import type { Cell, FeatureCollection, CellBountyCell } from '../types/mapbox'
 
-const getNonCommunityDeviceCount = (devices: { [key: string]: number }): number => {
+const getNonCommunityDeviceCount = (devices: {
+  [key: string]: number
+}): number => {
   if (!devices || typeof devices !== 'object') {
     return 0
   }
-  
+
   return Object.entries(devices).reduce((total, [deviceType, count]) => {
     if (deviceType !== 'community') {
       return total + count
@@ -13,7 +15,9 @@ const getNonCommunityDeviceCount = (devices: { [key: string]: number }): number 
   }, 0)
 }
 
-const hasCommunityDevicesOnly = (devices: { [key: string]: number }): boolean => {
+const hasCommunityDevicesOnly = (devices: {
+  [key: string]: number
+}): boolean => {
   if (!devices || typeof devices !== 'object') {
     return false
   }
@@ -69,11 +73,13 @@ const createHeatmapCollection = (cells: Cell[]): FeatureCollection => {
   }
 }
 
-const createTargetedRolloutsHeatmapCollection = (cells: Cell[]): FeatureCollection => {
+const createTargetedRolloutsHeatmapCollection = (
+  cells: Cell[],
+): FeatureCollection => {
   return {
     type: 'FeatureCollection',
     features: cells
-      .filter(cell => !hasCommunityDevicesOnly(cell.devices))
+      .filter((cell) => !hasCommunityDevicesOnly(cell.devices))
       .map((cell: Cell) => ({
         type: 'Feature',
         properties: {
@@ -94,8 +100,70 @@ const createTargetedRolloutsHeatmapCollection = (cells: Cell[]): FeatureCollecti
   }
 }
 
+const createCellBountyCollection = (
+  cellBountyCells: CellBountyCell[],
+): FeatureCollection => {
+  const features = cellBountyCells.map((bounty) => {
+    // Convert polygon from [lat, lon] to [lon, lat] for GeoJSON
+    const polygonCoordinates = bounty.polygon.map((coord) => [coord[1], coord[0]])
+
+    return {
+      type: 'Feature' as const,
+      properties: {
+        index: bounty.index,
+        devices_accepted: bounty.devices_accepted,
+        total_rewards: bounty.total_rewards,
+        activation_period_start: bounty.activation_period_start,
+        activation_period_end: bounty.activation_period_end,
+        distribution_period_in_days: bounty.distribution_period_in_days,
+        center: bounty.center,
+        device_count: 0, // Default since we don't have device data from mocks
+        devices: {}, // Default since we don't have device data from mocks
+      },
+      geometry: {
+        type: 'Polygon' as const,
+        coordinates: [polygonCoordinates],
+      },
+    }
+  })
+
+  return {
+    type: 'FeatureCollection',
+    features,
+  }
+}
+
+const createCellBountyHeatmapCollection = (
+  cellBountyCells: CellBountyCell[],
+): FeatureCollection => {
+  const features = cellBountyCells.map((bounty) => {
+    return {
+      type: 'Feature' as const,
+      properties: {
+        index: bounty.index,
+        device_count: bounty.devices_accepted, // Use devices_accepted for heatmap weight
+        devices_accepted: bounty.devices_accepted,
+        total_rewards: bounty.total_rewards,
+        center: bounty.center,
+        devices: {}, // Default since we don't have device data from mocks
+      },
+      geometry: {
+        type: 'Point' as const,
+        coordinates: [bounty.center.lon, bounty.center.lat],
+      },
+    }
+  })
+
+  return {
+    type: 'FeatureCollection',
+    features,
+  }
+}
+
 export default {
   createCellsCollection,
   createHeatmapCollection,
   createTargetedRolloutsHeatmapCollection,
+  createCellBountyCollection,
+  createCellBountyHeatmapCollection,
 }

@@ -30,11 +30,31 @@ const getCollections = async () => {
     // create collection for targeted rollouts heatmap
     const targetedRolloutsHeatmapCollection: FeatureCollection =
       createCollections.createTargetedRolloutsHeatmapCollection(cells)
-    
-    // store calced collections
-    mapboxStore.fillCollections({ cellsCollection, heatmapCollection, targetedRolloutsHeatmapCollection })
 
-    return { cellsCollection, heatmapCollection, targetedRolloutsHeatmapCollection } as Collections
+    const cellBountyCells = await wxmApi.getCellBountyCells().catch(() => [])
+
+    const cellBountyCollection: FeatureCollection =
+      createCollections.createCellBountyCollection(cellBountyCells)
+
+    const cellBountyHeatmapCollection: FeatureCollection =
+      createCollections.createCellBountyHeatmapCollection(cellBountyCells)
+
+    // store calced collections
+    mapboxStore.fillCollections({
+      cellsCollection,
+      heatmapCollection,
+      targetedRolloutsHeatmapCollection,
+      cellBountyCollection,
+      cellBountyHeatmapCollection,
+    })
+
+    return {
+      cellsCollection,
+      heatmapCollection,
+      targetedRolloutsHeatmapCollection,
+      cellBountyCollection,
+      cellBountyHeatmapCollection,
+    } as Collections
   } else {
     return {} as Collections
   }
