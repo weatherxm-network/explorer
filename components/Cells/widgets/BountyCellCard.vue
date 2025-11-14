@@ -22,7 +22,7 @@
   <VCard class="BountyCellCard" color="purple" elevation="0">
     <VCardText class="pa-4 px-6">
       <h3 class="text-text font-weight-bold text-h6 mb-3">
-        This is a Bounty Cell!
+        This is a Cell Bounty!
       </h3>
 
       <p class="text-text text-body-2 mb-4" style="line-height: 1.6">

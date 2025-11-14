@@ -178,7 +178,7 @@
             class="fa-solid fa-star text-text me-2"
             style="font-size: 14px"
           ></i>
-          <span class="text-text text-subtitle-2 me-2">Bounty Cell</span>
+          <span class="text-text text-subtitle-2 me-2">Cell Bounty</span>
         </VSheet>
         <VSheet
           v-if="!props.loading && !!props.activeStations"

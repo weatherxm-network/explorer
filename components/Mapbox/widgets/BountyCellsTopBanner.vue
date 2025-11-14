@@ -69,7 +69,7 @@
     >
       <button
         class="banner__close"
-        aria-label="Dismiss bounty cells banner"
+        aria-label="Dismiss cell bounties banner"
         type="button"
         @click.stop="handleDismiss"
       >
@@ -80,7 +80,7 @@
         <i class="fa-solid fa-star banner__icon"></i>
 
         <div class="banner__text">
-          <strong>Bounty Cells</strong>
+          <strong>Cell Bounties</strong>
           <span>Discover boosted rewards in selected areas on the map.</span>
         </div>
       </div>

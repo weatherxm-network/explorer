@@ -54,7 +54,7 @@
     {
       key: 'cell-bounty',
       src: cellBountyLayerImg,
-      label: 'Cell Bounty',
+      label: 'Cell Bounties',
     },
   ]
 
@@ -302,7 +302,7 @@
             <template #label>
               <div class="LayerOptions__option__label">
                 <span class="LayerOptions__option__label--title"
-                  >Cell Bounty</span
+                  >Cell Bounties</span
                 >
                 <p class="LayerOptions__option__label--description">
                   View of cells with active cell bounty programs.
