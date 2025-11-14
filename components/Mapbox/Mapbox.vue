@@ -946,6 +946,17 @@
       removeTargetedRolloutsFilter()
     }
 
+    // Remove outline if switching away from cell-bounty layer and a bounty cell is selected
+    if (type !== 'cell-bounty' && clickCellId.value) {
+      const isBountyCell = collections.value?.cellBountyCollection?.features.some(
+        (f) => f.properties.index === clickCellId.value,
+      )
+      if (isBountyCell) {
+        removeOutLineLayer(clickCellId.value)
+        clickCellId.value = ''
+      }
+    }
+
     hexagonLayerType.value = type
     // Update the currentLayerType in the store
     mapboxStore.setCurrentLayerType(type)

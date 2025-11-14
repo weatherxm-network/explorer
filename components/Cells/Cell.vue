@@ -87,12 +87,15 @@
           showCellsDevices.value = true
         } else {
           loading.value = false
-          showCellsDevices.value = false
+          // If it's a bounty cell, don't show error - just hide devices
+          showCellsDevices.value = !!bountyCellData.value
         }
       })
       .catch(() => {
         loading.value = false
-        showCellsDevices.value = false
+        // If it's a bounty cell, don't show error - just hide devices
+        // This prevents the "Something went wrong" message for bounty cells
+        showCellsDevices.value = !!bountyCellData.value
       })
   })
 </script>
