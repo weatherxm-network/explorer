@@ -859,7 +859,7 @@
       if (type === 'cell-bounty' && collections.value?.cellBountyCollection) {
         const features = collections.value.cellBountyCollection.features
         if (features.length > 0) {
-          // Calculate bounds from all bounty cell features
+          // Calculate bounds from all cell bounty features
           const bounds = new mapboxgl.LngLatBounds()
 
           features.forEach((feature) => {
@@ -1068,7 +1068,7 @@
     )
 
     let isBountyCell = false
-    // If not found in regular cells, check bounty cells
+    // If not found in regular cells, check cell bounties
     if (!cell) {
       cell = collections.value?.cellBountyCollection?.features.find(
         (bountyFeatures) => bountyFeatures.properties.index === cellIndex,
