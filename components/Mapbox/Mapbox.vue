@@ -16,6 +16,7 @@
   import TrackingConcentComponent from './widgets/TrackingConcentComponent.vue'
   import LayerSwitcher from './widgets/LayerSwitcher.vue'
   import NearbyStationsWidget from '@/components/Mapbox/widgets/NearbyStationsWidget.vue'
+  import BountyCellsTopBanner from './widgets/BountyCellsTopBanner.vue'
   import type { Point, SearchResultDevice, Collections } from './types/mapbox'
   import { useMapboxStore } from '~/stores/mapboxStore'
   import { useMobileStore } from '~/stores/mobileStore'
@@ -77,7 +78,9 @@
     return mapboxStore.getQualityRange
   })
 
-  const hasCommunityDevicesOnly = (devices: { [key: string]: number }): boolean => {
+  const hasCommunityDevicesOnly = (devices: {
+    [key: string]: number
+  }): boolean => {
     const deviceKeys = Object.keys(devices)
     return deviceKeys.length === 1 && deviceKeys[0] === 'community'
   }
@@ -220,16 +223,16 @@
     if (!collections.value?.cellsCollection) {
       return
     }
-    
+
     const enrichedCollection = {
       ...collections.value.cellsCollection,
-      features: collections.value.cellsCollection.features.map(feature => ({
+      features: collections.value.cellsCollection.features.map((feature) => ({
         ...feature,
         properties: {
           ...feature.properties,
-          community_only: hasCommunityDevicesOnly(feature.properties.devices)
-        }
-      }))
+          community_only: hasCommunityDevicesOnly(feature.properties.devices),
+        },
+      })),
     }
 
     map.value?.addSource('cells', {
@@ -252,6 +255,38 @@
       data: collections.value
         ?.targetedRolloutsHeatmapCollection as never as MapboxGeoJSONFeature,
     })
+  }
+
+  const addCellBountySource = () => {
+    if (!collections.value?.cellBountyCollection) {
+      return
+    }
+
+    try {
+      map.value?.addSource('cell-bounty', {
+        type: 'geojson',
+        data: collections.value
+          .cellBountyCollection as never as MapboxGeoJSONFeature,
+      })
+    } catch (error) {
+      console.error('Error adding cell-bounty source:', error)
+    }
+  }
+
+  const addCellBountyHeatSource = () => {
+    if (!collections.value?.cellBountyHeatmapCollection) {
+      return
+    }
+
+    try {
+      map.value?.addSource('cell-bounty-heatmap', {
+        type: 'geojson',
+        data: collections.value
+          .cellBountyHeatmapCollection as never as MapboxGeoJSONFeature,
+      })
+    } catch (error) {
+      console.error('Error adding cell-bounty-heatmap source:', error)
+    }
   }
 
   const addCellsLayer = () => {
@@ -577,67 +612,200 @@
     })
   }
 
+  const addCellBountyLayer = () => {
+    if (!map.value?.getSource('cell-bounty')) {
+      return
+    }
+
+    try {
+      map.value?.addLayer({
+        id: 'cell-bounty-hexagons',
+        type: 'fill',
+        source: 'cell-bounty',
+        layout: {
+          visibility: 'none',
+        },
+        paint: {
+          'fill-color': '#9128be',
+          'fill-opacity': [
+            'interpolate',
+            ['exponential', 0.5],
+            ['zoom'],
+            9.5,
+            0.0,
+            10,
+            0.6,
+            15,
+            0.6,
+          ],
+        },
+        filter: ['==', '$type', 'Polygon'],
+      })
+
+      map.value?.addLayer(
+        {
+          id: 'cell-bounty-hexagons-outline',
+          type: 'line',
+          source: 'cell-bounty',
+          layout: {
+            visibility: 'none',
+          },
+          paint: {
+            'line-color': '#9128be',
+            'line-width': 2,
+            'line-opacity': [
+              'interpolate',
+              ['exponential', 0.5],
+              ['zoom'],
+              0,
+              0.8,
+              9.5,
+              0.8,
+              10,
+              1.0,
+              15,
+              1.0,
+            ],
+          },
+          filter: ['==', '$type', 'Polygon'],
+        },
+        'cell-bounty-hexagons',
+      )
+    } catch (error) {
+      console.error('Error adding cell-bounty layer:', error)
+    }
+  }
+
+  const addCellBountyHeatLayer = () => {
+    if (!map.value?.getSource('cell-bounty-heatmap')) {
+      return
+    }
+
+    map.value?.addLayer(
+      {
+        id: 'cell-bounty-heat',
+        type: 'heatmap',
+        source: 'cell-bounty-heatmap',
+        maxzoom: 10,
+        minzoom: 0,
+        layout: {
+          visibility: 'none',
+        },
+        paint: {
+          'heatmap-weight': [
+            'interpolate',
+            ['linear'],
+            ['get', 'device_count'],
+            0,
+            0.5, // Minimum weight to ensure visibility
+            1,
+            1,
+            10,
+            10,
+          ],
+          'heatmap-color': [
+            'interpolate',
+            ['linear'],
+            ['heatmap-density'],
+            0,
+            'rgba(145.0, 40.0, 190.0, 0.0)',
+            0.2,
+            'rgba(145.0, 40.0, 190.0, 0.4)',
+            0.4,
+            'rgba(145.0, 40.0, 190.0, 0.6)',
+            0.6,
+            'rgba(145.0, 40.0, 190.0, 0.8)',
+            0.8,
+            'rgba(145.0, 40.0, 190.0, 0.9)',
+            1,
+            'rgba(145.0, 40.0, 190.0, 1.0)',
+          ],
+          'heatmap-radius': {
+            stops: [
+              [0, 10],
+              [5, 30],
+              [9, 50],
+            ],
+          },
+          'heatmap-opacity': [
+            'interpolate',
+            ['exponential', 0.5],
+            ['zoom'],
+            0,
+            1.0,
+            8,
+            0.9,
+            9,
+            0.5,
+            9.5,
+            0.1,
+            10,
+            0.0,
+          ],
+        },
+      },
+      'waterway-label',
+    )
+  }
+
   const applyTargetedRolloutsFilter = () => {
     if (!map.value || !map.value.getLayer('targeted-rollouts-hexagons')) {
       return
     }
-    
+
     const filter = [
       'all',
       ['==', '$type', 'Polygon'],
-      ['!=', 'community_only', true]
+      ['!=', 'community_only', true],
     ]
 
     map.value.setFilter('targeted-rollouts-hexagons', filter)
-    
+
     if (map.value.getLayer('device-count-labels')) {
       map.value.setFilter('device-count-labels', [
         'all',
         ['!=', 'community_only', true],
-        ['>', 'non_community_device_count', 0] 
+        ['>', 'non_community_device_count', 0],
       ])
-      
-      
+
       map.value.setLayoutProperty('device-count-labels', 'text-field', [
         'to-string',
-        ['get', 'non_community_device_count']
+        ['get', 'non_community_device_count'],
       ])
     }
-    
+
     if (map.value.getLayer('cell-capacity-labels')) {
       map.value.setFilter('cell-capacity-labels', [
         'all',
         ['!=', 'community_only', true],
-        ['>', 'non_community_device_count', 0] 
+        ['>', 'non_community_device_count', 0],
       ])
     }
   }
-
 
   const removeTargetedRolloutsFilter = () => {
     if (!map.value || !map.value.getLayer('targeted-rollouts-hexagons')) {
       return
     }
-    
+
     const defaultFilter = ['==', '$type', 'Polygon']
     map.value.setFilter('targeted-rollouts-hexagons', defaultFilter)
-    
+
     // Reset label filters
     if (map.value.getLayer('device-count-labels')) {
       map.value.setFilter('device-count-labels', null)
-      
+
       // Reset label to show total device count
       map.value.setLayoutProperty('device-count-labels', 'text-field', [
         'to-string',
-        ['get', 'device_count']
+        ['get', 'device_count'],
       ])
     }
-    
+
     if (map.value.getLayer('cell-capacity-labels')) {
       map.value.setFilter('cell-capacity-labels', null)
     }
   }
-
 
   const toggleHexagonLayerType = (type: LayerKeys) => {
     if (!map.value || !map.value.getLayer('cells')) {
@@ -654,7 +822,11 @@
       'visibility',
       type === 'cell-capacity' ? 'visible' : 'none',
     )
-    map.value?.setLayoutProperty('device-count-labels', 'visibility', 'visible')
+    map.value?.setLayoutProperty(
+      'device-count-labels',
+      'visibility',
+      type === 'cell-bounty' ? 'none' : 'visible',
+    )
     map.value?.setLayoutProperty(
       'data-quality-hexagons',
       'visibility',
@@ -667,31 +839,99 @@
       type === 'targeted-rollouts' ? 'visible' : 'none',
     )
 
+    if (map.value.getLayer('cell-bounty-hexagons')) {
+      const visibility = type === 'cell-bounty' ? 'visible' : 'none'
+
+      map.value.setLayoutProperty(
+        'cell-bounty-hexagons',
+        'visibility',
+        visibility,
+      )
+
+      if (map.value.getLayer('cell-bounty-hexagons-outline')) {
+        map.value.setLayoutProperty(
+          'cell-bounty-hexagons-outline',
+          'visibility',
+          visibility,
+        )
+      }
+
+      if (type === 'cell-bounty' && collections.value?.cellBountyCollection) {
+        const features = collections.value.cellBountyCollection.features
+        if (features.length > 0) {
+          // Calculate bounds from all bounty cell features
+          const bounds = new mapboxgl.LngLatBounds()
+
+          features.forEach((feature) => {
+            if (
+              feature.geometry.type === 'Polygon' &&
+              feature.geometry.coordinates
+            ) {
+              // Add all polygon coordinates to bounds
+              const coordinates = feature.geometry.coordinates[0] as number[][]
+              coordinates.forEach((coord) => {
+                bounds.extend([coord[0], coord[1]])
+              })
+            } else if (feature.properties.center) {
+              // Fallback to center point if polygon not available
+              const center = feature.properties.center
+              if (
+                center &&
+                typeof center === 'object' &&
+                'lat' in center &&
+                'lon' in center
+              ) {
+                bounds.extend([center.lon, center.lat])
+              }
+            }
+          })
+
+          map.value.fitBounds(bounds, {
+            padding: { top: 100, bottom: 100, left: 100, right: 100 },
+            duration: 1000,
+            maxZoom: 8,
+          })
+        }
+      }
+
+      map.value.triggerRepaint()
+    }
+
     // Control heatmap visibility based on layer type
     if (map.value.getLayer('heat')) {
       map.value.setLayoutProperty(
         'heat',
         'visibility',
-        type === 'targeted-rollouts' ? 'none' : 'visible'
+        type === 'targeted-rollouts' || type === 'cell-bounty'
+          ? 'none'
+          : 'visible',
       )
     }
-    
+
     if (map.value.getLayer('targeted-rollouts-heat')) {
       map.value.setLayoutProperty(
         'targeted-rollouts-heat',
         'visibility',
-        type === 'targeted-rollouts' ? 'visible' : 'none'
+        type === 'targeted-rollouts' ? 'visible' : 'none',
+      )
+    }
+
+    if (map.value.getLayer('cell-bounty-heat')) {
+      map.value.setLayoutProperty(
+        'cell-bounty-heat',
+        'visibility',
+        type === 'cell-bounty' ? 'visible' : 'none',
       )
     }
 
     // Apply filter to hide community-only devices in targeted rollouts layer
     if (type === 'targeted-rollouts') {
       applyTargetedRolloutsFilter()
-      
+
       // Clear any selected cell outline when switching to targeted rollouts if it's a community-only cell
       if (clickCellId.value && collections.value?.cellsCollection) {
         const cell = collections.value.cellsCollection.features.find(
-          f => f.properties.index === clickCellId.value
+          (f) => f.properties.index === clickCellId.value,
         )
         if (cell && hasCommunityDevicesOnly(cell.properties.devices)) {
           removeOutLineLayer(clickCellId.value)
@@ -746,14 +986,22 @@
   }
 
   const mouseFunctionality = () => {
-    const hexagonLayers = ['cells', 'data-quality-hexagons', 'targeted-rollouts-hexagons']
+    const hexagonLayers = [
+      'cells',
+      'data-quality-hexagons',
+      'targeted-rollouts-hexagons',
+      'cell-bounty-hexagons',
+    ]
 
     hexagonLayers.forEach((layerId) => {
       // Change the cursor to a pointer when the mouse is over the hexagon layers
       map.value?.on('mouseenter', layerId, (e) => {
         // Don't change cursor for community-only cells in targeted rollouts
-        if (layerId === 'targeted-rollouts-hexagons' && 
-            e.features && e.features[0]?.properties?.community_only === true) {
+        if (
+          layerId === 'targeted-rollouts-hexagons' &&
+          e.features &&
+          e.features[0]?.properties?.community_only === true
+        ) {
           return
         }
         map.value!.getCanvas().style.cursor = 'pointer'
@@ -766,19 +1014,26 @@
   }
 
   const mouseHoverFunctionality = () => {
-    const hexagonLayers = ['cells', 'data-quality-hexagons', 'targeted-rollouts-hexagons']
+    const hexagonLayers = [
+      'cells',
+      'data-quality-hexagons',
+      'targeted-rollouts-hexagons',
+      'cell-bounty-hexagons',
+    ]
 
     hexagonLayers.forEach((layerId) => {
       // on cell hover
       map.value?.on('mousemove', layerId, (e) => {
         const currentCell = e.features![0].properties?.index
-        
+
         // Skip if in targeted rollouts layer and cell is community-only
-        if (layerId === 'targeted-rollouts-hexagons' && 
-            e.features![0].properties?.community_only === true) {
+        if (
+          layerId === 'targeted-rollouts-hexagons' &&
+          e.features![0].properties?.community_only === true
+        ) {
           return
         }
-        
+
         // check if current polygon is not the same
         if (hoverCellId.value !== currentCell) {
           if (clickCellId.value !== currentCell) {
@@ -808,10 +1063,22 @@
 
   // add cell outline layer
   const addOutLineLayer = (cellIndex: string) => {
-    // search in collection based on cell index
-    const cell = collections.value?.cellsCollection.features.filter(
+    let cell = collections.value?.cellsCollection.features.find(
       (cellsFeatures) => cellsFeatures.properties.index === cellIndex,
-    )[0]
+    )
+
+    let isBountyCell = false
+    // If not found in regular cells, check bounty cells
+    if (!cell) {
+      cell = collections.value?.cellBountyCollection?.features.find(
+        (bountyFeatures) => bountyFeatures.properties.index === cellIndex,
+      )
+      isBountyCell = !!cell
+    }
+
+    if (!cell) {
+      return // Cell not found in any collection
+    }
 
     // check if source already exists
     if (!map.value?.getSource(`outline${cellIndex}`)) {
@@ -822,24 +1089,28 @@
           type: 'Feature',
           geometry: {
             type: 'Polygon',
-            coordinates: [cell?.geometry.coordinates[0]],
+            coordinates: [cell.geometry.coordinates[0]],
           },
         } as MapboxGeoJSONFeature,
       })
     }
     // check if layer already exists
     if (!map.value?.getLayer(`outline${cellIndex}`)) {
-      // create layer
-      map.value?.addLayer({
-        id: `outline${cellIndex}`,
-        type: 'line',
-        source: `outline${cellIndex}`,
-        layout: {},
-        paint: {
-          'line-color': '#6ca1f5',
-          'line-width': 3.5,
+      const beforeId = isBountyCell ? 'cell-bounty-hexagons-outline' : 'cells'
+
+      map.value?.addLayer(
+        {
+          id: `outline${cellIndex}`,
+          type: 'line',
+          source: `outline${cellIndex}`,
+          layout: {},
+          paint: {
+            'line-color': '#6ca1f5',
+            'line-width': 3.5,
+          },
         },
-      })
+        beforeId,
+      )
     }
   }
 
@@ -868,7 +1139,14 @@
     if (!map.value) return
 
     const features = map.value.queryRenderedFeatures(undefined, {
-      layers: ['cells', 'data-quality-hexagons', 'heat', 'targeted-rollouts-hexagons', 'targeted-rollouts-heat'],
+      layers: [
+        'cells',
+        'data-quality-hexagons',
+        'heat',
+        'targeted-rollouts-hexagons',
+        'targeted-rollouts-heat',
+        'cell-bounty-hexagons',
+      ],
     })
 
     const uniqueCells = new Map<string, number>()
@@ -891,13 +1169,20 @@
   }
 
   const clickOnCell = () => {
-    const hexagonLayers = ['cells', 'data-quality-hexagons', 'targeted-rollouts-hexagons']
+    const hexagonLayers = [
+      'cells',
+      'data-quality-hexagons',
+      'targeted-rollouts-hexagons',
+      'cell-bounty-hexagons',
+    ]
 
     hexagonLayers.forEach((layerId) => {
       map.value?.on('click', layerId, (e) => {
         // Prevent clicking on community-only cells in targeted rollouts layer
-        if (layerId === 'targeted-rollouts-hexagons' && 
-            e.features![0].properties?.community_only === true) {
+        if (
+          layerId === 'targeted-rollouts-hexagons' &&
+          e.features![0].properties?.community_only === true
+        ) {
           return
         }
 
@@ -1033,11 +1318,14 @@
       // create map collections
       collections.value = await calcedMapboxData.getCollections()
 
-      console.log('Raw collections sample:', collections.value?.cellsCollection.features.slice(0, 3).map(f => ({
-        index: f.properties.index,
-        devices: f.properties.devices,
-        device_count: f.properties.device_count
-      })))
+      console.log(
+        'Raw collections sample:',
+        collections.value?.cellsCollection.features.slice(0, 3).map((f) => ({
+          index: f.properties.index,
+          devices: f.properties.devices,
+          device_count: f.properties.device_count,
+        })),
+      )
       // error handling on empty collection
       _.isEmpty(collections.value)
         ? (snackbar.value = true)
@@ -1046,6 +1334,8 @@
       addCellsSource()
       addHeatSource()
       addTargetedRolloutsHeatSource()
+      addCellBountySource()
+      addCellBountyHeatSource()
       // add layers to map
       addCellsLayer()
       addHeatLayer()
@@ -1053,6 +1343,8 @@
       addCellCapacityLabelsLayer()
       addDataQualityLayer()
       addTargetedRolloutsLayer()
+      addCellBountyLayer()
+      addCellBountyHeatLayer()
       addDeviceCountLabels()
 
       // enable data quality as default
@@ -1074,7 +1366,9 @@
         calculateVisibleActiveStations()
       }, 300)
 
-      const debouncedCalculate = _.debounce(calculateVisibleActiveStations, 300)
+      const debouncedCalculate = _.debounce(() => {
+        calculateVisibleActiveStations()
+      }, 300)
       map.value?.on('dragend', debouncedCalculate)
       map.value?.on('zoomend', debouncedCalculate)
 
@@ -1100,6 +1394,7 @@
       absolute
     ></VProgressLinear>
     <SearchBar />
+    <BountyCellsTopBanner @switch-layer="handleLayerChange" />
     <NearbyStationsWidget :count="activeStationsCount" />
     <LayerSwitcher @layer-change="handleLayerChange" />
     <div id="map" :style="navButtonsStyles"></div>

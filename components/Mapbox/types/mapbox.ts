@@ -21,7 +21,7 @@ interface Properties {
   device_count: number
   center: Point
   avg_data_quality?: number
-  devices: { 
+  devices: {
     [key: string]: number
   }
 }
@@ -42,10 +42,23 @@ export interface FeatureCollection {
   features: Feature[]
 }
 
+export interface CellBountyCell {
+  index: string
+  devices_accepted: number
+  total_rewards: number
+  activation_period_start: string
+  activation_period_end: string
+  distribution_period_in_days: number
+  center: Point
+  polygon: [number, number][] // Array of [lat, lon] pairs
+}
+
 export interface Collections {
   cellsCollection: FeatureCollection
   heatmapCollection: FeatureCollection
   targetedRolloutsHeatmapCollection?: FeatureCollection
+  cellBountyCollection?: FeatureCollection
+  cellBountyHeatmapCollection?: FeatureCollection
 }
 
 export interface SearchResultDevice {
@@ -87,4 +100,8 @@ export interface UnitsUserPrefs {
   pressure: UnitPrefStruct
 }
 
-export type LayerKeys = 'cell-capacity' | 'data-quality' | 'targeted-rollouts'
+export type LayerKeys =
+  | 'cell-capacity'
+  | 'data-quality'
+  | 'targeted-rollouts'
+  | 'cell-bounty'
