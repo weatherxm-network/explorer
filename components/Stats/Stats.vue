@@ -174,11 +174,7 @@
             <LastUpdatedFooter :last-updated="lastUpdated" />
 
             <!------ Contact ------>
-            <ContactCard
-              :style="{
-                marginTop: `calc(100% ${isInfoBannerShown ? `- ${elementHeight}px` : '+ 20px'}`,
-              }"
-            />
+            <ContactCard class="mt-4" />
           </div>
         </VCardText>
       </VCard>
