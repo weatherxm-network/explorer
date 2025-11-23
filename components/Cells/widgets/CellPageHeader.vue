@@ -84,7 +84,8 @@
       '--background-color': theme.themes.value.dark.colors.background,
     }
   })
-  const getTheme = computed(() => {
+
+  const isDarkTheme = computed(() => {
     return theme.global.name.value === 'dark'
   })
 
@@ -139,7 +140,7 @@
               >
                 <div
                   class="pt-1 pb-1 px-1 text-caption"
-                  :class="getTheme ? 'text-text' : 'text-top'"
+                  :class="isDarkTheme ? 'text-text' : 'text-top'"
                 >
                   {{ tooltipText }}
                 </div>
@@ -166,13 +167,7 @@
         <VSheet
           v-if="!props.loading && props.isBountyCell"
           class="pl-3 pr-1 py-1 text-subtitle-2 flex-grow-0 d-inline-flex align-center rounded-lg"
-          style="
-            background: linear-gradient(
-              35deg,
-              #3b2d78 0%,
-              #d41da7 100%
-            ) !important;
-          "
+          :class="isDarkTheme ? 'DarkBountyCellCard' : 'LightBountyCellCard'"
         >
           <i
             class="fa-solid fa-star text-text me-2"
@@ -258,6 +253,15 @@
 </template>
 
 <style>
+  .DarkBountyCellCard {
+    background: linear-gradient(35deg, #3b2d78 0%, #d41da7 100%) !important;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+
+  .LightBountyCellCard {
+    background: linear-gradient(35deg, #dcd6f7 0%, #fad6ef 100%) !important;
+  }
   .v-tooltip > .v-overlay__content {
     background-color: var(--background-color);
   }

@@ -1,11 +1,15 @@
 <script setup lang="ts">
   import type { CellBountyCell } from '@/components/Mapbox/types/mapbox'
   import dayjs from 'dayjs'
+  import { computed } from 'vue'
+  import { useTheme } from 'vuetify'
 
   interface Props {
     bountyData: CellBountyCell
     totalStations: number
   }
+
+  const theme = useTheme()
 
   const props = defineProps<Props>()
   const remainingSlots = computed(() => {
@@ -16,10 +20,18 @@
     if (!props.bountyData.activation_period_end) return null
     return dayjs(props.bountyData.activation_period_end).format('MMM. D, h:mmA')
   })
+
+  const isDarkTheme = computed(() => {
+    return theme.global.name.value === 'dark'
+  })
 </script>
 
 <template>
-  <VCard class="BountyCellCard" color="purple" elevation="0">
+  <VCard
+    :class="isDarkTheme ? 'DarkBountyCellCard' : 'LightBountyCellCard'"
+    color="purple"
+    elevation="0"
+  >
     <VCardText class="pa-4 px-6">
       <h3 class="text-text font-weight-bold text-h6 mb-3">
         This is a Cell Bounty!
@@ -78,9 +90,13 @@
 </template>
 
 <style scoped>
-  .BountyCellCard {
+  .DarkBountyCellCard {
     background: linear-gradient(35deg, #3b2d78 0%, #d41da7 100%) !important;
     border-radius: 12px;
     margin-bottom: 16px;
+  }
+
+  .LightBountyCellCard {
+    background: linear-gradient(35deg, #dcd6f7 0%, #fad6ef 100%) !important;
   }
 </style>
