@@ -24,6 +24,8 @@ interface Properties {
   devices: {
     [key: string]: number
   }
+  country_code?: string
+  country_name?: string
 }
 
 interface Geometry {
@@ -59,6 +61,16 @@ export interface Collections {
   targetedRolloutsHeatmapCollection?: FeatureCollection
   cellBountyCollection?: FeatureCollection
   cellBountyHeatmapCollection?: FeatureCollection
+}
+
+export interface CellBountyCountry {
+  id: string
+  code: string
+  name: string
+  count: number
+  bbox: [number, number, number, number]
+  centroid: Point
+  indexes: string[]
 }
 
 export interface SearchResultDevice {

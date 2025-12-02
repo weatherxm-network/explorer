@@ -4,6 +4,7 @@ import type {
   LayerKeys,
   SearchResultDevice,
   SearchResultLocation,
+  CellBountyCountry,
 } from '~/components/Mapbox/types/mapbox'
 
 export const useMapboxStore = defineStore('MapboxStore', {
@@ -15,6 +16,8 @@ export const useMapboxStore = defineStore('MapboxStore', {
       searchedAddressToFly: null,
       qualityRange: [0, 100],
       currentLayerType: 'cell-capacity',
+      bountyCountries: [],
+      selectedBountyCountries: [],
     }
   },
   getters: {
@@ -24,6 +27,8 @@ export const useMapboxStore = defineStore('MapboxStore', {
     getSearchedAddressToFly: (state) => state.searchedAddressToFly,
     getQualityRange: (state) => state.qualityRange,
     getCurrentLayerType: (state) => state.currentLayerType,
+    getBountyCountries: (state) => state.bountyCountries,
+    getSelectedBountyCountries: (state) => state.selectedBountyCountries,
   },
 
   actions: {
@@ -43,7 +48,28 @@ export const useMapboxStore = defineStore('MapboxStore', {
       this.qualityRange = range
     },
     setCurrentLayerType(layerType: LayerKeys) {
-      this.currentLayerType = layerType;
+      this.currentLayerType = layerType
+    },
+    setBountyCountries(countries: CellBountyCountry[]) {
+      this.bountyCountries = countries
+    },
+    setSelectedBountyCountries(countryCodes: string[]) {
+      this.selectedBountyCountries = Array.from(new Set(countryCodes))
+    },
+    toggleBountyCountry(countryCode: string) {
+      if (this.selectedBountyCountries.includes(countryCode)) {
+        this.selectedBountyCountries = this.selectedBountyCountries.filter(
+          (code) => code !== countryCode,
+        )
+      } else {
+        this.selectedBountyCountries = [
+          ...this.selectedBountyCountries,
+          countryCode,
+        ]
+      }
+    },
+    clearBountySelection() {
+      this.selectedBountyCountries = []
     },
   },
 })
@@ -55,4 +81,6 @@ interface MapState {
   initMapPositionEvent: null
   qualityRange: [number, number]
   currentLayerType: LayerKeys
+  bountyCountries: CellBountyCountry[]
+  selectedBountyCountries: string[]
 }
