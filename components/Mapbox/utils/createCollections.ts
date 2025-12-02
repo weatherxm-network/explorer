@@ -1,4 +1,5 @@
 import type { Cell, FeatureCollection, CellBountyCell } from '../types/mapbox'
+import { feature as lookupCountry } from '@rapideditor/country-coder'
 
 const getNonCommunityDeviceCount = (devices: {
   [key: string]: number
@@ -104,8 +105,11 @@ const createCellBountyCollection = (
   cellBountyCells: CellBountyCell[],
 ): FeatureCollection => {
   const features = cellBountyCells.map((bounty) => {
-    // Convert polygon from [lat, lon] to [lon, lat] for GeoJSON
     const polygonCoordinates = bounty.polygon.map((coord) => [coord[1], coord[0]])
+    const { lon, lat } = bounty.center
+    const country = lookupCountry([lon, lat])
+    const countryCode = country?.properties?.iso1A2 || 'UNK'
+    const countryName = country?.properties?.nameEn || 'Unknown'
 
     return {
       type: 'Feature' as const,
@@ -117,8 +121,10 @@ const createCellBountyCollection = (
         activation_period_end: bounty.activation_period_end,
         distribution_period_in_days: bounty.distribution_period_in_days,
         center: bounty.center,
-        device_count: 0, // Default since we don't have device data from mocks
-        devices: {}, // Default since we don't have device data from mocks
+        device_count: 0,
+        devices: {},
+        country_code: countryCode,
+        country_name: countryName,
       },
       geometry: {
         type: 'Polygon' as const,

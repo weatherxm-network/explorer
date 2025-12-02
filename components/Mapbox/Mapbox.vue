@@ -10,6 +10,7 @@
   import _ from 'lodash'
   import calcedMapboxData from './utils/calcedMapboxData'
   import mapCreation from './utils/mapCreation'
+  import { extractCellBountyCountries } from './utils/cellBountyCountries'
   import StatsButton from './widgets/StatsButton.vue'
   import RefreshSnackbar from './widgets/RefreshSnackbar.vue'
   import SearchBar from './widgets/SearchBar.vue'
@@ -17,10 +18,18 @@
   import LayerSwitcher from './widgets/LayerSwitcher.vue'
   import NearbyStationsWidget from '@/components/Mapbox/widgets/NearbyStationsWidget.vue'
   import BountyCellsTopBanner from './widgets/BountyCellsTopBanner.vue'
-  import type { Point, SearchResultDevice, Collections } from './types/mapbox'
+  import CellBountyFilterOverlay from './widgets/CellBountyFilterOverlay.vue'
+  import type {
+    Point,
+    SearchResultDevice,
+    Collections,
+    CellBountyCountry,
+  } from './types/mapbox'
   import { useMapboxStore } from '~/stores/mapboxStore'
   import { useMobileStore } from '~/stores/mobileStore'
   import wxmApi from '~/api/wxmApi'
+
+  type MapboxFilter = Exclude<Parameters<MapboxMap['setFilter']>[1], undefined>
 
   const config = useRuntimeConfig().public
   const mobileStore = useMobileStore()
@@ -38,12 +47,42 @@
   const clickCellId = ref('')
   const snackbar = ref(false)
   const onLine = ref(navigator.onLine)
-  const hexagonLayerType = ref<LayerKeys>('cell-capacity')
+  const hexagonLayerType = ref<LayerKeys>('data-quality')
+  const visibleBountyCellsCount = ref(0)
+
+  if (
+    route.query.mapStyle &&
+    [
+      'cell-capacity',
+      'data-quality',
+      'targeted-rollouts',
+      'cell-bounty',
+    ].includes(route.query.mapStyle as string)
+  ) {
+    hexagonLayerType.value = route.query.mapStyle as LayerKeys
+    mapboxStore.setCurrentLayerType(hexagonLayerType.value)
+  }
+
   const activeStationsCount = ref(0)
+  const cellActiveCounts = ref(new Map<string, number>())
+  const focusedBountyCountry = ref<string | null>(null)
+  let focusCountryTimeout: number | undefined
 
   const smBreakpoint = computed(() => {
     return display.smAndDown.value
   })
+
+  const visibleNearbyCount = computed(() =>
+    hexagonLayerType.value === 'cell-bounty'
+      ? visibleBountyCellsCount.value
+      : activeStationsCount.value,
+  )
+
+  const openSidebar = () => {
+    if (display.smAndDown.value) {
+      mobileStore.setPageState(true)
+    }
+  }
 
   const navButtonsStyles = computed(() => {
     return {
@@ -77,6 +116,108 @@
   const qualityRange = computed(() => {
     return mapboxStore.getQualityRange
   })
+
+  const bountyCountries = computed(() => mapboxStore.getBountyCountries)
+  const selectedBountyCountries = computed(
+    () => mapboxStore.getSelectedBountyCountries,
+  )
+
+  const getResponsivePadding = () => {
+    if (typeof window === 'undefined') {
+      return 64
+    }
+    const width = window.innerWidth || 0
+    if (width < 600) return 48
+    if (width < 1024) return 64
+    return 96
+  }
+
+  const fitCountriesByCodes = (codes: string[], duration = 380) => {
+    if (!map.value || !codes.length) return
+
+    const targets: CellBountyCountry[] = bountyCountries.value.filter(
+      (country) => codes.includes(country.id),
+    )
+    if (!targets.length) return
+
+    const bounds = new mapboxgl.LngLatBounds()
+    targets.forEach((country) => {
+      bounds.extend([country.bbox[0], country.bbox[1]])
+      bounds.extend([country.bbox[2], country.bbox[3]])
+    })
+
+    const padding = getResponsivePadding()
+
+    try {
+      map.value.fitBounds(bounds, {
+        padding: {
+          top: padding,
+          bottom: padding,
+          left: padding,
+          right: padding,
+        },
+        duration,
+        easing: (t) => 1 - Math.pow(1 - t, 3),
+        maxZoom: codes.length === 1 ? 8.5 : 7.2,
+      })
+    } catch (error) {
+      console.warn('Unable to fit bounty countries', error)
+    }
+  }
+
+  const applyCellBountyStyling = (selection: string[]) => {
+    if (!map.value || !map.value.getLayer('cell-bounty-hexagons')) {
+      return
+    }
+
+    const literal: ['literal', string[]] = ['literal', selection]
+
+    map.value.setPaintProperty('cell-bounty-hexagons', 'fill-color', [
+      'case',
+      ['in', ['get', 'country_code'], literal],
+      'rgba(187, 106, 255, 0.65)',
+      'rgba(145, 40, 190, 0.18)',
+    ])
+
+    map.value.setPaintProperty('cell-bounty-hexagons', 'fill-outline-color', [
+      'case',
+      ['in', ['get', 'country_code'], literal],
+      '#f9fafb',
+      '#9128be',
+    ])
+
+    if (map.value.getLayer('cell-bounty-hexagons-outline')) {
+      map.value.setPaintProperty('cell-bounty-hexagons-outline', 'line-color', [
+        'case',
+        ['in', ['get', 'country_code'], literal],
+        '#f9fafb',
+        '#9128be',
+      ])
+
+      map.value.setPaintProperty('cell-bounty-hexagons-outline', 'line-width', [
+        'case',
+        ['in', ['get', 'country_code'], literal],
+        2.5,
+        1,
+      ])
+    }
+  }
+
+  const scheduleFitSelectedCountries = _.debounce((codes: string[]) => {
+    fitCountriesByCodes(codes, codes.length > 1 ? 450 : 380)
+  }, 150)
+
+  const focusBountyCountry = (countryCode: string) => {
+    if (!countryCode) return
+    fitCountriesByCodes([countryCode], 420)
+    focusedBountyCountry.value = countryCode
+    if (focusCountryTimeout) {
+      window.clearTimeout(focusCountryTimeout)
+    }
+    focusCountryTimeout = window.setTimeout(() => {
+      focusedBountyCountry.value = null
+    }, 1400)
+  }
 
   const hasCommunityDevicesOnly = (devices: {
     [key: string]: number
@@ -128,7 +269,7 @@
       navigateTo(
         `/stations/${formatDeviceName.denormalizeDeviceName(newDevice.name)}`,
       )
-      mobileStore.setPageState(true)
+      openSidebar()
     },
   )
 
@@ -143,6 +284,30 @@
       updateDataQualityFilter(newRange)
     }
   })
+
+  watch(
+    () => selectedBountyCountries.value.slice(),
+    (selection) => {
+      if (hexagonLayerType.value !== 'cell-bounty') return
+      applyCellBountyStyling(selection)
+      if (selection.length) {
+        scheduleFitSelectedCountries([...selection])
+      }
+    },
+    { immediate: true },
+  )
+
+  watch(
+    () => hexagonLayerType.value,
+    (layer) => {
+      if (layer === 'cell-bounty') {
+        applyCellBountyStyling(selectedBountyCountries.value)
+        if (selectedBountyCountries.value.length) {
+          scheduleFitSelectedCountries([...selectedBountyCountries.value])
+        }
+      }
+    },
+  )
 
   const onResize = () => {
     // check if map is ready
@@ -856,41 +1021,10 @@
         )
       }
 
-      if (type === 'cell-bounty' && collections.value?.cellBountyCollection) {
-        const features = collections.value.cellBountyCollection.features
-        if (features.length > 0) {
-          // Calculate bounds from all cell bounty features
-          const bounds = new mapboxgl.LngLatBounds()
-
-          features.forEach((feature) => {
-            if (
-              feature.geometry.type === 'Polygon' &&
-              feature.geometry.coordinates
-            ) {
-              // Add all polygon coordinates to bounds
-              const coordinates = feature.geometry.coordinates[0] as number[][]
-              coordinates.forEach((coord) => {
-                bounds.extend([coord[0], coord[1]])
-              })
-            } else if (feature.properties.center) {
-              // Fallback to center point if polygon not available
-              const center = feature.properties.center
-              if (
-                center &&
-                typeof center === 'object' &&
-                'lat' in center &&
-                'lon' in center
-              ) {
-                bounds.extend([center.lon, center.lat])
-              }
-            }
-          })
-
-          map.value.fitBounds(bounds, {
-            padding: { top: 100, bottom: 100, left: 100, right: 100 },
-            duration: 1000,
-            maxZoom: 8,
-          })
+      if (type === 'cell-bounty') {
+        applyCellBountyStyling(selectedBountyCountries.value)
+        if (selectedBountyCountries.value.length) {
+          fitCountriesByCodes([...selectedBountyCountries.value], 450)
         }
       }
 
@@ -948,9 +1082,10 @@
 
     // Remove outline if switching away from cell-bounty layer and a bounty cell is selected
     if (type !== 'cell-bounty' && clickCellId.value) {
-      const isBountyCell = collections.value?.cellBountyCollection?.features.some(
-        (f) => f.properties.index === clickCellId.value,
-      )
+      const isBountyCell =
+        collections.value?.cellBountyCollection?.features.some(
+          (f) => f.properties.index === clickCellId.value,
+        )
       if (isBountyCell) {
         removeOutLineLayer(clickCellId.value)
         clickCellId.value = ''
@@ -960,6 +1095,11 @@
     hexagonLayerType.value = type
     // Update the currentLayerType in the store
     mapboxStore.setCurrentLayerType(type)
+
+    calculateVisibleActiveStations()
+
+    const router = useRouter()
+    router.replace({ query: { ...route.query, mapStyle: type } })
   }
 
   const handleLayerChange = (type: LayerKeys) => {
@@ -970,19 +1110,15 @@
     const [min, max] = range
 
     if (min === 0 && max === 100) {
-      map.value?.setFilter('data-quality-hexagons', [
-        'all',
-        ['==', '$type', 'Polygon'],
-      ] as any)
+      const baseFilter: MapboxFilter = ['all', ['==', '$type', 'Polygon']]
+      map.value?.setFilter('data-quality-hexagons', baseFilter)
     } else {
-      const filter = [
+      const filter: MapboxFilter = [
         'all',
         ['==', '$type', 'Polygon'],
         [
           'any',
-          // Always show cells with no avg_data_quality property (grey cells)
           ['!has', 'avg_data_quality'],
-          // Show cells within the selected quality range
           [
             'all',
             ['has', 'avg_data_quality'],
@@ -990,7 +1126,7 @@
             ['<=', 'avg_data_quality', max],
           ],
         ],
-      ] as any
+      ]
 
       map.value?.setFilter('data-quality-hexagons', filter)
     }
@@ -1142,7 +1278,7 @@
       clickCellId.value = ''
     }
     if (!smBreakpoint.value) {
-      navigateTo('/stats')
+      navigateTo({ path: '/stats', query: route.query })
     }
   }
 
@@ -1161,6 +1297,7 @@
     })
 
     const uniqueCells = new Map<string, number>()
+    const bountyCells = new Set<string>()
 
     features.forEach((feature) => {
       const index = feature.properties?.index
@@ -1168,6 +1305,13 @@
 
       if (index && !uniqueCells.has(index)) {
         uniqueCells.set(index, activeDeviceCount)
+      }
+
+      if (
+        feature.layer?.id === 'cell-bounty-hexagons' &&
+        typeof index === 'string'
+      ) {
+        bountyCells.add(index)
       }
     })
 
@@ -1177,6 +1321,7 @@
     )
 
     activeStationsCount.value = totalActiveDevices
+    visibleBountyCellsCount.value = bountyCells.size
   }
 
   const clickOnCell = () => {
@@ -1221,7 +1366,7 @@
 
         // navigato to cells page
         navigateTo(`/cells/${cellIndex}`)
-        mobileStore.setPageState(true)
+        openSidebar()
 
         // track GA event
         trackGAevent('explorer_cell', { ITEM_ID: clickCellId.value })
@@ -1233,7 +1378,7 @@
     const splittedUrl = route.path.split('/')
     if (splittedUrl[1] === 'cells') {
       handleCellUrl(splittedUrl[2])
-      mobileStore.setPageState(true)
+      openSidebar()
     }
     if (splittedUrl[1] === 'stations' || splittedUrl[1] === 'reward_timeline') {
       const normalizeRouteDeviceName = formatDeviceName.normalizeDeviceName(
@@ -1245,11 +1390,11 @@
           if (searchedDevice.devices.length !== 0) {
             const device = searchedDevice.devices[0]
             handleHashCellDevice(device)
-            mobileStore.setPageState(true)
+            openSidebar()
           }
         })
         .catch(() => {
-          mobileStore.setPageState(true)
+          openSidebar()
         })
     }
   }
@@ -1329,6 +1474,34 @@
       // create map collections
       collections.value = await calcedMapboxData.getCollections()
 
+      // Populate active counts lookup
+      if (collections.value?.cellsCollection) {
+        collections.value.cellsCollection.features.forEach((f) => {
+          if (f.properties.index && f.properties.active_device_count) {
+            cellActiveCounts.value.set(
+              f.properties.index,
+              f.properties.active_device_count,
+            )
+          }
+        })
+      }
+
+      if (collections.value?.cellBountyCollection) {
+        const countriesMeta = extractCellBountyCountries(
+          collections.value.cellBountyCollection,
+        )
+        mapboxStore.setBountyCountries(countriesMeta)
+        if (
+          !mapboxStore.getSelectedBountyCountries.length &&
+          countriesMeta.length
+        ) {
+          const defaultSelection = countriesMeta
+            .slice(0, Math.min(3, countriesMeta.length))
+            .map((country) => country.id)
+          mapboxStore.setSelectedBountyCountries(defaultSelection)
+        }
+      }
+
       console.log(
         'Raw collections sample:',
         collections.value?.cellsCollection.features.slice(0, 3).map((f) => ({
@@ -1358,9 +1531,8 @@
       addCellBountyHeatLayer()
       addDeviceCountLabels()
 
-      // enable data quality as default
-      // if changed here, should update LayerSwitcher
-      toggleHexagonLayerType('data-quality')
+      // enable data quality as default or from URL
+      toggleHexagonLayerType(hexagonLayerType.value)
 
       // add mouse functionality
       mouseFunctionality()
@@ -1393,6 +1565,9 @@
     window.removeEventListener('resize', () => {
       onResize()
     })
+    if (focusCountryTimeout) {
+      window.clearTimeout(focusCountryTimeout)
+    }
   })
 </script>
 
@@ -1406,7 +1581,13 @@
     ></VProgressLinear>
     <SearchBar />
     <BountyCellsTopBanner @switch-layer="handleLayerChange" />
-    <NearbyStationsWidget :count="activeStationsCount" />
+    <CellBountyFilterOverlay
+      :map-instance="map"
+      :is-active="hexagonLayerType === 'cell-bounty'"
+      :focused-country="focusedBountyCountry"
+      @focus-country="focusBountyCountry"
+    />
+    <NearbyStationsWidget :count="visibleNearbyCount" />
     <LayerSwitcher @layer-change="handleLayerChange" />
     <div id="map" :style="navButtonsStyles"></div>
 
