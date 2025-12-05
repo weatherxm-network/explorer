@@ -1,8 +1,11 @@
 <script setup lang="ts">
   import { onBeforeUnmount, ref, watch, computed, nextTick } from 'vue'
+  import { storeToRefs } from 'pinia'
   import type { Map as MapboxMap } from 'mapbox-gl'
   import { useMapboxStore } from '~/stores/mapboxStore'
+  import { useDrawerStore } from '~/stores/drawerStore'
   import type { CellBountyCountry } from '@/components/Mapbox/types/mapbox'
+  import { useDisplay } from 'vuetify'
 
   const props = defineProps<{
     mapInstance?: MapboxMap
@@ -15,6 +18,9 @@
   }>()
 
   const mapboxStore = useMapboxStore()
+  const drawerStore = useDrawerStore()
+  const { isDesktopDrawerOpen } = storeToRefs(drawerStore)
+  const display = ref(useDisplay())
 
   const isPanelOpen = ref(false)
   const searchQuery = ref('')
@@ -25,11 +31,11 @@
     y: number
   } | null>(null)
 
-  const countries = computed<CellBountyCountry[]>(() =>
-    mapboxStore.getBountyCountries || [],
+  const countries = computed<CellBountyCountry[]>(
+    () => mapboxStore.getBountyCountries || [],
   )
-  const selectedCountries = computed<string[]>(() =>
-    mapboxStore.getSelectedBountyCountries || [],
+  const selectedCountries = computed<string[]>(
+    () => mapboxStore.getSelectedBountyCountries || [],
   )
 
   const filteredCountries = computed(() => {
@@ -133,9 +139,15 @@
     const bounds = map.getBounds()
     const width = container.clientWidth
     const height = container.clientHeight
-    const inset = 16
-    const baseOffset = 72
-    const spacing = 56
+    const edgePadding = 24
+    const indicatorOffset = 48
+    const spacing = 52
+    const drawerOffset =
+      isDesktopDrawerOpen.value && !display.value.smAndDown ? 440 : 0
+    const xMax = width - edgePadding
+    const xMin = Math.min(drawerOffset + edgePadding, xMax)
+    const yMin = edgePadding
+    const yMax = height - edgePadding
 
     const labels: typeof labelPositions.value = []
     const rawIndicators: Array<{
@@ -145,6 +157,9 @@
       side: 'left' | 'right' | 'top' | 'bottom'
       x: number
       y: number
+      projectedX: number
+      projectedY: number
+      alongEdge: number
       rotation: number
     }> = []
 
@@ -163,28 +178,32 @@
           highlight: props.focusedCountry === country.id,
         })
       } else {
-        let side: 'left' | 'right' | 'top' | 'bottom' = 'right'
-        let x = projected.x
-        let y = projected.y
+        const clampedX = clamp(projected.x, xMin, xMax)
+        const clampedY = clamp(projected.y, yMin, yMax)
 
-        if (projected.x < inset) {
+        let side: 'left' | 'right' | 'top' | 'bottom'
+        let x: number
+        let y: number
+
+        if (projected.x < xMin) {
           side = 'left'
-          x = inset
-          y = clamp(projected.y, baseOffset, height - baseOffset)
-        } else if (projected.x > width - inset) {
+          x = clamp(xMin + indicatorOffset, xMin, xMax)
+          y = clampedY
+        } else if (projected.x > xMax) {
           side = 'right'
-          x = width - inset
-          y = clamp(projected.y, baseOffset, height - baseOffset)
-        } else if (projected.y < inset) {
+          x = clamp(xMax - indicatorOffset, xMin, xMax)
+          y = clampedY
+        } else if (projected.y < yMin) {
           side = 'top'
-          x = clamp(projected.x, baseOffset, width - baseOffset)
-          y = inset
+          x = clampedX
+          y = clamp(yMin + indicatorOffset, yMin, yMax)
         } else {
           side = 'bottom'
-          x = clamp(projected.x, baseOffset, width - baseOffset)
-          y = height - inset
+          x = clampedX
+          y = clamp(yMax - indicatorOffset, yMin, yMax)
         }
 
+        const alongEdge = side === 'top' || side === 'bottom' ? x : y
         const angle =
           (Math.atan2(projected.y - y, projected.x - x) * 180) / Math.PI + 90
 
@@ -195,6 +214,9 @@
           side,
           x,
           y,
+          projectedX: projected.x,
+          projectedY: projected.y,
+          alongEdge,
           rotation: angle,
         })
       }
@@ -211,7 +233,11 @@
     sideOrder.forEach((side) => {
       const items = rawIndicators
         .filter((indicator) => indicator.side === side)
-        .sort((a, b) => (side === 'top' || side === 'bottom' ? a.x - b.x : a.y - b.y))
+        .sort((a, b) =>
+          side === 'top' || side === 'bottom'
+            ? a.alongEdge - b.alongEdge
+            : a.alongEdge - b.alongEdge,
+        )
 
       const maxPerSide = 3
       const displayed =
@@ -220,26 +246,47 @@
           : items.slice()
       const overflow =
         items.length > maxPerSide ? items.slice(maxPerSide - 1) : []
+      const axisMin = side === 'top' || side === 'bottom' ? xMin : yMin
+      const axisMax = side === 'top' || side === 'bottom' ? xMax : yMax
+      let lastPosition = -Infinity
 
-      displayed.forEach((indicator, index) => {
+      displayed.forEach((indicator) => {
+        const desired = indicator.alongEdge
+        let resolved = desired
+
+        if (resolved - lastPosition < spacing) {
+          resolved = lastPosition + spacing
+        }
+
+        resolved = clamp(resolved, axisMin, axisMax)
+
+        let finalX = indicator.x
+        let finalY = indicator.y
         const positionStyle =
           side === 'left' || side === 'right'
             ? {
-                top: `${clamp(
-                  baseOffset + index * spacing,
-                  baseOffset,
-                  height - baseOffset,
-                )}px`,
+                top: `${resolved}px`,
                 left: `${indicator.x}px`,
               }
             : {
-                left: `${clamp(
-                  baseOffset + index * spacing,
-                  baseOffset,
-                  width - baseOffset,
-                )}px`,
+                left: `${resolved}px`,
                 top: `${indicator.y}px`,
               }
+
+        if (side === 'left' || side === 'right') {
+          finalY = resolved
+        } else {
+          finalX = resolved
+        }
+
+        const angle =
+          (Math.atan2(
+            indicator.projectedY - finalY,
+            indicator.projectedX - finalX,
+          ) *
+            180) /
+            Math.PI +
+          90
 
         indicators.push({
           id: indicator.id,
@@ -247,8 +294,9 @@
           name: indicator.name,
           side,
           style: positionStyle,
-          rotation: indicator.rotation,
+          rotation: angle,
         })
+        lastPosition = resolved
       })
 
       if (overflow.length) {
@@ -256,24 +304,32 @@
         const overflowCountries = overflow
           .map((item) => countries.value.find((c) => c.id === item.id))
           .filter(Boolean) as CellBountyCountry[]
+        const overflowPosition = clamp(lastPosition + spacing, axisMin, axisMax)
+        const overflowX =
+          side === 'left'
+            ? clamp(xMin + indicatorOffset, xMin, xMax)
+            : side === 'right'
+              ? clamp(xMax - indicatorOffset, xMin, xMax)
+              : overflowPosition
+        const overflowY =
+          side === 'top'
+            ? clamp(yMin + indicatorOffset, yMin, yMax)
+            : side === 'bottom'
+              ? clamp(yMax - indicatorOffset, yMin, yMax)
+              : overflowPosition
+        const overflowAngle =
+          (Math.atan2(
+            overflow[0].projectedY - overflowY,
+            overflow[0].projectedX - overflowX,
+          ) *
+            180) /
+            Math.PI +
+          90
+
         const overflowStyle =
           side === 'left' || side === 'right'
-            ? {
-                top: `${clamp(
-                  baseOffset + displayed.length * spacing,
-                  baseOffset,
-                  height - baseOffset,
-                )}px`,
-                left: `${overflow[0].x}px`,
-              }
-            : {
-                left: `${clamp(
-                  baseOffset + displayed.length * spacing,
-                  baseOffset,
-                  width - baseOffset,
-                )}px`,
-                top: `${overflow[0].y}px`,
-              }
+            ? { top: `${overflowPosition}px`, left: `${overflowX}px` }
+            : { left: `${overflowPosition}px`, top: `${overflowY}px` }
 
         indicators.push({
           id: `${side}-overflow`,
@@ -281,7 +337,7 @@
           name: `${overflow.length} more`,
           side,
           style: overflowStyle,
-          rotation: overflow[0].rotation,
+          rotation: overflowAngle,
           overflow: overflowCountries,
         })
       }
@@ -291,7 +347,9 @@
     edgeIndicators.value = indicators
   }
 
-  const handleIndicatorClick = (indicator: (typeof edgeIndicators.value)[number]) => {
+  const handleIndicatorClick = (
+    indicator: (typeof edgeIndicators.value)[number],
+  ) => {
     if (indicator.overflow) {
       overflowMenu.value = {
         side: indicator.side,
@@ -358,6 +416,13 @@
     },
   )
 
+  watch(
+    () => isDesktopDrawerOpen.value,
+    () => {
+      updateOverlayPositions()
+    },
+  )
+
   onBeforeUnmount(() => {
     detachMapListeners()
   })
@@ -365,49 +430,50 @@
 
 <template>
   <div v-if="isActive" class="CellBountyOverlay">
-    <div class="CellBountyOverlay__panel">
-      <div class="CellBountyOverlay__summary">
-        <button class="FilterButton" type="button" @click="togglePanel">
-          <span>Cell Bounty</span>
-          <span class="FilterButton__count">
-            {{ selectedCountries.length }} selected
-          </span>
-          <i
-            class="fa-solid"
-            :class="[
-              isPanelOpen ? 'fa-chevron-up' : 'fa-chevron-down',
-              'FilterButton__icon',
-            ]"
-          ></i>
-        </button>
-
-        <div v-if="selectedCountryMeta.length" class="SelectedChips">
-          <button
-            v-for="country in selectedCountryMeta"
-            :key="country.id"
-            class="SelectedChip"
-            type="button"
-            @click="toggleCountry(country.id)"
-          >
-            <span>{{ country.name }}</span>
-            <small>{{ country.count }}</small>
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-      </div>
+    <div class="OverlayControls">
+      <button class="OverlayToggle" type="button" @click="togglePanel">
+        <i class="fa-solid fa-bullseye"></i>
+        <span class="OverlayToggle__label">Cell Bounty</span>
+        <span class="OverlayToggle__count">{{ selectedCountries.length }}</span>
+        <i
+          class="fa-solid"
+          :class="[isPanelOpen ? 'fa-chevron-up' : 'fa-chevron-down']"
+        ></i>
+      </button>
 
       <transition name="PanelTransition">
-        <div v-if="isPanelOpen" class="FilterPanel">
+        <div v-if="isPanelOpen" class="OverlayPanel">
+          <header class="OverlayPanel__header">
+            <div class="OverlayPanel__title">
+              <strong>Cell Bounty filter</strong>
+              <small>{{ selectedCountries.length }} selected</small>
+            </div>
+            <div class="OverlayPanel__actions">
+              <button type="button" @click="selectAll">Select all</button>
+              <button type="button" @click="clearSelection">Clear</button>
+            </div>
+          </header>
+
+          <div v-if="selectedCountryMeta.length" class="SelectedChips">
+            <button
+              v-for="country in selectedCountryMeta"
+              :key="country.id"
+              class="SelectedChip"
+              type="button"
+              @click="toggleCountry(country.id)"
+            >
+              <span>{{ country.name }}</span>
+              <small>{{ country.count }}</small>
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
           <div class="FilterPanel__header">
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search country"
             />
-            <div class="FilterPanel__actions">
-              <button type="button" @click="selectAll">Select all</button>
-              <button type="button" @click="clearSelection">Clear</button>
-            </div>
           </div>
 
           <div class="FilterPanel__list">
@@ -445,9 +511,7 @@
         :style="label.style"
       >
         <span class="CountryLabel__name">{{ label.name }}</span>
-        <span class="CountryLabel__count">
-          {{ label.count }} bounties
-        </span>
+        <span class="CountryLabel__count"> {{ label.count }} bounties </span>
       </div>
     </div>
 
@@ -491,57 +555,106 @@
 
 <style scoped>
   .CellBountyOverlay {
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 12;
-    width: min(680px, 90vw);
+    position: fixed;
+    inset: 0;
+    z-index: 2;
     pointer-events: none;
   }
 
-  .CellBountyOverlay__panel {
+  .OverlayControls {
+    position: absolute;
+    top: 90px;
+    right: 24px;
+    z-index: 3;
     pointer-events: auto;
-    background: rgba(6, 12, 24, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
-    padding: 16px;
-    backdrop-filter: blur(14px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
-  }
-
-  .CellBountyOverlay__summary {
     display: flex;
+    align-items: flex-end;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
 
-  .FilterButton {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+  .OverlayToggle {
+    pointer-events: auto;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 999px;
-    padding: 8px 18px;
-    color: #f3f4f6;
-    font-size: 14px;
-    font-weight: 600;
+    background: rgba(4, 10, 20, 0.65);
+    color: #f9fafb;
+    padding: 6px 12px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
     cursor: pointer;
   }
 
-  .FilterButton__count {
-    opacity: 0.8;
+  .OverlayToggle__label {
+    text-transform: none;
   }
 
-  .FilterButton__icon {
+  .OverlayToggle__count {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 999px;
     font-size: 12px;
+  }
+
+  .OverlayPanel {
+    pointer-events: auto;
+    width: min(340px, 80vw);
+    background: rgba(6, 12, 24, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 14px;
+    backdrop-filter: blur(18px);
+    box-shadow:
+      0 18px 40px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.03);
+  }
+
+  .OverlayPanel__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .OverlayPanel__title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: #f9fafb;
+  }
+
+  .OverlayPanel__title small {
+    opacity: 0.7;
+  }
+
+  .OverlayPanel__actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .OverlayPanel__actions button {
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f9fafb;
+    cursor: pointer;
   }
 
   .SelectedChips {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    margin-bottom: 6px;
   }
 
   .SelectedChip {
@@ -561,19 +674,10 @@
     opacity: 0.8;
   }
 
-  .FilterPanel {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
   .FilterPanel__header {
     display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
   }
 
   .FilterPanel__header input {
@@ -583,21 +687,6 @@
     background: rgba(15, 23, 42, 0.6);
     padding: 8px 10px;
     color: #f9fafb;
-  }
-
-  .FilterPanel__actions {
-    display: flex;
-    gap: 6px;
-  }
-
-  .FilterPanel__actions button {
-    border-radius: 8px;
-    padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.08);
-    border: none;
-    color: #f9fafb;
-    font-size: 12px;
-    cursor: pointer;
   }
 
   .FilterPanel__list {
@@ -650,7 +739,7 @@
   .PanelTransition-enter-from,
   .PanelTransition-leave-to {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-4px) scale(0.98);
   }
 
   .CountryLabels {
@@ -704,7 +793,10 @@
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(12px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    box-shadow:
+      0 0 0 1px rgba(186, 106, 255, 0.6),
+      0 0 18px rgba(186, 106, 255, 0.5),
+      0 12px 30px rgba(0, 0, 0, 0.25);
     pointer-events: auto;
     cursor: pointer;
     gap: 2px;
@@ -751,13 +843,13 @@
   }
 
   @media (max-width: 768px) {
-    .CellBountyOverlay {
-      top: 12px;
-      width: calc(100% - 32px);
+    .OverlayControls {
+      top: 70px;
+      right: 12px;
     }
 
-    .CellBountyOverlay__panel {
-      padding: 12px;
+    .OverlayPanel {
+      width: calc(100vw - 32px);
     }
 
     .FilterPanel__list {
