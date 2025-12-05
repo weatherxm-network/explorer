@@ -1,55 +1,49 @@
 <script setup lang="ts">
   import type { LayerKeys } from '@/components/Mapbox/types/mapbox'
-  import localStorage from '~/cache/localStorage'
+  import { useMapboxStore } from '~/stores/mapboxStore'
 
-  const STORAGE_KEY = 'bounty-cells-top-banner-clicked'
-  const EXPIRY_DAYS = 30
-
-  const isVisible = ref(false)
+  const mapboxStore = useMapboxStore()
+  const isVisible = ref(true)
   const isMobile = ref(false)
 
   const emit = defineEmits<{
     switchLayer: [type: LayerKeys]
   }>()
 
-  onMounted(() => {
-    const mq = window.matchMedia('(max-width: 760px)')
-    const update = () => {
-      isMobile.value = mq.matches
-    }
-    update()
-    mq.addEventListener('change', update)
-    onBeforeUnmount(() => mq.removeEventListener('change', update))
+  let mq: MediaQueryList | null = null
 
-    const now = Date.now()
-    const dismissData = localStorage.get(STORAGE_KEY)
+  const updateIsMobile = () => {
+    if (!mq) return
+    isMobile.value = mq.matches
+  }
 
-    if (!dismissData) {
-      isVisible.value = true
-      return
-    }
-
-    if (
-      dismissData.dismissed &&
-      dismissData.expiresAt &&
-      now < dismissData.expiresAt
-    ) {
-      isVisible.value = false
-      return
-    }
-
+  const handleBannerChangeEvent = () => {
     isVisible.value = true
-    localStorage.remove(STORAGE_KEY)
+  }
+
+  onMounted(() => {
+    mq = window.matchMedia('(max-width: 760px)')
+    updateIsMobile()
+    mq.addEventListener('change', updateIsMobile)
+
+    window.addEventListener(
+      'bounty-cells-banner:change',
+      handleBannerChangeEvent,
+    )
   })
 
-  const saveDismiss = () => {
-    const expiresAt = Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000
-    localStorage.set(STORAGE_KEY, { dismissed: true, expiresAt })
-  }
+  onBeforeUnmount(() => {
+    if (mq) {
+      mq.removeEventListener('change', updateIsMobile)
+    }
+    window.removeEventListener(
+      'bounty-cells-banner:change',
+      handleBannerChangeEvent,
+    )
+  })
 
   const handleDismiss = () => {
     isVisible.value = false
-    saveDismiss()
   }
 
   const handleDiscover = (e: Event) => {
@@ -63,7 +57,7 @@
 <template>
   <Transition name="banner">
     <div
-      v-if="isVisible"
+      v-if="isVisible && mapboxStore.getCurrentLayerType !== 'cell-bounty'"
       class="banner"
       :class="{ 'banner--mobile': isMobile }"
     >
