@@ -690,7 +690,7 @@
   }
 
   .FilterPanel__list {
-    max-height: 220px;
+    max-height: 240px;
     overflow: auto;
     display: grid;
     gap: 8px;
@@ -842,14 +842,14 @@
     background: rgba(255, 255, 255, 0.08);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 640px) {
     .OverlayControls {
-      top: 70px;
-      right: 12px;
+      top: 160px;
+      right: 48px;
     }
 
     .OverlayPanel {
-      width: calc(100vw - 32px);
+      width: calc(80vw - 32px);
     }
 
     .FilterPanel__list {
