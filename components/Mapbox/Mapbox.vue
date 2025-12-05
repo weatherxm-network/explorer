@@ -29,10 +29,7 @@
   import { useMobileStore } from '~/stores/mobileStore'
   import wxmApi from '~/api/wxmApi'
 
-  type MapboxFilter = Exclude<
-    Parameters<MapboxMap['setFilter']>[1],
-    undefined
-  >
+  type MapboxFilter = Exclude<Parameters<MapboxMap['setFilter']>[1], undefined>
 
   const config = useRuntimeConfig().public
   const mobileStore = useMobileStore()
@@ -50,14 +47,42 @@
   const clickCellId = ref('')
   const snackbar = ref(false)
   const onLine = ref(navigator.onLine)
-  const hexagonLayerType = ref<LayerKeys>('cell-capacity')
+  const hexagonLayerType = ref<LayerKeys>('data-quality')
+  const visibleBountyCellsCount = ref(0)
+
+  if (
+    route.query.mapStyle &&
+    [
+      'cell-capacity',
+      'data-quality',
+      'targeted-rollouts',
+      'cell-bounty',
+    ].includes(route.query.mapStyle as string)
+  ) {
+    hexagonLayerType.value = route.query.mapStyle as LayerKeys
+    mapboxStore.setCurrentLayerType(hexagonLayerType.value)
+  }
+
   const activeStationsCount = ref(0)
+  const cellActiveCounts = ref(new Map<string, number>())
   const focusedBountyCountry = ref<string | null>(null)
   let focusCountryTimeout: number | undefined
 
   const smBreakpoint = computed(() => {
     return display.smAndDown.value
   })
+
+  const visibleNearbyCount = computed(() =>
+    hexagonLayerType.value === 'cell-bounty'
+      ? visibleBountyCellsCount.value
+      : activeStationsCount.value,
+  )
+
+  const openSidebar = () => {
+    if (display.smAndDown.value) {
+      mobileStore.setPageState(true)
+    }
+  }
 
   const navButtonsStyles = computed(() => {
     return {
@@ -110,8 +135,8 @@
   const fitCountriesByCodes = (codes: string[], duration = 380) => {
     if (!map.value || !codes.length) return
 
-    const targets: CellBountyCountry[] = bountyCountries.value.filter((country) =>
-      codes.includes(country.id),
+    const targets: CellBountyCountry[] = bountyCountries.value.filter(
+      (country) => codes.includes(country.id),
     )
     if (!targets.length) return
 
@@ -125,7 +150,12 @@
 
     try {
       map.value.fitBounds(bounds, {
-        padding: { top: padding, bottom: padding, left: padding, right: padding },
+        padding: {
+          top: padding,
+          bottom: padding,
+          left: padding,
+          right: padding,
+        },
         duration,
         easing: (t) => 1 - Math.pow(1 - t, 3),
         maxZoom: codes.length === 1 ? 8.5 : 7.2,
@@ -157,27 +187,19 @@
     ])
 
     if (map.value.getLayer('cell-bounty-hexagons-outline')) {
-      map.value.setPaintProperty(
-        'cell-bounty-hexagons-outline',
-        'line-color',
-        [
-          'case',
-          ['in', ['get', 'country_code'], literal],
-          '#f9fafb',
-          '#9128be',
-        ],
-      )
+      map.value.setPaintProperty('cell-bounty-hexagons-outline', 'line-color', [
+        'case',
+        ['in', ['get', 'country_code'], literal],
+        '#f9fafb',
+        '#9128be',
+      ])
 
-      map.value.setPaintProperty(
-        'cell-bounty-hexagons-outline',
-        'line-width',
-        [
-          'case',
-          ['in', ['get', 'country_code'], literal],
-          2.5,
-          1,
-        ],
-      )
+      map.value.setPaintProperty('cell-bounty-hexagons-outline', 'line-width', [
+        'case',
+        ['in', ['get', 'country_code'], literal],
+        2.5,
+        1,
+      ])
     }
   }
 
@@ -247,7 +269,7 @@
       navigateTo(
         `/stations/${formatDeviceName.denormalizeDeviceName(newDevice.name)}`,
       )
-      mobileStore.setPageState(true)
+      openSidebar()
     },
   )
 
@@ -281,9 +303,7 @@
       if (layer === 'cell-bounty') {
         applyCellBountyStyling(selectedBountyCountries.value)
         if (selectedBountyCountries.value.length) {
-          scheduleFitSelectedCountries([
-            ...selectedBountyCountries.value,
-          ])
+          scheduleFitSelectedCountries([...selectedBountyCountries.value])
         }
       }
     },
@@ -1062,9 +1082,10 @@
 
     // Remove outline if switching away from cell-bounty layer and a bounty cell is selected
     if (type !== 'cell-bounty' && clickCellId.value) {
-      const isBountyCell = collections.value?.cellBountyCollection?.features.some(
-        (f) => f.properties.index === clickCellId.value,
-      )
+      const isBountyCell =
+        collections.value?.cellBountyCollection?.features.some(
+          (f) => f.properties.index === clickCellId.value,
+        )
       if (isBountyCell) {
         removeOutLineLayer(clickCellId.value)
         clickCellId.value = ''
@@ -1074,6 +1095,11 @@
     hexagonLayerType.value = type
     // Update the currentLayerType in the store
     mapboxStore.setCurrentLayerType(type)
+
+    calculateVisibleActiveStations()
+
+    const router = useRouter()
+    router.replace({ query: { ...route.query, mapStyle: type } })
   }
 
   const handleLayerChange = (type: LayerKeys) => {
@@ -1084,10 +1110,7 @@
     const [min, max] = range
 
     if (min === 0 && max === 100) {
-      const baseFilter: MapboxFilter = [
-        'all',
-        ['==', '$type', 'Polygon'],
-      ]
+      const baseFilter: MapboxFilter = ['all', ['==', '$type', 'Polygon']]
       map.value?.setFilter('data-quality-hexagons', baseFilter)
     } else {
       const filter: MapboxFilter = [
@@ -1255,7 +1278,7 @@
       clickCellId.value = ''
     }
     if (!smBreakpoint.value) {
-      navigateTo('/stats')
+      navigateTo({ path: '/stats', query: route.query })
     }
   }
 
@@ -1274,6 +1297,7 @@
     })
 
     const uniqueCells = new Map<string, number>()
+    const bountyCells = new Set<string>()
 
     features.forEach((feature) => {
       const index = feature.properties?.index
@@ -1281,6 +1305,13 @@
 
       if (index && !uniqueCells.has(index)) {
         uniqueCells.set(index, activeDeviceCount)
+      }
+
+      if (
+        feature.layer?.id === 'cell-bounty-hexagons' &&
+        typeof index === 'string'
+      ) {
+        bountyCells.add(index)
       }
     })
 
@@ -1290,6 +1321,7 @@
     )
 
     activeStationsCount.value = totalActiveDevices
+    visibleBountyCellsCount.value = bountyCells.size
   }
 
   const clickOnCell = () => {
@@ -1334,7 +1366,7 @@
 
         // navigato to cells page
         navigateTo(`/cells/${cellIndex}`)
-        mobileStore.setPageState(true)
+        openSidebar()
 
         // track GA event
         trackGAevent('explorer_cell', { ITEM_ID: clickCellId.value })
@@ -1346,7 +1378,7 @@
     const splittedUrl = route.path.split('/')
     if (splittedUrl[1] === 'cells') {
       handleCellUrl(splittedUrl[2])
-      mobileStore.setPageState(true)
+      openSidebar()
     }
     if (splittedUrl[1] === 'stations' || splittedUrl[1] === 'reward_timeline') {
       const normalizeRouteDeviceName = formatDeviceName.normalizeDeviceName(
@@ -1358,11 +1390,11 @@
           if (searchedDevice.devices.length !== 0) {
             const device = searchedDevice.devices[0]
             handleHashCellDevice(device)
-            mobileStore.setPageState(true)
+            openSidebar()
           }
         })
         .catch(() => {
-          mobileStore.setPageState(true)
+          openSidebar()
         })
     }
   }
@@ -1442,6 +1474,18 @@
       // create map collections
       collections.value = await calcedMapboxData.getCollections()
 
+      // Populate active counts lookup
+      if (collections.value?.cellsCollection) {
+        collections.value.cellsCollection.features.forEach((f) => {
+          if (f.properties.index && f.properties.active_device_count) {
+            cellActiveCounts.value.set(
+              f.properties.index,
+              f.properties.active_device_count,
+            )
+          }
+        })
+      }
+
       if (collections.value?.cellBountyCollection) {
         const countriesMeta = extractCellBountyCountries(
           collections.value.cellBountyCollection,
@@ -1487,9 +1531,8 @@
       addCellBountyHeatLayer()
       addDeviceCountLabels()
 
-      // enable data quality as default
-      // if changed here, should update LayerSwitcher
-      toggleHexagonLayerType('data-quality')
+      // enable data quality as default or from URL
+      toggleHexagonLayerType(hexagonLayerType.value)
 
       // add mouse functionality
       mouseFunctionality()
@@ -1544,7 +1587,7 @@
       :focused-country="focusedBountyCountry"
       @focus-country="focusBountyCountry"
     />
-    <NearbyStationsWidget :count="activeStationsCount" />
+    <NearbyStationsWidget :count="visibleNearbyCount" />
     <LayerSwitcher @layer-change="handleLayerChange" />
     <div id="map" :style="navButtonsStyles"></div>
 
