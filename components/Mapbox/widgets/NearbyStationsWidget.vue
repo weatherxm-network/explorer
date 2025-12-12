@@ -1,10 +1,14 @@
 <script setup lang="ts">
   defineProps<{
     count: number
+    isCellBounty?: boolean
   }>()
 </script>
 <template>
-  <div class="NearbyStations">{{ count }} active stations in this area</div>
+  <div class="NearbyStations">
+    {{ count }} active {{ isCellBounty ? 'cell bounties' : 'stations' }} in this
+    area
+  </div>
 </template>
 <style lang="css" scoped>
   .NearbyStations {
