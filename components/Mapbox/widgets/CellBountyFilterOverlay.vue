@@ -139,15 +139,16 @@
     const bounds = map.getBounds()
     const width = container.clientWidth
     const height = container.clientHeight
-    const edgePadding = 24
-    const indicatorOffset = 48
-    const spacing = 52
+    const xPadding = 48
+    const yPadding = height / 3
+    const indicatorOffset = display.value.smAndDown ? 48 : 56
+    const spacing = display.value.smAndDown ? 40 : 44
     const drawerOffset =
       isDesktopDrawerOpen.value && !display.value.smAndDown ? 440 : 0
-    const xMax = width - edgePadding
-    const xMin = Math.min(drawerOffset + edgePadding, xMax)
-    const yMin = edgePadding
-    const yMax = height - edgePadding
+    const xMax = width - xPadding
+    const xMin = Math.min(drawerOffset + xPadding, xMax)
+    const yMin = yPadding
+    const yMax = height - yPadding
 
     const labels: typeof labelPositions.value = []
     const rawIndicators: Array<{
