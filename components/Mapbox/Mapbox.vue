@@ -1587,7 +1587,10 @@
       :focused-country="focusedBountyCountry"
       @focus-country="focusBountyCountry"
     />
-    <NearbyStationsWidget :count="visibleNearbyCount" />
+    <NearbyStationsWidget
+      :count="visibleNearbyCount"
+      :is-cell-bounty="hexagonLayerType === 'cell-bounty'"
+    />
     <LayerSwitcher @layer-change="handleLayerChange" />
     <div id="map" :style="navButtonsStyles"></div>
 
