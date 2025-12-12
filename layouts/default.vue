@@ -3,14 +3,22 @@
   import { storeToRefs } from 'pinia'
   import { useMobileStore } from '~/stores/mobileStore'
   import { useInfoBannerStore } from '~/stores/infoBannerStore'
+  import { useDrawerStore } from '~/stores/drawerStore'
   import Mapbox from '~/components/Mapbox/Mapbox.vue'
   import InfoBanner from '~/components/common/InfoBanner.vue'
 
-  const { pageState } = storeToRefs(useMobileStore())
+  const mobileStore = useMobileStore()
+  const { pageState } = storeToRefs(mobileStore)
+  const drawerStore = useDrawerStore()
+  const { isDesktopDrawerOpen } = storeToRefs(drawerStore)
   const infoBannerStore = useInfoBannerStore()
   const { isInfoBannerShown, elementHeight } = storeToRefs(infoBannerStore)
   const display = ref(useDisplay())
   const infoBannerRef = ref<HTMLDivElement>()
+
+  const toggleDesktopDrawer = () => {
+    drawerStore.toggleDesktopDrawerState()
+  }
 </script>
 
 <template>
@@ -18,6 +26,7 @@
     <InfoBanner ref="infoBannerRef" />
     <div v-if="!display.smAndDown" class="position-relative">
       <VNavigationDrawer
+        v-if="isDesktopDrawerOpen"
         width="440"
         permanent
         location="left"
@@ -36,6 +45,28 @@
           </VLayout>
         </div>
       </VNavigationDrawer>
+      <v-btn
+        size="x-small"
+        class="position-absolute flex items-center justify-center"
+        :style="{
+          left: isDesktopDrawerOpen ? '440px' : '0',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          zIndex: 100,
+          borderRadius: '0 4px 4px 0',
+          height: '48px',
+          width: '24px',
+        }"
+        rounded="0"
+        @click="toggleDesktopDrawer"
+      >
+        <i
+          class="fa text-primary mt-6"
+          :class="[
+            isDesktopDrawerOpen ? 'fa-chevron-left' : 'fa-chevron-right',
+          ]"
+        ></i>
+      </v-btn>
     </div>
     <div
       v-if="display.smAndDown"

@@ -17,9 +17,12 @@
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
   import type { NetworkStatsResponse } from './types/stats'
+  import { storeToRefs } from 'pinia'
+  import { useDrawerStore } from '~/stores/drawerStore'
+  const drawerStore = useDrawerStore()
 
-  const infoBannerStore = useInfoBannerStore()
-  const { isInfoBannerShown, elementHeight } = storeToRefs(infoBannerStore)
+  const { isDesktopDrawerOpen } = storeToRefs(drawerStore)
+
   const mobileStore = useMobileStore()
   const display = ref(useDisplay())
   const route = useRoute()
@@ -103,6 +106,7 @@
 
 <template>
   <VCard
+    v-if="isDesktopDrawerOpen || display.smAndDown"
     class="w-100 h-100"
     :color="display.smAndDown ? `background` : `blueTint`"
   >

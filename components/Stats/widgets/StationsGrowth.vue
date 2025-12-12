@@ -9,7 +9,11 @@
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
   import type { NetworkStatsResponse } from '../types/stats'
+  import { useDrawerStore } from '~/stores/drawerStore'
+  import { storeToRefs } from 'pinia'
 
+  const drawerStore = useDrawerStore()
+  const { isDesktopDrawerOpen } = storeToRefs(drawerStore)
   const mobileStore = useMobileStore()
   const display = ref(useDisplay())
   const route = useRoute()
@@ -87,6 +91,7 @@
 </script>
 <template>
   <VCard
+    v-if="isDesktopDrawerOpen || display.smAndDown"
     class="w-100 h-100"
     :color="display.smAndDown ? `background` : `blueTint`"
   >

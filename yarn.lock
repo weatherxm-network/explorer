@@ -2822,6 +2822,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@rapideditor/country-coder@npm:^5.6.0":
+  version: 5.6.0
+  resolution: "@rapideditor/country-coder@npm:5.6.0"
+  dependencies:
+    which-polygon: "npm:^2.2.1"
+  checksum: 10c0/202422209891874c1b7af8344ab3f7977ef165d44abcd96fff64d9a93fb57c3ee2b38a8400551a047965521fa79cbbd586b0940f4f67f08d3d7b0dfc25a45aec
+  languageName: node
+  linkType: hard
+
 "@rollup/plugin-alias@npm:^5.1.0":
   version: 5.1.0
   resolution: "@rollup/plugin-alias@npm:5.1.0"
@@ -3244,6 +3253,50 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/bbox@npm:^7.3.1":
+  version: 7.3.1
+  resolution: "@turf/bbox@npm:7.3.1"
+  dependencies:
+    "@turf/helpers": "npm:7.3.1"
+    "@turf/meta": "npm:7.3.1"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/c2b0cd6246bf323a8da4faf84d36d0210cc5185ab19cc1cfd41fe09a73a43c042cc29becf8bf387038525df419cbe4b16ec0e0243e65eb3c391a2fa8e233487c
+  languageName: node
+  linkType: hard
+
+"@turf/centroid@npm:^7.3.1":
+  version: 7.3.1
+  resolution: "@turf/centroid@npm:7.3.1"
+  dependencies:
+    "@turf/helpers": "npm:7.3.1"
+    "@turf/meta": "npm:7.3.1"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/13ef4fcb6cbfd0769098f508e926c30e46450a981a3a49f2bbca013a8f83d753dd26ba56fbc1bd3c9bd46fb0d940fb90e7483d05608cc8d935961eabf6046833
+  languageName: node
+  linkType: hard
+
+"@turf/helpers@npm:7.3.1":
+  version: 7.3.1
+  resolution: "@turf/helpers@npm:7.3.1"
+  dependencies:
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/95344c07413f249291f98d15a2141242ba87e984fb03b833a2a55c3e0106374102e1dd0ba6cbf7b3c8d7ee9f5f575cce2c3146cc8984117285907212b644b124
+  languageName: node
+  linkType: hard
+
+"@turf/meta@npm:7.3.1":
+  version: 7.3.1
+  resolution: "@turf/meta@npm:7.3.1"
+  dependencies:
+    "@turf/helpers": "npm:7.3.1"
+    "@types/geojson": "npm:^7946.0.10"
+  checksum: 10c0/822e1cd03be4a85ce88f2770cf89fd2b8782557d227a3c004b08b599b55e64e4b4ddf03192a5c3d1a865f40a7f6d8ecd4faa157503b775970e86c36d625434d1
+  languageName: node
+  linkType: hard
+
 "@types/eslint-config-prettier@npm:^6.11.3":
   version: 6.11.3
   resolution: "@types/eslint-config-prettier@npm:6.11.3"
@@ -3281,6 +3334,13 @@ __metadata:
   version: 7946.0.14
   resolution: "@types/geojson@npm:7946.0.14"
   checksum: 10c0/54f3997708fa2970c03eeb31f7e4540a0eb6387b15e9f8a60513a1409c23cafec8d618525404573468b59c6fecbfd053724b3327f7fca416729c26271d799f55
+  languageName: node
+  linkType: hard
+
+"@types/geojson@npm:^7946.0.10":
+  version: 7946.0.16
+  resolution: "@types/geojson@npm:7946.0.16"
+  checksum: 10c0/1ff24a288bd5860b766b073ead337d31d73bdc715e5b50a2cee5cb0af57a1ed02cc04ef295f5fa68dc40fe3e4f104dd31282b2b818a5ba3231bc1001ba084e3c
   languageName: node
   linkType: hard
 
@@ -7615,6 +7675,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lineclip@npm:^1.1.5":
+  version: 1.1.5
+  resolution: "lineclip@npm:1.1.5"
+  checksum: 10c0/3b4272a5fe67ce703825a0520003083c1b5412bfd8244e32879d7ce9ddfc429c2af78c608eb379037b404ea2937e60480c18925638235fdd6a821b4f4e4ef683
+  languageName: node
+  linkType: hard
+
 "lines-and-columns@npm:^1.1.6":
   version: 1.2.4
   resolution: "lines-and-columns@npm:1.2.4"
@@ -9735,6 +9802,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"quickselect@npm:^1.0.1":
+  version: 1.1.1
+  resolution: "quickselect@npm:1.1.1"
+  checksum: 10c0/8890dfe3c42d18e84fb5c18aee04da49b0f5b9d2a7196344c4451cb5660549a2bf770be866704a4a9e6c73d35475c599dd24cf78abcc19886ab54c019a952a37
+  languageName: node
+  linkType: hard
+
 "quickselect@npm:^2.0.0":
   version: 2.0.0
   resolution: "quickselect@npm:2.0.0"
@@ -9762,6 +9836,15 @@ __metadata:
   version: 1.2.1
   resolution: "range-parser@npm:1.2.1"
   checksum: 10c0/96c032ac2475c8027b7a4e9fe22dc0dfe0f6d90b85e496e0f016fbdb99d6d066de0112e680805075bd989905e2123b3b3d002765149294dce0c1f7f01fcc2ea0
+  languageName: node
+  linkType: hard
+
+"rbush@npm:^2.0.1":
+  version: 2.0.2
+  resolution: "rbush@npm:2.0.2"
+  dependencies:
+    quickselect: "npm:^1.0.1"
+  checksum: 10c0/dfaef8171ff1fb15924e0a84150cc23e31508d67a7821ddb948cd0a5d003f5a20406836866bb1a2dc1f1e2dee06aeb2ce02a1f61a4a8f84ccb792696f43883a7
   languageName: node
   linkType: hard
 
@@ -10944,6 +11027,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tslib@npm:^2.8.1":
+  version: 2.8.1
+  resolution: "tslib@npm:2.8.1"
+  checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62
+  languageName: node
+  linkType: hard
+
 "tuf-js@npm:^2.2.1":
   version: 2.2.1
   resolution: "tuf-js@npm:2.2.1"
@@ -11960,6 +12050,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"which-polygon@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "which-polygon@npm:2.2.1"
+  dependencies:
+    lineclip: "npm:^1.1.5"
+    rbush: "npm:^2.0.1"
+  checksum: 10c0/4f712181fc086ccdc414aaf328cfbcd40b028a74496e70b97925afb247ec4f21f31c7ad171998ea47e19fe6f091aae38e25997eec880ef70cbe2556d74a8f27d
+  languageName: node
+  linkType: hard
+
 "which@npm:^2.0.1":
   version: 2.0.2
   resolution: "which@npm:2.0.2"
@@ -12073,6 +12173,9 @@ __metadata:
     "@nuxt/devtools": "npm:latest"
     "@nuxt/eslint": "npm:^0.3.13"
     "@pinia/nuxt": "npm:^0.5.1"
+    "@rapideditor/country-coder": "npm:^5.6.0"
+    "@turf/bbox": "npm:^7.3.1"
+    "@turf/centroid": "npm:^7.3.1"
     "@types/eslint-config-prettier": "npm:^6.11.3"
     "@types/eslint__js": "npm:^8.42.3"
     "@types/lodash": "npm:^4.14.202"
