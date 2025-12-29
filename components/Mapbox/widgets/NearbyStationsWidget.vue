@@ -1,14 +1,18 @@
 <script setup lang="ts">
-  defineProps<{
+  import { computed } from 'vue'
+  import { formatNearbyStationsLabel } from '~/utils/mapLabels.js'
+
+  const props = defineProps<{
     count: number
     isCellBounty?: boolean
   }>()
+
+  const label = computed(() =>
+    formatNearbyStationsLabel(props.count, props.isCellBounty),
+  )
 </script>
 <template>
-  <div class="NearbyStations">
-    {{ count }} active {{ isCellBounty ? 'cell bounties' : 'stations' }} in this
-    area
-  </div>
+  <div v-if="label" class="NearbyStations">{{ label }}</div>
 </template>
 <style lang="css" scoped>
   .NearbyStations {

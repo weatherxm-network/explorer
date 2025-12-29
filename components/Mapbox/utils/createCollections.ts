@@ -26,6 +26,16 @@ const hasCommunityDevicesOnly = (devices: {
   return deviceKeys.length === 1 && deviceKeys[0] === 'community'
 }
 
+const getCapacityStatus = (capacity: number, deviceCount: number) => {
+  if (!capacity || capacity <= 0) return 'unknown'
+
+  const ratio = deviceCount / capacity
+  if (ratio < 0.5) return 'available'
+  if (ratio < 0.9) return 'near'
+  if (ratio <= 1.05) return 'at'
+  return 'over'
+}
+
 const createCellsCollection = (cells: Cell[]): FeatureCollection => {
   return {
     type: 'FeatureCollection',
@@ -40,6 +50,7 @@ const createCellsCollection = (cells: Cell[]): FeatureCollection => {
         avg_data_quality: cell.avg_data_quality,
         capacity: cell.capacity,
         active_device_count: cell.active_device_count,
+        capacity_status: getCapacityStatus(cell.capacity, cell.device_count),
       },
       geometry: {
         type: 'Polygon',

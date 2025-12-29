@@ -85,6 +85,19 @@
           </span>
         </div>
       </div>
+
+      <div class="mt-6 text-center">
+        <VBtn
+          href="https://calendly.com/example-bounty-call"
+          target="_blank"
+          rel="noopener"
+          color="white"
+          variant="elevated"
+          class="text-purple-darken-3 font-weight-bold"
+        >
+          Contact us on Calendly
+        </VBtn>
+      </div>
     </VCardText>
   </VCard>
 </template>
