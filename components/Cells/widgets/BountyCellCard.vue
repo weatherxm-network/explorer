@@ -88,7 +88,7 @@
 
       <div class="mt-6 text-center">
         <VBtn
-          href="https://calendly.com/example-bounty-call"
+          href="https://calendly.com/lsilva-weatherxm/30min"
           target="_blank"
           rel="noopener"
           color="white"
