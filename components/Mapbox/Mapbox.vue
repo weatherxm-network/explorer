@@ -15,25 +15,33 @@
   import RefreshSnackbar from './widgets/RefreshSnackbar.vue'
   import SearchBar from './widgets/SearchBar.vue'
   import TrackingConcentComponent from './widgets/TrackingConcentComponent.vue'
-  import LayerSwitcher from './widgets/LayerSwitcher.vue'
   import NearbyStationsWidget from '@/components/Mapbox/widgets/NearbyStationsWidget.vue'
   import BountyCellsTopBanner from './widgets/BountyCellsTopBanner.vue'
   import CellBountyFilterOverlay from './widgets/CellBountyFilterOverlay.vue'
+  import MapControlsTrigger from './controls/MapControlsTrigger.vue'
+  import MapControlsPanel from './controls/MapControlsPanel.vue'
   import type {
     Point,
     SearchResultDevice,
     Collections,
     CellBountyCountry,
   } from './types/mapbox'
+  import { useMapControlsStore } from '~/stores/mapControlsStore'
   import { useMapboxStore } from '~/stores/mapboxStore'
   import { useMobileStore } from '~/stores/mobileStore'
   import wxmApi from '~/api/wxmApi'
+  import { storeToRefs } from 'pinia'
+  import { useDrawerStore } from '~/stores/drawerStore'
 
   type MapboxFilter = Exclude<Parameters<MapboxMap['setFilter']>[1], undefined>
 
   const config = useRuntimeConfig().public
   const mobileStore = useMobileStore()
   const mapboxStore = useMapboxStore()
+  const drawerStore = useDrawerStore()
+  const mapControlsStore = useMapControlsStore()
+
+  const { isDesktopDrawerOpen } = storeToRefs(drawerStore)
   const { trackGAevent } = useGAevents()
   const display = useDisplay()
   const theme = useTheme()
@@ -47,20 +55,22 @@
   const clickCellId = ref('')
   const snackbar = ref(false)
   const onLine = ref(navigator.onLine)
-  const hexagonLayerType = ref<LayerKeys>('data-quality')
+  const controlsContainer = ref<HTMLElement | null>(null)
+
   const visibleBountyCellsCount = ref(0)
 
-  if (
-    route.query.mapStyle &&
-    [
-      'cell-capacity',
-      'data-quality',
-      'targeted-rollouts',
-      'cell-bounty',
-    ].includes(route.query.mapStyle as string)
-  ) {
-    hexagonLayerType.value = route.query.mapStyle as LayerKeys
-    mapboxStore.setCurrentLayerType(hexagonLayerType.value)
+  // Sync Route to Store
+  if (route.query.mapStyle) {
+    const style = route.query.mapStyle as string
+    if (style === 'cell-bounty') {
+      mapControlsStore.setCellBounties(true)
+    } else if (style === 'targeted-rollouts') {
+      mapControlsStore.setOverlayMode('targeted_rollouts')
+    } else if (style === 'data-quality') {
+      mapControlsStore.setOverlayMode('capacity_quality')
+    } else if (style === 'cell-capacity') {
+      mapControlsStore.setOverlayMode('capacity_quality')
+    }
   }
 
   const activeStationsCount = ref(0)
@@ -72,8 +82,23 @@
     return display.smAndDown.value
   })
 
+  const defaultThemeStyle = computed(
+    () =>
+      (theme.current.value.dark
+        ? 'mapbox://styles/mapbox/dark-v11'
+        : 'mapbox://styles/mapbox/light-v11') as MapStyleId,
+  )
+
+  // Align default map style with the current theme (without overriding custom choices like satellite)
+  if (
+    mapControlsStore.getActiveStyleId === 'mapbox://styles/mapbox/dark-v11' ||
+    mapControlsStore.getActiveStyleId === 'mapbox://styles/mapbox/light-v11'
+  ) {
+    mapControlsStore.setMapStyle(defaultThemeStyle.value)
+  }
+
   const visibleNearbyCount = computed(() =>
-    hexagonLayerType.value === 'cell-bounty'
+    mapControlsStore.isCellBountiesEnabled
       ? visibleBountyCellsCount.value
       : activeStationsCount.value,
   )
@@ -99,6 +124,30 @@
         ? 'brightness(0) invert(1)'
         : 'invert(0%) sepia(0%) saturate(3351%) hue-rotate(142deg) brightness(87%) contrast(100%)',
     }
+  })
+
+  const controlsThemeVars = computed(() => {
+    const isDark = theme.current.value.dark
+    return {
+      '--controls-surface': isDark ? '#1f222a' : '#ffffff',
+      '--controls-surface-strong': isDark ? '#262a33' : '#f7f8fa',
+      '--controls-border': isDark
+        ? 'rgba(255,255,255,0.08)'
+        : 'rgba(0,0,0,0.08)',
+      '--controls-text': isDark ? '#f4f6fb' : '#1f2933',
+      '--controls-muted': isDark ? '#9ea7b6' : '#6b7280',
+      '--controls-shadow': isDark
+        ? '0 10px 40px rgba(0,0,0,0.45)'
+        : '0 10px 40px rgba(0,0,0,0.18)',
+    }
+  })
+
+  watchEffect(() => {
+    if (typeof document === 'undefined') return
+    const vars = controlsThemeVars.value
+    Object.entries(vars).forEach(([key, val]) => {
+      document.documentElement.style.setProperty(key, val as string)
+    })
   })
 
   const initMapPositonEvent = computed(() => {
@@ -279,33 +328,163 @@
     }
   })
 
+  // Manual global click listener to handle panel closing
+  const onGlobalClick = (e: MouseEvent) => {
+    // If mobile, let bottom sheet handle its own closing (scrim)
+    if (smBreakpoint.value) return
+
+    if (!mapControlsStore.isPanelOpen) return
+
+    // Check if click is inside the controls container use composedPath for better shadow dom support (optional)
+    if (
+      controlsContainer.value &&
+      controlsContainer.value.contains(e.target as Node)
+    ) {
+      return
+    }
+
+    // Click was outside
+    mapControlsStore.setPanelOpen(false)
+  }
+
+  function updateMapLayers() {
+    if (!map.value) return
+
+    const mode = mapControlsStore.getOverlayMode
+    const bountiesEnabled = mapControlsStore.isCellBountiesEnabled
+
+    // Helper to safe set visibility
+    const setVisibility = (layerId: string, visible: boolean) => {
+      if (map.value?.getLayer(layerId)) {
+        map.value.setLayoutProperty(
+          layerId,
+          'visibility',
+          visible ? 'visible' : 'none',
+        )
+      }
+    }
+
+    // 1. Handle Overlay Mode
+    if (mode === 'targeted_rollouts') {
+      setVisibility('cells', false)
+      setVisibility('targeted-rollouts-hexagons', true)
+      setVisibility('targeted-rollouts-heat', true)
+      setVisibility('heat', false)
+      setVisibility('device-count-labels', true) // Show device count labels for rollouts
+
+      applyTargetedRolloutsFilter()
+    } else {
+      setVisibility('targeted-rollouts-hexagons', false)
+      setVisibility('targeted-rollouts-heat', false)
+      removeTargetedRolloutsFilter()
+
+      setVisibility('cells', true)
+      setVisibility('cell-capacity-labels', true)
+      setVisibility('device-count-labels', false)
+      setVisibility('heat', true) // keep glow at zoomed-out levels
+    }
+
+    // 2. Handle Bounties (Independent)
+    setVisibility('cell-bounty-hexagons', bountiesEnabled)
+    setVisibility('cell-bounty-heat', bountiesEnabled)
+    if (map.value.getLayer('cell-bounty-hexagons-outline')) {
+      map.value.setLayoutProperty(
+        'cell-bounty-hexagons-outline',
+        'visibility',
+        bountiesEnabled ? 'visible' : 'none',
+      )
+    }
+
+    // Zoom to bounties if enabled and we have selection
+    if (bountiesEnabled && mapboxStore.getSelectedBountyCountries.length) {
+      // Use debounce or ensure this doesn't conflict with initial load
+      scheduleFitSelectedCountries([...mapboxStore.getSelectedBountyCountries])
+    }
+  }
+
+  function mountSourcesAndLayers() {
+    if (!collections.value) return
+
+    addCellsSource()
+    addHeatSource()
+    addTargetedRolloutsHeatSource()
+    addCellBountySource()
+    addCellBountyHeatSource()
+
+    addCellsLayer()
+    addHeatLayer()
+    addTargetedRolloutsHeatLayer()
+    addCellCapacityLabelsLayer()
+    addTargetedRolloutsLayer()
+    addCellBountyLayer()
+    addCellBountyHeatLayer()
+    addDeviceCountLabels()
+
+    updateDataQualityFilter(qualityRange.value)
+    updateMapLayers()
+  }
+
+  const rebuildMapStyle = (styleId: MapStyleId) => {
+    if (!map.value) return
+
+    mapboxLoading.value = true
+    map.value.setStyle(styleId)
+    map.value.once('style.load', () => {
+      if (collections.value) {
+        mountSourcesAndLayers()
+      }
+      mapboxLoading.value = false
+    })
+  }
+
   watch(qualityRange, (newRange) => {
-    if (map.value && map.value.getLayer('data-quality-hexagons')) {
+    if (map.value && map.value.getLayer('cells')) {
       updateDataQualityFilter(newRange)
     }
   })
 
   watch(
+    () => theme.current.value.dark,
+    () => {
+      const active = mapControlsStore.getActiveStyleId
+      if (
+        active === 'mapbox://styles/mapbox/dark-v11' ||
+        active === 'mapbox://styles/mapbox/light-v11'
+      ) {
+        mapControlsStore.setMapStyle(defaultThemeStyle.value)
+      }
+    },
+  )
+
+  watch(
     () => selectedBountyCountries.value.slice(),
     (selection) => {
-      if (hexagonLayerType.value !== 'cell-bounty') return
       applyCellBountyStyling(selection)
-      if (selection.length) {
+      if (mapControlsStore.isCellBountiesEnabled && selection.length) {
         scheduleFitSelectedCountries([...selection])
       }
     },
     { immediate: true },
   )
 
+  // Main Layer Logic Watcher
   watch(
-    () => hexagonLayerType.value,
-    (layer) => {
-      if (layer === 'cell-bounty') {
-        applyCellBountyStyling(selectedBountyCountries.value)
-        if (selectedBountyCountries.value.length) {
-          scheduleFitSelectedCountries([...selectedBountyCountries.value])
-        }
-      }
+    [
+      () => mapControlsStore.getOverlayMode,
+      () => mapControlsStore.isCellBountiesEnabled,
+      () => mapControlsStore.getActiveStyleId,
+    ],
+    () => {
+      updateMapLayers()
+    },
+  )
+
+  // Style Watcher (Separate because it might need style reload, but if it is just updateLayers call it's fine)
+  watch(
+    () => mapControlsStore.getActiveStyleId,
+    (newStyle) => {
+      if (!map.value) return
+      rebuildMapStyle(newStyle)
     },
   )
 
@@ -378,11 +557,20 @@
     )[0] as HTMLElement
 
     if (mapboxLogo) {
-      smBreakpoint.value
-        ? (mapboxLogo.style.left = '0px')
-        : (mapboxLogo.style.left = '440px')
+      if (smBreakpoint.value || !isDesktopDrawerOpen.value) {
+        mapboxLogo.style.left = '0px'
+      } else {
+        mapboxLogo.style.left = '440px'
+      }
     }
   }
+
+  watch(isDesktopDrawerOpen, () => {
+    changeMapboxLogoPosition()
+    setTimeout(() => {
+      map.value?.resize()
+    }, 300)
+  })
 
   const addCellsSource = () => {
     if (!collections.value?.cellsCollection) {
@@ -465,44 +653,44 @@
       paint: {
         'fill-color': [
           'case',
-          ['==', ['get', 'capacity'], 0],
-          '#C6C6D0',
-          ['==', ['get', 'capacity'], 2],
+          ['==', ['typeof', ['get', 'avg_data_quality']], 'undefined'],
+          '#C6C6D0', // Grey for no data
+          ['==', ['get', 'avg_data_quality'], null],
+          '#C6C6D0', // Grey for null data
           [
             'step',
-            ['/', ['get', 'device_count'], ['get', 'capacity']],
-            '#1497B7',
-            0.5,
-            '#346CDA',
-            0.9,
-            '#346CDA',
-            1.0,
-            '#3F39FF',
-            1.00001,
-            '#7B39FF',
-          ],
-
-          [
-            'step',
-            ['/', ['get', 'device_count'], ['get', 'capacity']],
-            '#1497B7',
-            0.66,
-            '#346CDA',
-            0.9,
-            '#346CDA',
-            1.0,
-            '#3F39FF',
-            1.00001,
-            '#7B39FF',
+            ['get', 'avg_data_quality'],
+            '#FF1744', // 0-19.99
+            19.99,
+            '#FFAB49', // 20-79.99
+            79.99,
+            '#00E676', // 80-100
           ],
         ],
-        'fill-opacity': 0.5,
+        'fill-opacity': [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          9.5,
+          0.0,
+          10,
+          0.6,
+          15,
+          0.6,
+        ],
       },
       filter: ['==', '$type', 'Polygon'],
     })
   }
 
   const addHeatLayer = () => {
+    const beforeId =
+      map.value
+        ?.getStyle()
+        ?.layers?.find((l) => l.type === 'symbol' && l.id.includes('label'))
+        ?.id ??
+      map.value?.getStyle()?.layers?.find((l) => l.type === 'symbol')?.id
+
     map.value?.addLayer(
       {
         id: 'heat',
@@ -567,11 +755,18 @@
           ],
         },
       },
-      'waterway-label',
+      beforeId,
     )
   }
 
   const addTargetedRolloutsHeatLayer = () => {
+    const beforeId =
+      map.value
+        ?.getStyle()
+        ?.layers?.find((l) => l.type === 'symbol' && l.id.includes('label'))
+        ?.id ??
+      map.value?.getStyle()?.layers?.find((l) => l.type === 'symbol')?.id
+
     map.value?.addLayer(
       {
         id: 'targeted-rollouts-heat',
@@ -632,7 +827,7 @@
           ],
         },
       },
-      'waterway-label',
+      beforeId,
     )
   }
 
@@ -677,7 +872,7 @@
           'concat',
           ['to-string', ['get', 'device_count']],
           '/',
-          ['to-string', ['get', 'capacity']],
+          ['to-string', ['coalesce', ['get', 'capacity'], 0]],
         ],
         'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
         'text-size': 12,
@@ -703,51 +898,9 @@
       },
       filter: [
         'all',
-        ['>', ['get', 'device_count'], 0], // Only show cells with devices
-        ['>', ['get', 'capacity'], 0], // Only show cells with capacity
+        ['>=', ['get', 'capacity'], 0],
+        ['>=', ['get', 'device_count'], 0],
       ],
-    })
-  }
-
-  const addDataQualityLayer = () => {
-    map.value?.addLayer({
-      id: 'data-quality-hexagons',
-      type: 'fill',
-      source: 'cells',
-      layout: {
-        visibility: 'none', // Initially hidden, will be toggled by layer switcher
-      },
-      paint: {
-        'fill-color': [
-          'case',
-          // Handle null/undefined avg_data_quality values
-          ['==', ['typeof', ['get', 'avg_data_quality']], 'undefined'],
-          '#C6C6D0', // Grey for no data
-          ['==', ['get', 'avg_data_quality'], null],
-          '#C6C6D0', // Grey for null data
-          [
-            'step',
-            ['get', 'avg_data_quality'], // Use raw value (assuming already 0-100)
-            '#FF1744', // Red for 0-19.99% (default)
-            19.99,
-            '#FFAB49', // Orange for 20-79.99%
-            79.99,
-            '#00E676', // Green for 80-100%
-          ],
-        ],
-        'fill-opacity': [
-          'interpolate',
-          ['exponential', 0.5],
-          ['zoom'],
-          9.5,
-          0.0,
-          10,
-          0.6, // Same visibility pattern as device count labels
-          15,
-          0.6,
-        ],
-      },
-      filter: ['==', '$type', 'Polygon'],
     })
   }
 
@@ -846,6 +999,13 @@
       return
     }
 
+    const beforeId =
+      map.value
+        ?.getStyle()
+        ?.layers?.find((l) => l.type === 'symbol' && l.id.includes('label'))
+        ?.id ??
+      map.value?.getStyle()?.layers?.find((l) => l.type === 'symbol')?.id
+
     map.value?.addLayer(
       {
         id: 'cell-bounty-heat',
@@ -909,7 +1069,7 @@
           ],
         },
       },
-      'waterway-label',
+      beforeId,
     )
   }
 
@@ -972,170 +1132,82 @@
     }
   }
 
-  const toggleHexagonLayerType = (type: LayerKeys) => {
-    if (!map.value || !map.value.getLayer('cells')) {
-      return
-    }
-
-    if (type === 'cell-capacity') {
-      map.value?.setLayoutProperty('cells', 'visibility', 'visible')
-    } else {
-      map.value?.setLayoutProperty('cells', 'visibility', 'none')
-    }
-    map.value?.setLayoutProperty(
-      'cell-capacity-labels',
-      'visibility',
-      type === 'cell-capacity' ? 'visible' : 'none',
-    )
-    map.value?.setLayoutProperty(
-      'device-count-labels',
-      'visibility',
-      type === 'cell-bounty' ? 'none' : 'visible',
-    )
-    map.value?.setLayoutProperty(
-      'data-quality-hexagons',
-      'visibility',
-      type === 'data-quality' ? 'visible' : 'none',
-    )
-
-    map.value?.setLayoutProperty(
-      'targeted-rollouts-hexagons',
-      'visibility',
-      type === 'targeted-rollouts' ? 'visible' : 'none',
-    )
-
-    if (map.value.getLayer('cell-bounty-hexagons')) {
-      const visibility = type === 'cell-bounty' ? 'visible' : 'none'
-
-      map.value.setLayoutProperty(
-        'cell-bounty-hexagons',
-        'visibility',
-        visibility,
-      )
-
-      if (map.value.getLayer('cell-bounty-hexagons-outline')) {
-        map.value.setLayoutProperty(
-          'cell-bounty-hexagons-outline',
-          'visibility',
-          visibility,
-        )
-      }
-
-      if (type === 'cell-bounty') {
-        applyCellBountyStyling(selectedBountyCountries.value)
-        if (selectedBountyCountries.value.length) {
-          fitCountriesByCodes([...selectedBountyCountries.value], 450)
-        }
-      }
-
-      map.value.triggerRepaint()
-    }
-
-    // Control heatmap visibility based on layer type
-    if (map.value.getLayer('heat')) {
-      map.value.setLayoutProperty(
-        'heat',
-        'visibility',
-        type === 'targeted-rollouts' || type === 'cell-bounty'
-          ? 'none'
-          : 'visible',
-      )
-    }
-
-    if (map.value.getLayer('targeted-rollouts-heat')) {
-      map.value.setLayoutProperty(
-        'targeted-rollouts-heat',
-        'visibility',
-        type === 'targeted-rollouts' ? 'visible' : 'none',
-      )
-    }
-
-    if (map.value.getLayer('cell-bounty-heat')) {
-      map.value.setLayoutProperty(
-        'cell-bounty-heat',
-        'visibility',
-        type === 'cell-bounty' ? 'visible' : 'none',
-      )
-    }
-
-    // Apply filter to hide community-only devices in targeted rollouts layer
-    if (type === 'targeted-rollouts') {
-      applyTargetedRolloutsFilter()
-
-      // Clear any selected cell outline when switching to targeted rollouts if it's a community-only cell
-      if (clickCellId.value && collections.value?.cellsCollection) {
-        const cell = collections.value.cellsCollection.features.find(
-          (f) => f.properties.index === clickCellId.value,
-        )
-        if (cell && hasCommunityDevicesOnly(cell.properties.devices)) {
-          removeOutLineLayer(clickCellId.value)
-          clickCellId.value = ''
-          // Also navigate away from the cell page
-          if (!smBreakpoint.value) {
-            navigateTo('/stats')
-          }
-        }
-      }
-    } else {
-      removeTargetedRolloutsFilter()
-    }
-
-    // Remove outline if switching away from cell-bounty layer and a bounty cell is selected
-    if (type !== 'cell-bounty' && clickCellId.value) {
-      const isBountyCell =
-        collections.value?.cellBountyCollection?.features.some(
-          (f) => f.properties.index === clickCellId.value,
-        )
-      if (isBountyCell) {
-        removeOutLineLayer(clickCellId.value)
-        clickCellId.value = ''
-      }
-    }
-
-    hexagonLayerType.value = type
-    // Update the currentLayerType in the store
-    mapboxStore.setCurrentLayerType(type)
-
-    calculateVisibleActiveStations()
-
-    const router = useRouter()
-    router.replace({ query: { ...route.query, mapStyle: type } })
-  }
-
   const handleLayerChange = (type: LayerKeys) => {
-    toggleHexagonLayerType(type)
+    // Legacy mapping (mostly from BountyCellsTopBanner)
+    if (type === 'cell-bounty') {
+      mapControlsStore.setCellBounties(true)
+    } else if (type === 'targeted-rollouts') {
+      mapControlsStore.setOverlayMode('targeted_rollouts')
+    } else if (type === 'data-quality') {
+      mapControlsStore.setOverlayMode('capacity_quality')
+    } else if (type === 'cell-capacity') {
+      mapControlsStore.setOverlayMode('capacity_quality')
+    }
   }
 
   const updateDataQualityFilter = (range: [number, number]) => {
     const [min, max] = range
+    const isCapQuality = mapControlsStore.getOverlayMode === 'capacity_quality'
 
-    if (min === 0 && max === 100) {
-      const baseFilter: MapboxFilter = ['all', ['==', '$type', 'Polygon']]
-      map.value?.setFilter('data-quality-hexagons', baseFilter)
-    } else {
-      const filter: MapboxFilter = [
-        'all',
-        ['==', '$type', 'Polygon'],
-        [
-          'any',
-          ['!has', 'avg_data_quality'],
-          [
+    const basePolygon: MapboxFilter = ['all', ['==', '$type', 'Polygon']]
+    const basePoint: MapboxFilter = [
+      'all',
+      ['==', '$type', 'Point'],
+      ['>=', 'capacity', 0],
+      ['>=', 'device_count', 0],
+    ]
+
+    const polygonFilter: MapboxFilter =
+      !isCapQuality || (min === 0 && max === 100)
+        ? basePolygon
+        : [
             'all',
-            ['has', 'avg_data_quality'],
-            ['>=', 'avg_data_quality', min],
-            ['<=', 'avg_data_quality', max],
-          ],
-        ],
-      ]
+            ['==', '$type', 'Polygon'],
+            [
+              'any',
+              ['!has', 'avg_data_quality'],
+              [
+                'all',
+                ['has', 'avg_data_quality'],
+                ['>=', 'avg_data_quality', min],
+                ['<=', 'avg_data_quality', max],
+              ],
+            ],
+          ]
 
-      map.value?.setFilter('data-quality-hexagons', filter)
+    const pointFilter: MapboxFilter =
+      !isCapQuality || (min === 0 && max === 100)
+        ? basePoint
+        : [
+            'all',
+            ['==', '$type', 'Point'],
+            ['>=', 'capacity', 0],
+            ['>=', 'device_count', 0],
+            [
+              'any',
+              ['!has', 'avg_data_quality'],
+              [
+                'all',
+                ['has', 'avg_data_quality'],
+                ['>=', 'avg_data_quality', min],
+                ['<=', 'avg_data_quality', max],
+              ],
+            ],
+          ]
+
+    map.value?.getLayer('cells') && map.value.setFilter('cells', polygonFilter)
+    map.value?.getLayer('cell-capacity-labels') &&
+      map.value.setFilter('cell-capacity-labels', pointFilter)
+    if (isCapQuality) {
+      map.value?.getLayer('heat') && map.value.setFilter('heat', pointFilter)
+      map.value?.getLayer('device-count-labels') &&
+        map.value.setFilter('device-count-labels', pointFilter)
     }
   }
 
   const mouseFunctionality = () => {
     const hexagonLayers = [
       'cells',
-      'data-quality-hexagons',
       'targeted-rollouts-hexagons',
       'cell-bounty-hexagons',
     ]
@@ -1163,7 +1235,6 @@
   const mouseHoverFunctionality = () => {
     const hexagonLayers = [
       'cells',
-      'data-quality-hexagons',
       'targeted-rollouts-hexagons',
       'cell-bounty-hexagons',
     ]
@@ -1272,6 +1343,11 @@
   }
 
   const clickOnMap = () => {
+    // Close panel if open
+    if (mapControlsStore.isPanelOpen) {
+      mapControlsStore.setPanelOpen(false)
+    }
+
     // remove outline layer if any
     if (clickCellId.value) {
       removeOutLineLayer(clickCellId.value)
@@ -1288,7 +1364,6 @@
     const features = map.value.queryRenderedFeatures(undefined, {
       layers: [
         'cells',
-        'data-quality-hexagons',
         'heat',
         'targeted-rollouts-hexagons',
         'targeted-rollouts-heat',
@@ -1327,7 +1402,6 @@
   const clickOnCell = () => {
     const hexagonLayers = [
       'cells',
-      'data-quality-hexagons',
       'targeted-rollouts-hexagons',
       'cell-bounty-hexagons',
     ]
@@ -1448,6 +1522,9 @@
   }
 
   onMounted(async () => {
+    // Add global click listener
+    window.addEventListener('click', onGlobalClick)
+
     mapboxLoading.value = true
     window.addEventListener('resize', () => {
       onResize()
@@ -1457,7 +1534,7 @@
 
     map.value = mapCreation.createMap(
       config.mapboxAccessToken,
-      config.mapboxStyle,
+      mapControlsStore.getActiveStyleId,
     )
     navControls = createNavControls()
     geolocate = createGeolocate()
@@ -1502,37 +1579,15 @@
         }
       }
 
-      console.log(
-        'Raw collections sample:',
-        collections.value?.cellsCollection.features.slice(0, 3).map((f) => ({
-          index: f.properties.index,
-          devices: f.properties.devices,
-          device_count: f.properties.device_count,
-        })),
-      )
       // error handling on empty collection
       _.isEmpty(collections.value)
         ? (snackbar.value = true)
         : (snackbar.value = false)
-      // add sources to map
-      addCellsSource()
-      addHeatSource()
-      addTargetedRolloutsHeatSource()
-      addCellBountySource()
-      addCellBountyHeatSource()
-      // add layers to map
-      addCellsLayer()
-      addHeatLayer()
-      addTargetedRolloutsHeatLayer()
-      addCellCapacityLabelsLayer()
-      addDataQualityLayer()
-      addTargetedRolloutsLayer()
-      addCellBountyLayer()
-      addCellBountyHeatLayer()
-      addDeviceCountLabels()
+      mountSourcesAndLayers()
 
       // enable data quality as default or from URL
-      toggleHexagonLayerType(hexagonLayerType.value)
+      // toggleHexagonLayerType(hexagonLayerType.value)
+      updateMapLayers()
 
       // add mouse functionality
       mouseFunctionality()
@@ -1562,6 +1617,7 @@
   })
 
   onBeforeUnmount(() => {
+    window.removeEventListener('click', onGlobalClick)
     window.removeEventListener('resize', () => {
       onResize()
     })
@@ -1580,18 +1636,31 @@
       absolute
     ></VProgressLinear>
     <SearchBar />
-    <BountyCellsTopBanner @switch-layer="handleLayerChange" />
+    <BountyCellsTopBanner
+      v-if="!mapControlsStore.isCellBountiesEnabled"
+      @switch-layer="handleLayerChange"
+    />
     <CellBountyFilterOverlay
       :map-instance="map"
-      :is-active="hexagonLayerType === 'cell-bounty'"
+      :is-active="mapControlsStore.isCellBountiesEnabled"
       :focused-country="focusedBountyCountry"
       @focus-country="focusBountyCountry"
     />
     <NearbyStationsWidget
       :count="visibleNearbyCount"
-      :is-cell-bounty="hexagonLayerType === 'cell-bounty'"
+      :is-cell-bounty="mapControlsStore.isCellBountiesEnabled"
     />
-    <LayerSwitcher @layer-change="handleLayerChange" />
+    <!-- <LayerSwitcher @layer-change="handleLayerChange" /> -->
+    <div
+      ref="controlsContainer"
+      class="MapControlsContainer"
+      @click.stop
+      :style="controlsThemeVars"
+    >
+      <MapControlsPanel />
+      <MapControlsTrigger class="Mapbox__controls-trigger" />
+    </div>
+
     <div id="map" :style="navButtonsStyles"></div>
 
     <StatsButton />
@@ -1675,5 +1744,32 @@
       border-width: 0px;
       background: var(--top-color);
     }
+  }
+  @media (min-width: 960px) {
+    .LayerSwitcher__mobile {
+      display: none;
+    }
+  }
+
+  .MapControlsContainer {
+    position: absolute !important;
+    bottom: 30px;
+    right: 20px;
+    z-index: 2000 !important;
+    pointer-events: auto !important;
+
+    @media (min-width: 600px) {
+      bottom: 40px;
+      right: 60px;
+    }
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Align panel and trigger to the right */
+  }
+
+  .Mapbox__controls-trigger {
+    /* Relative inside flex container */
+    flex-shrink: 0;
   }
 </style>

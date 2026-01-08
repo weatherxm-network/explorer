@@ -21,6 +21,7 @@ interface Properties {
   device_count: number
   center: Point
   avg_data_quality?: number
+  capacity_status?: 'available' | 'near' | 'at' | 'over' | 'unknown'
   devices: {
     [key: string]: number
   }
