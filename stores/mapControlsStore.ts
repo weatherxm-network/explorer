@@ -3,6 +3,11 @@ import { defineStore } from 'pinia'
 export type OverlayMode = 'capacity_quality' | 'targeted_rollouts'
 export type MapStyleId = 'mapbox://styles/mapbox/dark-v11' | 'mapbox://styles/mapbox/light-v11' | 'mapbox://styles/mapbox/satellite-v9' | 'mapbox://styles/mapbox/outdoors-v12'
 
+const getDefaultStyleId = (): MapStyleId => {
+    const config = useRuntimeConfig().public
+    return (config.mapboxStyle || 'mapbox://styles/mapbox/dark-v11') as MapStyleId
+}
+
 interface MapControlsState {
     activeStyleId: MapStyleId
     overlayMode: OverlayMode
@@ -12,7 +17,7 @@ interface MapControlsState {
 
 export const useMapControlsStore = defineStore('MapControlsStore', {
     state: (): MapControlsState => ({
-        activeStyleId: 'mapbox://styles/mapbox/dark-v11', // Default to Dark
+        activeStyleId: getDefaultStyleId(), // Default to configured style
         overlayMode: 'capacity_quality', // Default as per current app behavior roughly
         cellBountiesEnabled: true,
         panelOpen: false

@@ -56,6 +56,8 @@
   const snackbar = ref(false)
   const onLine = ref(navigator.onLine)
   const controlsContainer = ref<HTMLElement | null>(null)
+  const darkStyleId = (config.mapboxStyle ||
+    'mapbox://styles/mapbox/dark-v11') as MapStyleId
 
   const visibleBountyCellsCount = ref(0)
 
@@ -85,13 +87,13 @@
   const defaultThemeStyle = computed(
     () =>
       (theme.current.value.dark
-        ? 'mapbox://styles/mapbox/dark-v11'
+        ? darkStyleId
         : 'mapbox://styles/mapbox/light-v11') as MapStyleId,
   )
 
   // Align default map style with the current theme (without overriding custom choices like satellite)
   if (
-    mapControlsStore.getActiveStyleId === 'mapbox://styles/mapbox/dark-v11' ||
+    mapControlsStore.getActiveStyleId === darkStyleId ||
     mapControlsStore.getActiveStyleId === 'mapbox://styles/mapbox/light-v11'
   ) {
     mapControlsStore.setMapStyle(defaultThemeStyle.value)
@@ -448,7 +450,7 @@
     () => {
       const active = mapControlsStore.getActiveStyleId
       if (
-        active === 'mapbox://styles/mapbox/dark-v11' ||
+        active === darkStyleId ||
         active === 'mapbox://styles/mapbox/light-v11'
       ) {
         mapControlsStore.setMapStyle(defaultThemeStyle.value)
