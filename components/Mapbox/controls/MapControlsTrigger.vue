@@ -46,8 +46,8 @@
 <style scoped lang="scss">
   .MapControlsTrigger {
     position: relative;
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     background-color: var(
       --controls-surface,
@@ -76,7 +76,7 @@
     }
 
     &__icon {
-      font-size: 20px;
+      font-size: 24px;
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -91,8 +91,8 @@
 
     &__badge {
       position: absolute;
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
       border: 2px solid var(--top-color, #fff);
 
