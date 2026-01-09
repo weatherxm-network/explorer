@@ -53,7 +53,7 @@ export interface CellBountyCell {
   activation_period_end: string
   distribution_period_in_days: number
   center: Point
-  polygon: [number, number][] // Array of [lat, lon] pairs
+  polygon: Point[] | [number, number][]
 }
 
 export interface Collections {

@@ -1,25 +1,8 @@
 <script setup lang="ts">
-  import type { CellBountyCell } from '@/components/Mapbox/types/mapbox'
-  import dayjs from 'dayjs'
   import { computed } from 'vue'
   import { useTheme } from 'vuetify'
 
-  interface Props {
-    bountyData: CellBountyCell
-    totalStations: number
-  }
-
   const theme = useTheme()
-
-  const props = defineProps<Props>()
-  const remainingSlots = computed(() => {
-    return Math.max(0, props.bountyData.devices_accepted - props.totalStations)
-  })
-
-  const closingDate = computed(() => {
-    if (!props.bountyData.activation_period_end) return null
-    return dayjs(props.bountyData.activation_period_end).format('MMM. D, h:mmA')
-  })
 
   const isDarkTheme = computed(() => {
     return theme.global.name.value === 'dark'
@@ -37,18 +20,13 @@
         This is a Cell Bounty!
       </h3>
 
-      <p class="text-text text-body-2 mb-4" style="line-height: 1.6">
-        Be one of the first to deploy a station in this special cell and unlock
-        boosted rewards!
-      </p>
-
       <div class="d-flex flex-column ga-3 px-6">
         <div class="d-flex align-center">
           <i
             class="fa-solid fa-sack-dollar text-text me-3"
             style="font-size: 20px; width: 24px"
           ></i>
-          <span class="text-text text-body-2">Up το x10 boost rewards</span>
+          <span class="text-text text-body-2">x10 rewards for 12 months</span>
         </div>
 
         <div class="d-flex align-center">
@@ -56,34 +34,22 @@
             class="fa-solid fa-calendar text-text me-3"
             style="font-size: 20px; width: 24px"
           ></i>
-          <span class="text-text text-body-2"
-            >Get rewarded for
-            {{ Math.round(bountyData.distribution_period_in_days / 30) }} months
-          </span>
-        </div>
-
-        <div class="d-flex align-center">
-          <i
-            class="fa-solid fa-users text-text me-3"
-            style="font-size: 20px; width: 24px"
-          ></i>
-          <span class="text-text text-body-2"
-            >Up to {{ bountyData.devices_accepted }} devices share the rewards
-            ({{ remainingSlots }} remaining)</span
-          >
-        </div>
-
-        <div class="d-flex align-center">
-          <i
-            class="fa-solid fa-user text-text me-3"
-            style="font-size: 20px; width: 24px"
-          ></i>
           <span class="text-text text-body-2">
-            First come first served.
-            <span v-if="closingDate">Closing at {{ closingDate }}</span>
-            <span v-else>Limited time offer</span>
+            Bounty expires on 2026/02/1 14:00 GMT
           </span>
         </div>
+      </div>
+
+      <div class="mt-6 d-flex justify-center">
+        <VBtn
+          href="https://docs.weatherxm.com/rewards/reward-boosts#cell-bounties"
+          target="_blank"
+          rel="noopener"
+          variant="text"
+          class="BountyInfoButton text-text"
+        >
+          More info
+        </VBtn>
       </div>
 
       <div class="mt-6 text-center">
@@ -95,7 +61,7 @@
           variant="elevated"
           class="text-purple-darken-3 font-weight-bold"
         >
-          Contact us on Calendly
+          Contact us
         </VBtn>
       </div>
     </VCardText>
@@ -111,5 +77,10 @@
 
   .LightBountyCellCard {
     background: linear-gradient(35deg, #dcd6f7 0%, #fad6ef 100%) !important;
+  }
+
+  .BountyInfoButton {
+    text-transform: none;
+    opacity: 0.8;
   }
 </style>
