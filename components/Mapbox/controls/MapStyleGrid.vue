@@ -6,6 +6,9 @@
   import { computed } from 'vue'
 
   const store = useMapControlsStore()
+  const config = useRuntimeConfig().public
+  const darkStyleId = (config.mapboxStyle ||
+    'mapbox://styles/mapbox/dark-v11') as MapStyleId
 
   interface MapStyleOption {
     id: MapStyleId
@@ -16,7 +19,7 @@
 
   const styles: MapStyleOption[] = [
     {
-      id: 'mapbox://styles/mapbox/dark-v11',
+      id: darkStyleId,
       label: 'Dark',
       icon: 'fa-moon text-text',
       accent: '#111827',
