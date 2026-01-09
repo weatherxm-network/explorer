@@ -17,6 +17,7 @@
     cellDataQuality: number
     isBountyCell?: boolean
     bountyCellMaxStations?: number
+    cellCapacity?: number
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -27,6 +28,7 @@
     cellDataQuality: 0,
     isBountyCell: false,
     bountyCellMaxStations: 10,
+    cellCapacity: 10,
   })
   const { trackGAevent } = useGAevents()
   const mobileStore = useMobileStore()
@@ -43,11 +45,23 @@
   const { copy } = useClipboard({ legacy: true })
   const constructedDeviceUrl = ref(location.origin + location.pathname)
   const infoTooltipTitle = ref('Cell Capacity')
-  const infoTooltipText = ref(
-    !display.value.smAndDown
-      ? `<p>Cell capacity is a parameter that is used to define the maximum number of stations that are eligible for rewards in a specific cell. Every cell has a predefined capacity that depends on its geospatial characteristics*.<br><br> Every station is ranked in its cell daily, based on its reward score and its seniority. As long as the station's ranking is above the capacity threshold, it will be rewarded, whereas getting below it will lead to zero rewards. For example, in a cell with a max capacity of 5 stations, if a station is ranked 3rd it will get rewarded, but if it is ranked 7th, it won't receive any rewards.<br><br><i>* The cell capacity is currently set to the fixed value of 10 rewardable stations, for every cell.</i></p>`
-      : `<p>Cell capacity is a parameter that is used to define the maximum number of stations that are eligible for rewards in a specific cell. Every cell has a predefined capacity that depends on its geospatial characteristics*.<br><br> Every station is ranked in its cell daily, based on its reward score and its seniority. As long as the station's ranking is above the capacity threshold, it will be rewarded, whereas getting below it will lead to zero rewards. For example, in a cell with a max capacity of 5 stations, if a station is ranked 3rd it will get rewarded, but if it is ranked 7th, it won't receive any rewards.<br><br>Read more about how our Cell Capacity algorithm works.<br><br><i>* The cell capacity is currently set to the fixed value of 10 rewardable stations, for every cell.</i></p>`,
-  )
+  const infoTooltipText = computed(() => {
+    const capacity = props.isBountyCell
+      ? props.bountyCellMaxStations
+      : props.cellCapacity
+    const safeCapacity = capacity && capacity > 0 ? capacity : 10
+    const capacityNote = `<i>* The current capacity for this cell is ${safeCapacity} rewardable station${
+      safeCapacity === 1 ? '' : 's'
+    }.</i>`
+    const baseText =
+      'Cell capacity is a parameter that is used to define the maximum number of stations that are eligible for rewards in a specific cell. Every cell has a predefined capacity that depends on its geospatial characteristics*.<br><br> Every station is ranked in its cell daily, based on its reward score and its seniority. As long as the station\'s ranking is above the capacity threshold, it will be rewarded, whereas getting below it will lead to zero rewards. For example, in a cell with a max capacity of 5 stations, if a station is ranked 3rd it will get rewarded, but if it is ranked 7th, it won\'t receive any rewards.'
+
+    if (!display.value.smAndDown) {
+      return `<p>${baseText}<br><br>${capacityNote}</p>`
+    }
+
+    return `<p>${baseText}<br><br>Read more about how our Cell Capacity algorithm works.<br><br>${capacityNote}</p>`
+  })
 
   const closeCellsPage = () => {
     if (!display.value.smAndDown) {
@@ -196,7 +210,7 @@
           >
             <span class="me-2"
               >{{ props.totalStations }}/{{
-                props.isBountyCell ? props.bountyCellMaxStations : 10
+                props.isBountyCell ? props.bountyCellMaxStations : props.cellCapacity
               }}
               stations present</span
             >
