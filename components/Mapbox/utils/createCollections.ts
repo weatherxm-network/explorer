@@ -116,7 +116,20 @@ const createCellBountyCollection = (
   cellBountyCells: CellBountyCell[],
 ): FeatureCollection => {
   const features = cellBountyCells.map((bounty) => {
-    const polygonCoordinates = bounty.polygon.map((coord) => [coord[1], coord[0]])
+    const polygonCoordinates = bounty.polygon.map((coord) => {
+      if (Array.isArray(coord)) {
+        return [coord[1], coord[0]]
+      }
+      return [coord.lon, coord.lat]
+    })
+    if (polygonCoordinates.length) {
+      const [firstLon, firstLat] = polygonCoordinates[0]
+      const [lastLon, lastLat] =
+        polygonCoordinates[polygonCoordinates.length - 1]
+      if (firstLon !== lastLon || firstLat !== lastLat) {
+        polygonCoordinates.push([firstLon, firstLat])
+      }
+    }
     const { lon, lat } = bounty.center
     const country = lookupCountry([lon, lat])
     const countryCode = country?.properties?.iso1A2 || 'UNK'

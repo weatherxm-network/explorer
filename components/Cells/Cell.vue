@@ -4,6 +4,7 @@
   import DeviceCard from './widgets/DeviceCard.vue'
   import BountyCellCard from './widgets/BountyCellCard.vue'
   import { getCellDevices } from './utils/cells'
+  import wxmApi from '~/api/wxmApi'
   import type { Device } from '~/components/common/types/common'
   import type { CellBountyCell } from '@/components/Mapbox/types/mapbox'
   import LottieComponent from '~/components/common/LottieComponent.vue'
@@ -21,6 +22,7 @@
   const countActiveStations = ref(0)
   const countTotalStations = ref(0)
   const bountyCellData = ref<CellBountyCell | null>(null)
+  const cellCapacity = ref<number | null>(null)
   const animationContainerHeight = computed(() => {
     return { marginTop: `calc(${display.value.height / 2}px - 128px)` }
   })
@@ -30,6 +32,12 @@
 
   const mapboxStore = useMapboxStore()
   const currentLayerType = computed(() => mapboxStore.getCurrentLayerType)
+
+  const setCellCapacity = (capacity?: number | null) => {
+    if (typeof capacity === 'number' && capacity > 0) {
+      cellCapacity.value = capacity
+    }
+  }
 
   const clickOnDevice = (deviceName: string) => {
     navigateTo(
@@ -42,6 +50,12 @@
     const cellIndex = route.params.cellIndex as string
 
     const collections = mapboxStore.getCollections
+    if (collections?.cellsCollection) {
+      const cellFeature = collections.cellsCollection.features.find(
+        (feature) => feature.properties.index === cellIndex,
+      )
+      setCellCapacity(cellFeature?.properties?.capacity)
+    }
     if (collections?.cellBountyCollection) {
       const bountyFeature = collections.cellBountyCollection.features.find(
         (feature) => feature.properties.index === cellIndex,
@@ -59,6 +73,15 @@
             bountyFeature.properties.distribution_period_in_days,
         }
       }
+    }
+    if (cellCapacity.value === null) {
+      wxmApi
+        .getCells()
+        .then((cells) => {
+          const cell = cells.find((item) => item.index === cellIndex)
+          setCellCapacity(cell?.capacity)
+        })
+        .catch(() => {})
     }
 
     getCellDevices(cellIndex)
@@ -110,12 +133,10 @@
       :cell-data-quality="cellDataQuality"
       :is-bounty-cell="!!bountyCellData"
       :bounty-cell-max-stations="bountyCellData?.devices_accepted"
+      :cell-capacity="cellCapacity ?? 10"
     />
     <div v-if="bountyCellData" class="px-4 pt-6 pb-0">
-      <BountyCellCard
-        :bounty-data="bountyCellData"
-        :total-stations="countTotalStations"
-      />
+      <BountyCellCard />
     </div>
     <!--------------- Main Content -------------->
     <VCardText class="ma-0 pa-0 h-100 w-100">
