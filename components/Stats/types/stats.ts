@@ -8,6 +8,7 @@ interface NetHealth {
   network_uptime: number
   health_30days_graph: GraphDataPoint[]
   active_stations: number
+  high_quality_stations: number
 }
 
 interface NetGrowth {

@@ -76,6 +76,7 @@
       .getNetStats()
       .then((response) => {
         netHealth = response.net_health
+        console.log(netHealth)
         rewards = response.rewards
         netGrowth = response.net_growth
         contractUrl.value = response.contracts.rewards_url
