@@ -29,7 +29,7 @@
   const { trackGAevent } = useGAevents()
   const display = ref(useDisplay())
   const theme = useTheme()
-  const weatherStationsCardTitle = ref('Weather Stations breakdown')
+  const weatherStationsCardTitle = ref('Weather Stations Breakdown')
   const weatherStationsCardTotalSectionHeader = ref(
     'MANUFACTURED AND PROVISIONED',
   )

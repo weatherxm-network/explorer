@@ -15,6 +15,7 @@
       network_uptime: 0,
       health_30days_graph: [],
       active_stations: 0,
+      high_quality_stations: 0
     }),
   })
 
@@ -22,18 +23,18 @@
   const display = ref(useDisplay())
 
   const netHealthCardTitle = ref('Network Health')
-  const netHealthUptimeSubtext = ref('Network uptime')
-  const netHealthQoDScoreLabel = ref('DATA QUALITY SCORE')
+  const netHealthUptimeSubtext = ref('Data quality')
+  const netHealthQoDScoreLabel = ref('SYNOPTIC STATIONS')
   const netHealthActiveStationsLabel = ref('ACTIVE STATIONS')
 
   const tooltipTitle = ref('Network Health')
   const tooltipText = ref(
-    'Reflects the overall performance and reliability of the network. It consists of data quality, network uptime and number of healthy stations to indicate how well the network is functioning and how trustworthy the collected data is.',
+    'Reflects the overall performance and reliability of the network. It consists of data quality and number of healthy and synoptic stations to indicate how well the network is functioning and how trustworthy the collected data is.',
   )
 
   const dataQualityScoreTooltipTitle = ref('Data Quality Score')
   const dataQualityScoreTooltipText = ref(
-    'The Data Quality Score indicates the confidence level in the quality of the weather data received from a station.',
+    'Weather stations with high Data Quality Score above 87%',
   )
 
   const activeStationsTooltipTitle = ref('Active Stations')
@@ -54,6 +55,11 @@
   const activeStations = computed(() => {
     const formatter = new Intl.NumberFormat('en-GB', {})
     return formatter.format(props.health.active_stations)
+  })
+
+  const synopticStations = computed(() => {
+    const formatter = new Intl.NumberFormat('en-GB', {})
+    return formatter.format(props.health.high_quality_stations)
   })
 
   const percentageFormatter = (num: number) => {
@@ -132,7 +138,7 @@
             class="text-text d-flex justify-center"
             style="line-height: 120%"
           >
-            {{ percentageFormatter(props.health.network_uptime) }}%
+            {{ percentageFormatter(props.health.network_avg_qod) }}%
           </div>
           <div
             class="text-darkGrey d-flex justify-center"
@@ -151,6 +157,38 @@
       <VCol class="pa-0 ma-0" cols="6">
         <VSheet
           class="px-4 pb-3 pt-3 ma-0 mr-1"
+          color="layer1"
+          style="border-radius: 8px"
+        >
+          <div class="d-flex justify-space-between align-center mb-4">
+            <div class="text-text text-caption">
+              {{ netHealthActiveStationsLabel }}
+            </div>
+            <div
+              @mouseenter="
+                trackGAevent('clickInfoIcon', { ITEM_ID: 'active_stations' })
+              "
+              @click="
+                trackGAevent('clickInfoIcon', { ITEM_ID: 'active_stations' })
+              "
+            >
+              <TooltipComponent
+                :message="activeStationsTooltipText"
+                :container="'any'"
+                :tooltip-title="activeStationsTooltipTitle"
+              />
+            </div>
+          </div>
+          <div :style="responsiveTextStyles">
+            <div class="text-text d-flex justify-start">
+              {{ activeStations }}
+            </div>
+          </div>
+        </VSheet>
+      </VCol>
+      <VCol class="pa-0 ma-0" cols="6">
+        <VSheet
+          class="px-4 pb-3 pt-3 ma-0 ml-1"
           color="layer1"
           style="border-radius: 8px"
         >
@@ -178,39 +216,7 @@
               v-if="netHealthQoDScoreLabel"
               class="text-text d-flex justify-start"
             >
-              {{ percentageFormatter(props.health.network_avg_qod) }}%
-            </div>
-          </div>
-        </VSheet>
-      </VCol>
-      <VCol class="pa-0 ma-0" cols="6">
-        <VSheet
-          class="px-4 pb-3 pt-3 ma-0 ml-1"
-          color="layer1"
-          style="border-radius: 8px"
-        >
-          <div class="d-flex justify-space-between align-center mb-4">
-            <div class="text-text text-caption">
-              {{ netHealthActiveStationsLabel }}
-            </div>
-            <div
-              @mouseenter="
-                trackGAevent('clickInfoIcon', { ITEM_ID: 'active_stations' })
-              "
-              @click="
-                trackGAevent('clickInfoIcon', { ITEM_ID: 'active_stations' })
-              "
-            >
-              <TooltipComponent
-                :message="activeStationsTooltipText"
-                :container="'any'"
-                :tooltip-title="activeStationsTooltipTitle"
-              />
-            </div>
-          </div>
-          <div :style="responsiveTextStyles">
-            <div class="text-text d-flex justify-start">
-              {{ activeStations }}
+              {{ synopticStations }}
             </div>
           </div>
         </VSheet>
