@@ -120,7 +120,7 @@
             @click="() => navigateTo('/stats')"
           ></i>
           <span class="ma-0 pa-0 font-weight-bold" style="font-size: 1.577rem">
-            {{ 'Network growth' }}
+            {{ 'Network Breakdown' }}
           </span>
         </div>
 

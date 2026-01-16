@@ -20,15 +20,20 @@
   })
 
   const display = ref(useDisplay())
-  const cardTitle = ref('Network Growth')
-  const cardMainSubtext = ref('Network scale up')
-  const cardLeftColText = ref('NETWORK SIZE')
+  const cardTitle = ref('Network Analysis')
+  const cardMainSubtext = ref('MoM Growth')
+  const cardLeftColText = ref('DEPLOYED STATIONS')
   const cardRightColText = ref('ADDED IN LAST 30 DAYS')
 
   const responsiveTextStyles = computed(() => {
     return display.value.smAndDown
       ? { 'font-size': '1.402rem', 'font-weight': 700 }
       : { 'font-size': '1.705rem', 'font-weight': 700 }
+  })
+
+  const deployedStations = computed(() => {
+    const formatter = new Intl.NumberFormat('en-GB', {})
+    return formatter.format(props.growth.network_size)
   })
 
   const lastRunGraphData = computed(() => {
@@ -52,7 +57,7 @@
     >
       <div
         style="font-size: 1.094rem; font-weight: 700"
-        class="text-text pl-2 pt-1 cursor-pointer"
+        class="text-text text-decoration-underline pl-2 pt-1 cursor-pointer"
         @click="() => navigateTo('/stats/stations-growth')"
       >
         {{ cardTitle }}
@@ -129,7 +134,7 @@
           </div>
           <div :style="responsiveTextStyles">
             <div class="text-text d-flex justify-start">
-              {{ nFormat(props.growth.network_size) }}
+              {{ deployedStations }}
             </div>
           </div>
         </VSheet>

@@ -34,7 +34,7 @@
 
   const dataQualityScoreTooltipTitle = ref('Data Quality Score')
   const dataQualityScoreTooltipText = ref(
-    'Weather stations with high Data Quality Score that are deemed trustworthy.',
+    'Weather stations with high Data Quality Score above 87%',
   )
 
   const activeStationsTooltipTitle = ref('Active Stations')
@@ -55,6 +55,11 @@
   const activeStations = computed(() => {
     const formatter = new Intl.NumberFormat('en-GB', {})
     return formatter.format(props.health.active_stations)
+  })
+
+  const synopticStations = computed(() => {
+    const formatter = new Intl.NumberFormat('en-GB', {})
+    return formatter.format(props.health.high_quality_stations)
   })
 
   const percentageFormatter = (num: number) => {
@@ -211,7 +216,7 @@
               v-if="netHealthQoDScoreLabel"
               class="text-text d-flex justify-start"
             >
-              {{ props.health.high_quality_stations }}
+              {{ synopticStations }}
             </div>
           </div>
         </VSheet>
