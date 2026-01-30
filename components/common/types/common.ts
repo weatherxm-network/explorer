@@ -56,6 +56,7 @@ export interface Device {
   name: string
   profile: string
   timezone: string
+  photoUrl?: string | null
   cellActiveDeviceCount?: number
   cellAvgDataQuality?: number
 }

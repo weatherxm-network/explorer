@@ -9,6 +9,7 @@
   import ObservationsSheet from './widgets/ObservationsSheet.vue'
   import Forecast from './widgets/Forecast.vue'
   import StationHealth from './widgets/StationHealth.vue'
+  import StationPhoto from './widgets/StationPhoto.vue'
   import wxmApi from '~/api/wxmApi'
   import { useMobileStore } from '~/stores/mobileStore'
   import type { Device } from '~/components/common/types/common'
@@ -201,6 +202,8 @@
                   :device="resolvedDevice"
                   :address="cellAddress"
                 />
+
+                <StationPhoto :device="resolvedDevice" />
 
                 <ObservationsSheet
                   :device="resolvedDevice"
