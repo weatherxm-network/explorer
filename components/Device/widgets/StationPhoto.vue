@@ -45,7 +45,7 @@
       color="layer1"
     >
       <VCardText class="pa-0">
-        <div :style="{ aspectRatio: '4 / 3', width: '100%' }">
+        <div :style="{ height: '160px', width: '100%' }">
           <img
             :src="photoUrl"
             alt="Station photo"
@@ -53,6 +53,7 @@
               width: '100%',
               height: '100%',
               objectFit: 'cover',
+              objectPosition: 'center top',
               display: 'block',
             }"
             @error="handleImageError"
