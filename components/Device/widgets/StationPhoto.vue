@@ -14,7 +14,9 @@
     return typeof url === 'string' ? url.trim() : ''
   })
 
-  const showSection = computed(() => photoUrl.value.length > 0 && !imageError.value)
+  const showSection = computed(
+    () => photoUrl.value.length > 0 && !imageError.value,
+  )
 
   watch(
     () => props.device?.photoUrl,
@@ -45,17 +47,11 @@
       color="layer1"
     >
       <VCardText class="pa-0">
-        <div :style="{ height: '160px', width: '100%' }">
+        <div class="station-photo__frame">
           <img
             :src="photoUrl"
             alt="Station photo"
-            :style="{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center top',
-              display: 'block',
-            }"
+            class="station-photo__image"
             @error="handleImageError"
           />
         </div>
@@ -63,3 +59,25 @@
     </VCard>
   </div>
 </template>
+
+<style scoped>
+.station-photo__frame {
+  width: 100%;
+  height: 420px;
+}
+
+.station-photo__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+@media (min-width: 440px) and (max-width: 960px) {
+  .station-photo__frame {
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+}
+</style>
