@@ -97,7 +97,7 @@
       </div>
       <div :class="['pa-4']">
         <h5 :class="['text-body-1 font-weight-bold mb-2']">
-          Get hyperlocal weather data through our B2B API
+          Get WeatherXM PRO to access historical, real-time & forecast data
         </h5>
         <p class="mb-3 text-body-2">
           Ideal for insurance, agriculture, energy and event planning our API
