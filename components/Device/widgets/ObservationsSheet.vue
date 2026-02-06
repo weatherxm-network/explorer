@@ -12,6 +12,7 @@
   import { hasPartialObservationData } from '~/utils/common'
 
   import appPromoImg from '~/assets/app-promo.png'
+  import Forecast from '~/components/Device/widgets/Forecast.vue'
 
   dayjs.extend(utc)
   dayjs.extend(timezone)
@@ -331,6 +332,8 @@
         </VSheet>
       </VCardText>
     </VCard>
+
+    <Forecast />
 
     <div :class="['bg-blueTint', 'pa-4 ma-4 mt-6 rounded-xl']">
       <h5 :class="['text-h6']">Get the WeatherXM app to access:</h5>
