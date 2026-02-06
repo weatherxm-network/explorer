@@ -1,5 +1,6 @@
 <script setup lang="ts">
-  import { useDisplay } from 'vuetify'
+  import QRCode from 'qrcode'
+  import { useDisplay, useTheme } from 'vuetify'
   import dayjs from 'dayjs'
   import utc from 'dayjs/plugin/utc'
   import timezone from 'dayjs/plugin/timezone.js'
@@ -54,6 +55,10 @@
   const { calcCurrentWeather } = useWeatherStuff()
   const settingsStore = useSettingsStore()
   const currentUnits = ref(units.calcUnits())
+  const theme = useTheme()
+  const qrCanvas = ref<HTMLCanvasElement>()
+
+  const QR_URL = 'https://weatherxm2-h9cuwbhka-weatherxm-1.vercel.app/api'
 
   const displayCurrentMeasurements = ref(
     calcCurrentWeather(props.device.current_weather, currentUnits.value),
@@ -168,6 +173,34 @@
     emits('openWindow', 2)
     trackGAevent('deviceObservationsClickOnDownloadButton')
   }
+
+  watch(
+    () => theme.current.value.dark,
+    () => {
+      generateQR(QR_URL)
+    },
+  )
+
+  const generateQR = async (text: string) => {
+    try {
+      return QRCode.toCanvas(qrCanvas.value, text, {
+        color: {
+          dark: theme.current.value.colors.primary,
+          light: theme.current.value.colors.blueTint,
+        },
+        scale: 1,
+        width: 100,
+      })
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  onMounted(() => {
+    if (qrCanvas.value) {
+      generateQR(QR_URL)
+    }
+  })
 </script>
 
 <template>
@@ -375,6 +408,29 @@
           >
             <i class="fa-solid fa-check text-success" />
             many more...
+          </div>
+          <div class="mt-4">
+            <div
+              :class="[
+                'd-flex align-center justify-center border-thin border-opacity-100 border-primary',
+              ]"
+              :style="{
+                borderRadius: '10px',
+                width: '100px',
+                height: '100px',
+                aspectRatio: '1/1',
+              }"
+            >
+              <canvas
+                ref="qrCanvas"
+                :style="{
+                  aspectRatio: '1/1;',
+                }"
+              ></canvas>
+            </div>
+            <p class="text-caption mt-2 mb-0">
+              Scan with your phone camera
+            </p>
           </div>
           <button
             :class="[
