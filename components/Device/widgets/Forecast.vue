@@ -79,36 +79,6 @@
         </button>
       </div>
     </div>
-    <div :class="['pa-4 bg-blueTint']" :style="{ borderRadius: '20px' }">
-      <h5 :class="['mb-4 text-body-1 font-weight-bold']">
-        Get the WeatherXM app now
-      </h5>
-      <div
-        :class="[
-          'pa-5 border-thin border-opacity-100 border-primary ',
-        ]"
-        :style="{ borderRadius: '15px' }"
-      >
-        <div>
-          <p :class="['text-caption']">
-            Download from browser in
-            <span
-              :class="['text-decoration-underline cursor-pointer']"
-              @click="() => openStore('google')"
-            >
-              {{ 'Google Play' }}
-            </span>
-            and
-            <span
-              :class="['text-decoration-underline cursor-pointer']"
-              @click="() => openStore('apple')"
-            >
-              {{ 'App Store' }}
-            </span>
-          </p>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
