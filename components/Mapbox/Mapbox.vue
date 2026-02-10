@@ -50,6 +50,7 @@
   let geolocate = reactive<IControl>({} as IControl)
   const map = ref<MapboxMap>()
   const mapboxLoading = ref(false)
+  const mapReady = ref(false)
   const collections = ref<Collections>()
   const hoverCellId = ref('')
   const clickCellId = ref('')
@@ -1450,15 +1451,20 @@
     })
   }
 
-  const parseUrl = async () => {
-    const splittedUrl = route.path.split('/')
-    if (splittedUrl[1] === 'cells') {
-      handleCellUrl(splittedUrl[2])
+  const parseUrl = async (path = route.path) => {
+    if (!mapReady.value || !map.value || !collections.value) return
+
+    const splittedUrl = path.split('/').filter(Boolean)
+    if (splittedUrl[0] === 'cells' && splittedUrl[1]) {
+      handleCellUrl(splittedUrl[1])
       openSidebar()
     }
-    if (splittedUrl[1] === 'stations' || splittedUrl[1] === 'reward_timeline') {
+    if (
+      (splittedUrl[0] === 'stations' || splittedUrl[0] === 'reward_timeline') &&
+      splittedUrl[1]
+    ) {
       const normalizeRouteDeviceName = formatDeviceName.normalizeDeviceName(
-        splittedUrl[2],
+        decodeURIComponent(splittedUrl[1]),
       )
       await wxmApi
         .resolveDeviceName(normalizeRouteDeviceName)
@@ -1474,6 +1480,15 @@
         })
     }
   }
+
+  watch(
+    [() => route.path, () => mapReady.value],
+    async ([, ready]) => {
+      if (!ready) return
+      await parseUrl()
+    },
+    { immediate: true },
+  )
 
   const handleCellUrl = (urlCellIndex: string) => {
     try {
@@ -1600,7 +1615,7 @@
         if (e.defaultPrevented) return
         clickOnMap()
       })
-      parseUrl()
+      mapReady.value = true
 
       setTimeout(() => {
         calculateVisibleActiveStations()
@@ -1623,6 +1638,7 @@
     window.removeEventListener('resize', () => {
       onResize()
     })
+    mapReady.value = false
     if (focusCountryTimeout) {
       window.clearTimeout(focusCountryTimeout)
     }
