@@ -51,6 +51,7 @@
   const map = ref<MapboxMap>()
   const mapboxLoading = ref(false)
   const mapReady = ref(false)
+  const pendingDeepLinkPath = ref<string | null>(null)
   const collections = ref<Collections>()
   const hoverCellId = ref('')
   const clickCellId = ref('')
@@ -283,9 +284,9 @@
   })
 
   watch(
-    () => searchedAddressToFly.value,
-    (newAddress) => {
-      if (!newAddress) return
+    [() => searchedAddressToFly.value, () => mapReady.value],
+    ([newAddress, ready]) => {
+      if (!newAddress || !ready) return
 
       map.value?.flyTo({
         center: [newAddress.center.lon, newAddress.center.lat],
@@ -295,9 +296,9 @@
   )
 
   watch(
-    () => searchedDeviceToFly.value,
-    (newDevice) => {
-      if (!newDevice) return
+    [() => searchedDeviceToFly.value, () => mapReady.value],
+    ([newDevice, ready]) => {
+      if (!newDevice || !ready) return
 
       const coords: Point = {
         lon: newDevice.cell_center.lon,
@@ -318,9 +319,10 @@
         zoom: 13,
       })
       // navigato to cells page
-      navigateTo(
-        `/stations/${formatDeviceName.denormalizeDeviceName(newDevice.name)}`,
-      )
+      const targetPath = `/stations/${formatDeviceName.denormalizeDeviceName(newDevice.name)}`
+      if (route.path !== targetPath) {
+        navigateTo(targetPath)
+      }
       openSidebar()
     },
   )
@@ -1451,8 +1453,43 @@
     })
   }
 
+  const decodeRouteSegment = (segment: string) => {
+    try {
+      return decodeURIComponent(segment)
+    } catch {
+      return segment
+    }
+  }
+
+  const resolveDeviceFromSlug = async (slug: string) => {
+    const decodedSlug = decodeRouteSegment(slug)
+    const candidates = _.uniq([
+      formatDeviceName.normalizeDeviceName(decodedSlug),
+      decodedSlug.replace(/-/g, ' '),
+      decodedSlug,
+    ]).filter(Boolean)
+
+    for (const candidate of candidates) {
+      try {
+        const searchedDevice = await wxmApi.resolveDeviceName(candidate)
+        if (searchedDevice.devices.length !== 0) {
+          return searchedDevice.devices[0]
+        }
+      } catch {
+        // Try next candidate
+      }
+    }
+
+    return null
+  }
+
   const parseUrl = async (path = route.path) => {
-    if (!mapReady.value || !map.value || !collections.value) return
+    if (!map.value || !collections.value || !mapReady.value) {
+      pendingDeepLinkPath.value = path
+      return
+    }
+
+    pendingDeepLinkPath.value = null
 
     const splittedUrl = path.split('/').filter(Boolean)
     if (splittedUrl[0] === 'cells' && splittedUrl[1]) {
@@ -1463,31 +1500,32 @@
       (splittedUrl[0] === 'stations' || splittedUrl[0] === 'reward_timeline') &&
       splittedUrl[1]
     ) {
-      const normalizeRouteDeviceName = formatDeviceName.normalizeDeviceName(
-        decodeURIComponent(splittedUrl[1]),
-      )
-      await wxmApi
-        .resolveDeviceName(normalizeRouteDeviceName)
-        .then((searchedDevice) => {
-          if (searchedDevice.devices.length !== 0) {
-            const device = searchedDevice.devices[0]
-            handleHashCellDevice(device)
-            openSidebar()
-          }
-        })
-        .catch(() => {
-          openSidebar()
-        })
+      const device = await resolveDeviceFromSlug(splittedUrl[1])
+      if (device) {
+        handleHashCellDevice(device)
+      }
+      openSidebar()
     }
   }
 
   watch(
-    [() => route.path, () => mapReady.value],
-    async ([, ready]) => {
-      if (!ready) return
-      await parseUrl()
+    () => route.path,
+    async (path) => {
+      await parseUrl(path)
     },
     { immediate: true },
+  )
+
+  watch(
+    () => mapReady.value,
+    async (ready) => {
+      if (!ready) return
+      if (pendingDeepLinkPath.value) {
+        await parseUrl(pendingDeepLinkPath.value)
+        return
+      }
+      await parseUrl(route.path)
+    },
   )
 
   const handleCellUrl = (urlCellIndex: string) => {
@@ -1616,6 +1654,7 @@
         clickOnMap()
       })
       mapReady.value = true
+      await parseUrl(route.path)
 
       setTimeout(() => {
         calculateVisibleActiveStations()
