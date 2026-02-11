@@ -2,18 +2,6 @@
   import promoWXMProDesktopImg from '~/assets/promo-pro-desktop.png'
   import wxmProLogoWithText from '~/assets/wxm-pro-logo-text.svg'
 
-  const STORE_LINK = {
-    apple: 'https://apps.apple.com/ca/app/weatherxm/id1629841929',
-    google: 'https://play.google.com/store/apps/details?id=com.weatherxm.app',
-  }
-
-  const { trackGAevent } = useGAevents()
-
-  const openStore = (store: 'apple' | 'google') => {
-    trackGAevent('deviceForecastClickOnAppStoreLink', { ITEM_ID: store })
-    window.open(STORE_LINK[store], '_blank')
-  }
-
   const getWXMPro = () => {
     const WXMProLink = 'https://pro.weatherxm.com/sign-in'
     window.open(WXMProLink, '_blank')
