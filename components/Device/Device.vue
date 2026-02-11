@@ -11,6 +11,7 @@
   import StationHealth from './widgets/StationHealth.vue'
   import StationPhoto from './widgets/StationPhoto.vue'
   import wxmApi from '~/api/wxmApi'
+  import { useMapboxStore } from '~/stores/mapboxStore'
   import { useMobileStore } from '~/stores/mobileStore'
   import type { Device } from '~/components/common/types/common'
 
@@ -18,6 +19,7 @@
 
   const { trackGAevent } = useGAevents()
   const mobileStore = useMobileStore()
+  const mapboxStore = useMapboxStore()
   const display = ref(useDisplay())
   const route = useRoute()
   const loading = ref(false)
@@ -93,6 +95,7 @@
           const device = searchedDevice.devices[0]
           cellDeviceName.value = device.name
           backTo.value = device.cell_index
+          mapboxStore.setSearchedDeviceToFly(device)
 
           wxmApi
             .getDeviceByID(device.cell_index, device.id)
