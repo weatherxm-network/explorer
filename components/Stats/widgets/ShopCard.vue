@@ -36,6 +36,14 @@
               {{ cardTitle }}
             </div>
           </VRow>
+          <VRow class="ma-0 pa-0 mt-1">
+            <div
+              class="text-text"
+              :style="{ 'font-size': '0.85rem', 'font-weight': 500 }"
+            >
+              max daily reward: 2.20 $WXM
+            </div>
+          </VRow>
           <VRow
             v-for="sp in SELLING_POINTS"
             :key="sp"
