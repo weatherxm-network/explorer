@@ -41,7 +41,15 @@
               class="text-text"
               :style="{ 'font-size': '0.85rem', 'font-weight': 500 }"
             >
-              max daily reward: 2.20 $WXM
+              Daily Reward: 2.2 $WXM
+            </div>
+          </VRow>
+          <VRow class="ma-0 pa-0 mt-1">
+            <div
+              class="text-text"
+              :style="{ 'font-size': '0.85rem', 'font-weight': 500 }"
+            >
+              Daily Cell Bounty Reward: 15 $WXM
             </div>
           </VRow>
           <VRow
