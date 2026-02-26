@@ -174,6 +174,32 @@
   const selectedBountyCountries = computed(
     () => mapboxStore.getSelectedBountyCountries,
   )
+  const deepLinkViewportPriority = ref(false)
+  let deepLinkViewportPriorityTimeout: number | undefined
+
+  const isDeepLinkPath = (path = route.path) => {
+    const segments = path.split('/').filter(Boolean)
+    const target = segments[0]
+    return (
+      (target === 'stations' ||
+        target === 'reward_timeline' ||
+        target === 'cells') &&
+      !!segments[1]
+    )
+  }
+
+  const prioritizeDeepLinkViewport = (duration = 2200) => {
+    deepLinkViewportPriority.value = true
+    if (typeof window === 'undefined') return
+
+    if (deepLinkViewportPriorityTimeout) {
+      window.clearTimeout(deepLinkViewportPriorityTimeout)
+    }
+
+    deepLinkViewportPriorityTimeout = window.setTimeout(() => {
+      deepLinkViewportPriority.value = false
+    }, duration)
+  }
 
   const getResponsivePadding = () => {
     if (typeof window === 'undefined') {
@@ -257,6 +283,7 @@
   }
 
   const scheduleFitSelectedCountries = _.debounce((codes: string[]) => {
+    if (deepLinkViewportPriority.value) return
     fitCountriesByCodes(codes, codes.length > 1 ? 450 : 380)
   }, 150)
 
@@ -517,6 +544,7 @@
   }
 
   const mapsInitialPosition = () => {
+    if (deepLinkViewportPriority.value && isDeepLinkPath()) return
     // zoom out to initial position
     map.value?.flyTo({
       center: [24.162572, 38.667284],
@@ -1484,6 +1512,11 @@
   }
 
   const parseUrl = async (path = route.path) => {
+    if (isDeepLinkPath(path)) {
+      prioritizeDeepLinkViewport()
+      scheduleFitSelectedCountries.cancel()
+    }
+
     if (!map.value || !collections.value || !mapReady.value) {
       pendingDeepLinkPath.value = path
       return
@@ -1577,6 +1610,10 @@
   }
 
   onMounted(async () => {
+    if (isDeepLinkPath(route.path)) {
+      prioritizeDeepLinkViewport()
+    }
+
     // Add global click listener
     window.addEventListener('click', onGlobalClick)
 
@@ -1678,6 +1715,9 @@
       onResize()
     })
     mapReady.value = false
+    if (deepLinkViewportPriorityTimeout) {
+      window.clearTimeout(deepLinkViewportPriorityTimeout)
+    }
     if (focusCountryTimeout) {
       window.clearTimeout(focusCountryTimeout)
     }
