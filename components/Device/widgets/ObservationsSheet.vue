@@ -1,6 +1,5 @@
 <script setup lang="ts">
-  import QRCode from 'qrcode'
-  import { useDisplay, useTheme } from 'vuetify'
+  import { useDisplay } from 'vuetify'
   import dayjs from 'dayjs'
   import utc from 'dayjs/plugin/utc'
   import timezone from 'dayjs/plugin/timezone.js'
@@ -12,7 +11,6 @@
   import { useSettingsStore } from '~/stores/settingsStore'
   import { hasPartialObservationData } from '~/utils/common'
 
-  import appPromoImg from '~/assets/app-promo.png'
   import Forecast from '~/components/Device/widgets/Forecast.vue'
 
   dayjs.extend(utc)
@@ -55,11 +53,6 @@
   const { calcCurrentWeather } = useWeatherStuff()
   const settingsStore = useSettingsStore()
   const currentUnits = ref(units.calcUnits())
-  const theme = useTheme()
-  const qrCanvas = ref<HTMLCanvasElement>()
-
-  const QR_URL = 'https://weatherxm2-h9cuwbhka-weatherxm-1.vercel.app/api'
-
   const displayCurrentMeasurements = ref(
     calcCurrentWeather(props.device.current_weather, currentUnits.value),
   )
@@ -174,33 +167,6 @@
     trackGAevent('deviceObservationsClickOnDownloadButton')
   }
 
-  watch(
-    () => theme.current.value.dark,
-    () => {
-      generateQR(QR_URL)
-    },
-  )
-
-  const generateQR = async (text: string) => {
-    try {
-      return QRCode.toCanvas(qrCanvas.value, text, {
-        color: {
-          dark: theme.current.value.colors.primary,
-          light: theme.current.value.colors.blueTint,
-        },
-        scale: 1,
-        width: 100,
-      })
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  onMounted(() => {
-    if (qrCanvas.value) {
-      generateQR(QR_URL)
-    }
-  })
 </script>
 
 <template>
@@ -368,94 +334,5 @@
 
     <Forecast />
 
-    <div :class="['bg-blueTint', 'pa-4 ma-4 mt-6 rounded-xl']">
-      <h5 :class="['text-h6']">Get the WeatherXM app to access:</h5>
-      <div :class="['d-flex justify-space-between align-center']">
-        <!-- selling points section -->
-        <div :class="['w-50']">
-          <div
-            :class="[
-              'd-flex justify-start align-center ga-2',
-              'text-subtitle-2',
-            ]"
-          >
-            <i class="fa-solid fa-check text-success" />
-            Historical data
-          </div>
-          <div
-            :class="[
-              'd-flex justify-start align-center ga-2',
-              'text-subtitle-2',
-            ]"
-          >
-            <i class="fa-solid fa-check text-success" />
-            Daily & hourly forecast
-          </div>
-          <div
-            :class="[
-              'd-flex justify-start align-center ga-2',
-              'text-subtitle-2',
-            ]"
-          >
-            <i class="fa-solid fa-check text-success" />
-            Real-time weather data
-          </div>
-          <div
-            :class="[
-              'd-flex justify-start align-center ga-2',
-              'text-subtitle-2',
-            ]"
-          >
-            <i class="fa-solid fa-check text-success" />
-            many more...
-          </div>
-          <div class="mt-4">
-            <div
-              :class="[
-                'd-flex align-center justify-center border-thin border-opacity-100 border-primary',
-              ]"
-              :style="{
-                borderRadius: '10px',
-                width: '100px',
-                height: '100px',
-                aspectRatio: '1/1',
-              }"
-            >
-              <canvas
-                ref="qrCanvas"
-                :style="{
-                  aspectRatio: '1/1;',
-                }"
-              ></canvas>
-            </div>
-            <p class="text-caption mt-2 mb-0">
-              Scan with your phone camera
-            </p>
-          </div>
-          <button
-            :class="[
-              'px-5 py-2 rounded-lg mt-4',
-              'bg-primary font-weight-bold text-subtitle-2',
-              'cursor-pointer',
-            ]"
-            @click="openWindow"
-          >
-            Download App
-          </button>
-        </div>
-
-        <!-- image section -->
-        <div
-          :class="['w-50 h-100 position-relative']"
-          :style="{ minHeight: '140px' }"
-        >
-          <img
-            :src="appPromoImg"
-            :class="['position-absolute top-0 left-0 right']"
-            :style="{ transform: 'translateX(-10%)' }"
-          />
-        </div>
-      </div>
-    </div>
   </div>
 </template>

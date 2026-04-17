@@ -19,7 +19,7 @@ export const useMapControlsStore = defineStore('MapControlsStore', {
     state: (): MapControlsState => ({
         activeStyleId: getDefaultStyleId(), // Default to configured style
         overlayMode: 'capacity_quality', // Default as per current app behavior roughly
-        cellBountiesEnabled: true,
+        cellBountiesEnabled: false,
         panelOpen: false
     }),
 
