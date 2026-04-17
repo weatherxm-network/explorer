@@ -41,8 +41,8 @@
   const aboutSectionBodyText = ref('App Version')
   // theme options to display
   const theme = ref<Theme>({
-    currentTheme: 'light',
-    name: 'System',
+    currentTheme: 'dark',
+    name: 'Dark',
     options: [`Dark`, `Light`, `System`],
   })
 

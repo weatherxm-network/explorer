@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import promoWXMProDesktopImg from '~/assets/promo-pro-desktop.png'
   import wxmProLogoWithText from '~/assets/wxm-pro-logo-text.svg'
+  import AppAccessPanel from './AppAccessPanel.vue'
 
   const getWXMPro = () => {
     const WXMProLink = 'https://pro.weatherxm.com/sign-in'
@@ -9,9 +10,11 @@
 </script>
 
 <template>
-  <div :class="['ma-4']">
+  <div :class="['ma-4 d-flex flex-column ga-6']">
+    <AppAccessPanel />
+
     <div
-      :class="['bg-blueTint w-100 mb-6 overflow-hidden']"
+      :class="['bg-blueTint w-100 overflow-hidden']"
       :style="{ borderRadius: '20px' }"
     >
       <div

@@ -23,21 +23,20 @@
             >WeatherXM<i class="fa-solid fa-arrow-up-right-from-square pl-1" style="font-size: 12px"></i
           ></a>`,
         )
-      : `WeatherXM is a community powered web3 weather station network. <br><br>
-        Check out <a
+      : `<a
           target="_blank"
           href="https://weatherxm.com"
           class="text-decoration-none d-inline-flex align-center"
           style="color : ${anchorColor.value}"
-          >here<i class="fa-solid fa-arrow-up-right-from-square pl-1" style="font-size: 12px"></i
-        ></a>, WeatherXM hardware, B2B API for historical weather data, current observations form our weather station network and hyper-local forecasts.<br><br>
-        Check out <a
+          >WeatherXM<i class="fa-solid fa-arrow-up-right-from-square pl-1" style="font-size: 12px"></i
+        ></a> that rewards weather station owners with $WXM tokens and provides accurate weather services to individuals, businesses and research organizations.
+        For governance, tokenomics, protocol revenue visit <a
           target="_blank"
           href="https://weatherxm.network"
           class="text-decoration-none d-inline-flex align-center"
           style="color : ${anchorColor.value}"
-          >here<i class="fa-solid fa-arrow-up-right-from-square pl-1" style="font-size: 12px"></i
-        ></a>, WeatherXM governance, rewards allocation and network updates.`
+          >WeatherXM Network Assosiation<i class="fa-solid fa-arrow-up-right-from-square pl-1" style="font-size: 12px"></i
+        ></a>`
   })
 
   const isInNestedStats = computed(() => {

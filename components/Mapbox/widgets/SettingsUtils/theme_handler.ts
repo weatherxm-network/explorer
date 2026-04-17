@@ -12,6 +12,16 @@ const setTheme = (theme: Theme) => {
   localStorage.set(themeKey, theme)
 }
 
+const getDefaultTheme = () => {
+  const theme: Theme = {
+    currentTheme: 'dark',
+    name: 'Dark',
+    options: [`Dark`, `Light`, `System`]
+  }
+  setTheme(theme)
+  return theme
+}
+
 // get theme from OS as default
 const getOSTheme = () => {
   let theme: Theme = {
@@ -36,9 +46,9 @@ const getOSTheme = () => {
   return theme
 }
 
-// try to get theme localy , if fail try 'remotely'
+// try to get theme locally, otherwise default to dark on first load
 const getTheme = () => {
-  return getThemeFromLocalStorage() ?? getOSTheme()
+  return getThemeFromLocalStorage() ?? getDefaultTheme()
 }
 
 export default {
