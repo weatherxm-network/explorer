@@ -191,7 +191,10 @@
       <div class="mx-2 mt-2">
         <MainnetBanner v-if="mainnetShowFlag"></MainnetBanner>
       </div>
-      <EmptyRewards v-if="emptyStateFlag && !loading" />
+      <EmptyRewards
+        v-if="emptyStateFlag && !loading"
+        :has-wallet="props.device.has_wallet ?? props.device.metrics?.has_wallet ?? true"
+      />
       <TotalStationRewards
         v-if="!emptyStateFlag && !loading && showRewards"
         :total-rewards="totalStationRewards"
