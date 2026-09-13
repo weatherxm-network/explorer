@@ -1,6 +1,15 @@
 <script setup lang="ts">
   import { useDisplay, useTheme } from 'vuetify'
   import index from '~/assets/animations/index'
+
+  interface Props {
+    hasWallet?: boolean
+  }
+
+  const props = withDefaults(defineProps<Props>(), {
+    hasWallet: true,
+  })
+
   const display = useDisplay()
   const theme = useTheme()
 
@@ -8,10 +17,15 @@
     return display.smAndDown
   })
 
-  const title = ref('Rewards Coming Soon!')
-  const text = ref(
-    `Station hasn't received any rewards yet. Sit back and relax, while our systems are validating the station's location and data. The station should start receiving rewards in the next couple of days.`
-  )
+  const title = computed(() => {
+    return props.hasWallet ? 'Rewards Coming Soon!' : 'No Wallet Linked'
+  })
+
+  const text = computed(() => {
+    return props.hasWallet
+      ? "Station hasn't received any rewards yet. Sit back and relax, while our systems are validating the station's location and data. The station should start receiving rewards in the next couple of days."
+      : 'The owner has not connected a wallet to this station. This station is actively providing weather data, but does not participate in $WXM token distributions.'
+  })
 
   const tipTitle = ref('Pro Tip')
   const tipText = ref(
@@ -50,7 +64,7 @@
         {{ text }}
       </div>
     </div>
-    <VSheet class="d-flex" :color="calcProTipBackgroundColor">
+    <VSheet v-if="props.hasWallet" class="d-flex" :color="calcProTipBackgroundColor">
       <div :style="{ borderLeft: `1px solid ${theme.current.value.colors.primary}` }"></div>
       <div class="pa-2 text-text">
         <div style="font-size: 0.75rem; font-weight: 600; letter-spacing: normal" class="mb-1">

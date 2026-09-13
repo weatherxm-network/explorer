@@ -52,10 +52,12 @@ export interface Device {
     qod_score: number
     pol_reason: 'LOCATION_NOT_VERIFIED' | 'NO_LOCATION_DATA' | null
     ts: string
+    has_wallet?: boolean
   }
   name: string
   profile: string
   timezone: string
+  has_wallet?: boolean
   photoUrl?: string | null
   cellActiveDeviceCount?: number
   cellAvgDataQuality?: number
