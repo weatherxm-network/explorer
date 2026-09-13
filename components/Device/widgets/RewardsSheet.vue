@@ -51,7 +51,7 @@
   const { trackGAevent } = useGAevents()
   const remoteConfig = await fetchRemoteConfig()
   const mainnetShowFlag = ref<boolean>(
-    remoteConfig.feat_mainnet._value === 'true',
+    remoteConfig?.feat_mainnet?._value === 'true',
   )
   const loading = ref(false)
   // rewards stuff
