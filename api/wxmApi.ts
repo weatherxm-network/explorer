@@ -48,6 +48,9 @@ const resolveDeviceName = (deviceName: string) => {
 
 const getCellsData = async (cellIndex: string) => {
   const response = await client.get(`/api/v1/cells/${cellIndex}/devices`)
+  if (!response.data || !Array.isArray(response.data)) {
+    return []
+  }
   return response.data as Device[]
 }
 
