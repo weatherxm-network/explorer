@@ -14,6 +14,7 @@
   const route = useRoute()
   const showCellsDevices = ref(true)
   const loading = ref(false)
+  const isError = ref(false)
   const boldText = ref('Oops! Something went wrong.')
   const lightText = ref('Failed to get the public devices.')
   const orderedCellDevices = ref<Device[]>([])
@@ -107,18 +108,18 @@
 
           // show cell devices
           loading.value = false
+          isError.value = false
           showCellsDevices.value = true
         } else {
           loading.value = false
-          // If it's a bounty cell, don't show error - just hide devices
-          showCellsDevices.value = !!bountyCellData.value
+          isError.value = false
+          showCellsDevices.value = false
         }
       })
       .catch(() => {
         loading.value = false
-        // If it's a bounty cell, don't show error - just hide devices
-        // This prevents the "Something went wrong" message for bounty cells
-        showCellsDevices.value = !!bountyCellData.value
+        isError.value = true
+        showCellsDevices.value = false
       })
   })
 </script>
@@ -154,8 +155,9 @@
             />
           </div>
 
+          <!-- Error State -->
           <div
-            v-if="!showCellsDevices"
+            v-if="!showCellsDevices && !loading && isError && !bountyCellData"
             class="h-100 w-100 d-flex align-center justify-center"
             :style="errorContainerHeight"
           >
@@ -163,6 +165,19 @@
               :lottie-name="'errorState'"
               :bold-text="boldText"
               :light-text="lightText"
+            />
+          </div>
+
+          <!-- Empty Cell State (0 stations present) -->
+          <div
+            v-if="!showCellsDevices && !loading && !isError && !bountyCellData"
+            class="h-100 w-100 d-flex flex-column align-center justify-center pa-6"
+            :style="errorContainerHeight"
+          >
+            <LottieComponent
+              :lottie-name="'not_available'"
+              :bold-text="'No Stations in this Cell'"
+              :light-text="'There are currently no active stations deployed in this cell.'"
             />
           </div>
 
