@@ -49,10 +49,7 @@
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background-color: var(
-      --controls-surface,
-      #fff
-    ); /* Fallback if var not defined */
+    background-color: #31364a;
     box-shadow: var(--controls-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
     border: 1px solid var(--controls-border, rgba(0, 0, 0, 0.05));
     display: flex;
